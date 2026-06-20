@@ -3,85 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phuc Binh Scalping - Bio Link</title>
+    <title>Phúc Bình Scalping</title>
     <style>
-        /* CSS Giao diện */
+        /* Nền chuyển sắc chuẩn theo ảnh gốc từ Vàng Cam sang Đỏ */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(to right, #e6931e, #df372a);
+            margin: 0;
+            padding: 40px 20px;
             display: flex;
             justify-content: center;
-            align-items: center;
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
+            box-sizing: border-box;
         }
-        .container {
-            text-align: center;
-            max-width: 450px;
+
+        .wrapper {
+            max-width: 580px;
             width: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            text-align: center;
         }
+
+        /* Avatar tròn */
         .avatar {
-            width: 100px;
-            height: 100px;
+            width: 96px;
+            height: 96px;
             border-radius: 50%;
-            border: 3px solid #00ffcc;
             object-fit: cover;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             margin-bottom: 15px;
         }
+
+        /* Tiêu đề tên */
         h1 {
-            font-size: 24px;
-            margin: 10px 0 5px 0;
+            font-size: 28px;
+            color: #000000;
+            margin: 0 0 20px 0;
+            font-weight: 500;
         }
-        .subtitle {
-            font-size: 14px;
-            color: #cccccc;
-            margin-bottom: 25px;
-        }
-        .links-container {
+
+        /* Danh sách các ô link */
+        .links-list {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
         }
-        .link-card {
-            background: rgba(255, 255, 255, 0.2);
-            color: #ffffff;
+
+        /* Khung bọc chung cho tất cả các ô */
+        .card-item {
+            background-color: rgba(255, 255, 255, 0.65);
+            border-radius: 8px;
             text-decoration: none;
-            padding: 15px;
-            border-radius: 12px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            border: 1px solid transparent;
-        }
-        .link-card:hover {
-            background: #00ffcc;
             color: #000000;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 255, 204, 0.4);
+            display: flex;
+            align-items: center;
+            position: relative;
+            min-height: 54px;
+            box-sizing: border-box;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .card-item:hover {
+            transform: scale(1.01);
+            background-color: rgba(255, 255, 255, 0.75);
+        }
+
+        /* Ô thông tin ID VPS phía trên (không bấm được) */
+        .info-box {
+            padding: 12px;
+            justify-content: center;
+            flex-direction: column;
+            font-size: 15px;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        /* Icon bên trái của các nút bấm */
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            position: absolute;
+            left: 7px;
+            border-radius: 4px;
+            background: #fff; /* Giúp các icon luôn nổi bật */
+        }
+
+        /* Chữ của nút bấm nằm ở giữa */
+        .card-text {
+            width: 100%;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 500;
+            padding: 0 50px; /* Tránh chữ đè vào icon */
+        }
+
+        /* Dòng chữ bản quyền nhỏ dưới cùng */
+        .footer {
+            margin-top: 40px;
+            font-size: 12px;
+            color: rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <img src="https://via.placeholder.com/150" alt="Avatar" class="avatar">
+    <div class="wrapper">
+        <img src="logo.png" alt="Phúc Bình Scalping" class="avatar">
         
-        <h1>Phuc Binh Scalping</h1>
-        <div class="subtitle">Chia sẻ kiến thức & Tối ưu hóa lợi nhuận</div>
+        <h1>Phúc Bình Scalping</h1>
         
-        <div class="links-container">
-            <a href="https://t.me/your_telegram" target="_blank" class="link-card">Tham Gia Kênh Telegram</a>
-            <a href="https://zalo.me/your_zalo" target="_blank" class="link-card">Liên Hệ Zalo cá nhân</a>
-            <a href="https://facebook.com/your_fb" target="_blank" class="link-card">Facebook Fanpage</a>
-            <a href="https://youtube.com/your_yt" target="_blank" class="link-card">Kênh YouTube Scalping</a>
-            <a href="#" target="_blank" class="link-card">Đăng Ký Tài Khoản Giao Dịch</a>
+        <div class="links-list">
+            <div class="card-item info-box">
+                <div>TVĐT Chứng khoán Việt Nam</div>
+                <div>ID VPS: BOR5 - NGUYỄN PHÚC BÌNH</div>
+            </div>
+
+            <a href="#" target="_blank" class="card-item">
+                <img src="icon-vps.png" class="card-icon" alt="VPS">
+                <span class="card-text">Mở Tài khoản Chứng khoán chỉ 2 phút</span>
+            </a>
+
+            <a href="#" target="_blank" class="card-item">
+                <img src="icon-zalo.png" class="card-icon" alt="Zalo">
+                <span class="card-text">Room Cộng Đồng Phái Sinh</span>
+            </a>
+
+            <a href="#" target="_blank" class="card-item">
+                <img src="icon-youtube.png" class="card-icon" alt="Youtube">
+                <span class="card-text">Youtube</span>
+            </a>
+
+            <a href="#" target="_blank" class="card-item">
+                <img src="icon-tiktok.png" class="card-icon" alt="TikTok">
+                <span class="card-text">TikTok</span>
+            </a>
+
+            <a href="#" target="_blank" class="card-item">
+                <img src="icon-drive.png" class="card-icon" alt="Drive">
+                <span class="card-text">Phần mềm Phái Sinh</span>
+            </a>
+        </div>
+
+        <div class="footer">
         </div>
     </div>
 
