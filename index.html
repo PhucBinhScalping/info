@@ -10,10 +10,11 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background: linear-gradient(to right, #f9c851, #f15238);
             margin: 0;
-            padding: 20px;
+            padding: 20px 10px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            gap: 40px; /* Khoảng cách giữa trang 1 và trang 2 */
             min-height: 100vh;
             box-sizing: border-box;
             color: #000000;
@@ -27,9 +28,10 @@
             border-radius: 20px;
             backdrop-filter: blur(10px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            box-sizing: border-box;
         }
 
-        /* Thanh đầu trang: Logo và Tên thương hiệu lớn */
+        /* --- TRANG 1 --- */
         .header-section {
             display: flex;
             align-items: center;
@@ -56,14 +58,12 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
-        /* Bố cục chia 2 cột Trái - Phải */
         .main-content {
             display: flex;
             gap: 50px;
             flex-wrap: wrap;
         }
 
-        /* CỘT BÊN TRÁI: Phần mềm và Khung ảnh lướt */
         .left-column {
             flex: 1;
             min-width: 320px;
@@ -85,7 +85,7 @@
             margin-bottom: 20px;
         }
 
-        /* --- Cấu trúc Slider tự động lướt ảnh --- */
+        /* Khung Slider tự động lướt ảnh */
         .slider-container {
             width: 100%;
             max-width: 450px;
@@ -100,9 +100,9 @@
 
         .slider-wrapper {
             display: flex;
-            width: 300%; /* Số lượng ảnh x 100% (ở đây có 3 ảnh) */
+            width: 300%; 
             height: 100%;
-            animation: slideAnimation 12s infinite ease-in-out; /* Tự động lướt */
+            animation: slideAnimation 12s infinite ease-in-out;
         }
 
         .slider-wrapper img {
@@ -112,7 +112,6 @@
             background: #fff;
         }
 
-        /* Định thời gian chuyển đổi giữa các ảnh */
         @keyframes slideAnimation {
             0% { transform: translateX(0); }
             30% { transform: translateX(0); }
@@ -123,7 +122,6 @@
             100% { transform: translateX(0); }
         }
 
-        /* CỘT BÊN PHẢI: Thông tin và Nút bấm */
         .right-column {
             flex: 1;
             min-width: 320px;
@@ -161,7 +159,6 @@
             margin-bottom: 12px;
         }
 
-        /* Khu vực các nút bấm hàng ngang dưới cùng */
         .buttons-row {
             display: flex;
             gap: 20px;
@@ -187,29 +184,99 @@
             transform: scale(1.05);
         }
 
-        .btn-download {
-            background-color: #29b6f6;
-            color: #ffffff;
+        .btn-download { background-color: #29b6f6; color: #ffffff; }
+        .btn-youtube { background-color: #ff0000; color: #ffffff; }
+
+        /* --- TRANG 2: KHU VỰC QR CODE --- */
+        .qr-section {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 20px;
         }
 
-        .btn-youtube {
-            background-color: #ff0000;
-            color: #ffffff;
+        .qr-block {
+            flex: 1;
+            min-width: 260px;
+            max-width: 380px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .btn img {
-            width: 24px;
-            height: 24px;
-            object-fit: contain;
+        .qr-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #002060;
+            margin-bottom: 15px;
+            min-height: 52px; /* Giúp 2 tiêu đề đều hàng với nhau */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Tối ưu hiển thị mượt mà trên điện thoại */
+        /* Vỏ bọc màu xanh tròn trịa bo quanh QR giống hệt ảnh mẫu */
+        .qr-card-vps {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 240px;
+            box-sizing: border-box;
+        }
+
+        .qr-card-zalo {
+            background: #0066cc; /* Màu xanh của Zalo */
+            padding: 20px;
+            border-radius: 40px; /* Bo góc dạng kẹo mút bo tròn lớn */
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 260px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .qr-card-zalo img {
+            border-radius: 15px;
+        }
+
+        .qr-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Biểu tượng mũi tên đi xuống */
+        .scroll-arrow {
+            text-align: center;
+            font-size: 32px;
+            color: #002060;
+            margin: 10px 0 -20px 0;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        /* Tối ưu hiển thị Responsive trên điện thoại */
         @media (max-width: 768px) {
             .header-section { flex-direction: column; text-align: center; }
+            .header-title { font-size: 30px; }
             .main-content { flex-direction: column; gap: 30px; }
             .vps-info, .phone-info { text-align: center; }
             .buttons-row { flex-direction: column; width: 100%; }
             .btn { width: 100%; box-sizing: border-box; }
+            .qr-section { flex-direction: column; align-items: center; }
+            .qr-title { min-height: auto; margin-bottom: 10px; }
         }
     </style>
 </head>
@@ -222,16 +289,15 @@
         </div>
 
         <div class="main-content">
-            
             <div class="left-column">
-                <div class="software-title">Phần mềm phân tích biên độ</div>
+                <div class="software-title">Phần mềm phân tích biên độ</div>
                 <div class="software-subtitle">Chứng khoán phái sinh</div>
                 
                 <div class="slider-container">
                     <div class="slider-wrapper">
-                        <img src="phanmem1.png" alt="Phần mềm phân tích phái sinh">
-                        <img src="phanmem2.png" alt="Phần mềm phân tích phái sinh">
-                        <img src="phanmem3.png" alt="Phần mềm phân tích phái sinh">
+                        <img src="phanmem1.png" alt="Phần mềm phân tích phái sinh">
+                        <img src="phanmem2.png" alt="Phần mềm phân tích phái sinh">
+                        <img src="phanmem3.png" alt="Phần mềm phân tích phái sinh">
                     </div>
                 </div>
             </div>
@@ -248,11 +314,32 @@
 
                 <div class="buttons-row">
                     <a href="https://drive.google.com/file/d/1DyUh3qpm2wFkbvGmwDJjo8aVhiDZZFVT/view?usp=drive_link" target="_blank" class="btn btn-download">
-                        <img src="icon-drive.png" alt="Tải Bot"> Tải Bot
+                        Tải Bot
                     </a>
                     <a href="https://www.youtube.com/@PhucBinhScalping" target="_blank" class="btn btn-youtube">
-                        <img src="icon-youtube.png" alt="YouTube"> YouTube
+                        YouTube
                     </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="scroll-arrow">▼</div>
+    </div>
+
+    <div class="container">
+        <div class="qr-section">
+            
+            <div class="qr-block">
+                <div class="qr-title">Mở tài khoản chứng khoán chỉ 2 phút</div>
+                <div class="qr-card-vps">
+                    <img src="qr-vps.png" alt="QR Mở tài khoản VPS" class="qr-image">
+                </div>
+            </div>
+
+            <div class="qr-block">
+                <div class="qr-title">Tham gia nhóm Zalo</div>
+                <div class="qr-card-zalo">
+                    <img src="qr-zalo.png" alt="QR Nhóm Zalo" class="qr-image">
                 </div>
             </div>
 
