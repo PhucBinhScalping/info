@@ -142,7 +142,7 @@
         .phone-info {
             font-size: 18px;
             font-weight: bold;
-            color: #ff0000;
+            color: #fff200; /* Màu vàng chanh nổi bật rõ ràng */
             margin-bottom: 25px;
             text-align: right;
         }
@@ -177,8 +177,10 @@
             font-size: 18px;
             font-weight: bold;
             text-decoration: none;
-            transition: transform 0.2s;
+            transition: transform 0.2s, background-color 0.2s;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            cursor: pointer;
+            border: none;
         }
 
         .btn:hover {
@@ -195,6 +197,25 @@
             font-size: 15px;
             padding: 10px 20px;
             border-radius: 20px;
+        }
+
+        /* Nút Mời Cafe AD cuối trang */
+        .cafe-section {
+            text-align: center;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .btn-cafe {
+            background-color: #ff9800; /* Màu cam ấm áp của ly cafe */
+            color: #ffffff;
+            font-size: 18px;
+            padding: 14px 40px;
+            border-radius: 30px;
+        }
+        
+        .btn-cafe:hover {
+            background-color: #e68a00;
         }
 
         /* --- TRANG 2: KHU VỰC QR CODE --- */
@@ -259,6 +280,77 @@
             width: 100%;
             height: auto;
             display: block;
+        }
+
+        /* --- GIAO DIỆN HỘP THOẠI POP-UP QR BANK --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-box {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 20px;
+            max-width: 320px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: scale(1);
+        }
+
+        .modal-box h3 {
+            margin-top: 0;
+            color: #002060;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .bank-qr-img {
+            width: 100%;
+            max-width: 250px;
+            height: auto;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+
+        .btn-close {
+            background-color: #757575;
+            color: #ffffff;
+            font-size: 14px;
+            padding: 8px 25px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-close:hover {
+            background-color: #555555;
         }
 
         /* Tối ưu hiển thị Responsive trên điện thoại */
@@ -339,9 +431,45 @@
                     <img src="qr-zalo.png" alt="QR Nhóm Zalo" class="qr-image">
                 </div>
             </div>
+        </div>
 
+        <div class="cafe-section">
+            <button class="btn btn-cafe" id="openCafeBtn">☕ Mời cafe AD</button>
         </div>
     </div>
+
+    <div class="modal-overlay" id="cafeModal">
+        <div class="modal-box">
+            <h3>Mời Cafe Thêm Động Lực AD</h3>
+            <img src="qr-ngan-hang.png" alt="Mã QR Ngân Hàng" class="bank-qr-img">
+            <div>
+                <button class="btn-close" id="closeCafeBtn">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const openBtn = document.getElementById('openCafeBtn');
+        const closeBtn = document.getElementById('closeCafeBtn');
+        const modal = document.getElementById('cafeModal');
+
+        // Bấm nút thì hiện mã QR
+        openBtn.addEventListener('click', () => {
+            modal.classList.add('active');
+        });
+
+        // Bấm Đóng thì ẩn mã QR đi
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+
+        // Bấm ra vùng đen ngoài hộp thoại cũng tự đóng luôn cho tiện
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+    </script>
 
 </body>
 </html>
