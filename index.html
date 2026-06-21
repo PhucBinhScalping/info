@@ -5,6 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phúc Bình Scalping Phái Sinh</title>
     <style>
+        /* --- MENU ĐIỀU HƯỚNG MỚI (NAVBAR) --- */
+        html {
+            scroll-behavior: smooth; /* Cuộn mượt mà khi bấm menu */
+        }
+        
+        .navbar {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background: rgba(0, 32, 96, 0.95); /* Màu xanh đậm tiệp với màu chủ đạo */
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: center;
+            padding: 12px 0;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar-item a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            transition: color 0.2s;
+            padding: 5px 10px;
+        }
+
+        .navbar-item a:hover {
+            color: #fff200; /* Đổi sang màu vàng nổi bật khi hover */
+        }
+
         /* --- TRANG 3: KHU VỰC BÀI VIẾT CHIA SẺ --- */
         .blog-section {
             display: flex;
@@ -87,28 +126,28 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background: linear-gradient(to right, #f9c851, #f15238);
             margin: 0;
-            /* ĐÃ CHỈNH SỬA: Giảm padding phía trên từ 20px xuống 5px để đẩy thẻ sát lên trên theo ý bạn */
-            padding: 5px 10px 20px 10px; 
+            padding: 0 10px 20px 10px; 
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 25px; /* Giảm khoảng cách giữa các trang cho gọn gàng */
+            gap: 25px; 
             min-height: 100vh;
             box-sizing: border-box;
             color: #000000;
         }
 
+        /* Target offset để khi cuộn không bị thanh menu che mất tiêu đề */
         .container {
             max-width: 1100px;
             width: 100%;
             background: rgba(255, 255, 255, 0.15);
-            padding: 30px 40px; /* Giảm nhẹ padding top/bottom của khung */
+            padding: 30px 40px; 
             border-radius: 20px;
             backdrop-filter: blur(10px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             box-sizing: border-box;
-            /* ĐÃ THÊM: Đảm bảo margin phía trên bằng 0 để áp sát lề */
             margin-top: 0; 
+            scroll-margin-top: 70px; /* Thêm khoảng cách phía trên khi cuộn bằng menu */
         }
 
         /* --- TRANG 1 --- */
@@ -409,6 +448,8 @@
         .btn-close:hover { background-color: #555555; }
 
         @media (max-width: 768px) {
+            .navbar-menu { gap: 15px; }
+            .navbar-item a { font-size: 14px; }
             .header-section { flex-direction: column; text-align: center; }
             .header-title { font-size: 30px; }
             .main-content { flex-direction: column; gap: 30px; }
@@ -423,9 +464,18 @@
 </head>
 <body>
 
+    <!-- THANH MENU ĐIỀU HƯỚNG FIXED PHÍA TRÊN -->
+    <nav class="navbar">
+        <ul class="navbar-menu">
+            <li class="navbar-item"><a href="#dien-bien">Diễn biến thị trường</a></li>
+            <li class="navbar-item"><a href="#bai-viet">Bài Viết Chia Sẻ Kinh Nghiệm</a></li>
+        </ul>
+    </nav>
+
     <button class="sticky-contact-btn" id="openContactBtn">💬 Liên hệ tư vấn</button>
 
-    <div class="container">
+    <!-- TRANG 1: ĐÃ THÊM ID DIEN-BIEN VÀO ĐÂY -->
+    <div class="container" id="dien-bien">
         <div class="header-section">
             <img src="logo.png" alt="Logo" class="avatar">
             <h1 class="header-title">Phúc Bình Scalping Phái Sinh</h1>
@@ -494,7 +544,8 @@
         </div>
     </div>
     
-    <div class="container">
+    <!-- TRANG 3: ĐÃ THÊM ID BAI-VIET VÀO ĐÂY -->
+    <div class="container" id="bai-viet">
         <div class="blog-section">
             <div class="blog-header">📚 Bài Viết </div>
             <div class="blog-grid">
@@ -509,10 +560,10 @@
                 </a>
                 
                 <a href="VSA-Uneeb.html" target="_blank" class="blog-card">
-                    <img src="VSA-Wyckoff.png" alt="Phương pháp phân tích Wyckoff và VSA" class="blog-img">
+                    <img src="VSA-Wyckoff.png" alt="Phương pháp phân tích Wyckoff và VSA" class="blog-img">
                     <div class="blog-content">
-                        <h4 class="blog-title">Phương pháp phân tích Wyckoff và VSA</h4>
-                        <p class="blog-excerpt">Có bao giờ mọi người tự hỏi tại sao giá lại bất đầu tăng mạnh thế, vì sao khi đến một điểm giá lại có những vận động sideway? Liệu hành vi giá này có lập lại hay không? Hay chỉ là một sự ngẫu nhiên? Phương pháp Wyckoff sẽ giải thích rõ về...</p>
+                        <h4 class="blog-title">Phương pháp phân tích Wyckoff và VSA</h4>
+                        <p class="blog-excerpt">Có bao giờ mọi người tự hỏi tại sao giá lại bất đầu tăng mạnh thế, vì sao khi đến một điểm giá lại có những vận động sideway? Liệu hành vi giá này có lập lại hay không? Hay chỉ là một sự ngẫu nhiên? Phương pháp Wyckoff sẽ giải thích rõ về...</p>
                         <span class="blog-date">📅 Ngày 21/06/2026</span>
                     </div>
                 </a>
@@ -521,6 +572,7 @@
         </div>
     </div>
 
+    <!-- MODAL ĐĂNG KÝ -->
     <div class="modal-overlay" id="contactModal">
         <div class="modal-box">
             <h3>💬 Đăng Ký Tư Vấn</h3>
@@ -547,6 +599,7 @@
         </div>
     </div>
 
+    <!-- MODAL CAFE -->
     <div class="modal-overlay" id="cafeModal">
         <div class="modal-box">
             <h3>Mời Cafe Thêm Động Lực AD</h3>
