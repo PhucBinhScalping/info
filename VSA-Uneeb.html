@@ -4,6 +4,83 @@ xmlns:w="urn:schemas-microsoft-com:office:word"
 xmlns:m="http://schemas.microsoft.com/office/2004/12/omml"
 xmlns="http://www.w3.org/TR/REC-html40">
 <head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  /* 1. Tạo nền Gradient chuyển màu từ cam sang đỏ cho toàn bộ trang web */
+  body {
+    background: linear-gradient(135deg, #febb5b 0%, #f15a24 50%, #ee3a43 100%);
+    margin: 0;
+    padding: 40px 20px;
+    font-family: "Segoe UI", Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* 2. Khung nội dung màu trắng bo góc, đổ bóng nằm ở chính giữa màn hình */
+  .container {
+    background-color: #ffffff;
+    max-width: 800px; /* Độ rộng tiêu chuẩn giống trang mẫu */
+    width: 100%;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    box-sizing: border-box;
+  }
+
+  /* 3. Định dạng lại hình ảnh thumbnail cho vừa khít khung */
+  .container img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+
+  /* 4. Định dạng tiêu đề lớn (H1) */
+  .container h1 {
+    color: #0b3c5d; /* Màu xanh đậm sang trọng */
+    font-size: 26px;
+    line-height: 1.4;
+    text-transform: uppercase;
+    margin-top: 25px;
+    margin-bottom: 15px;
+  }
+
+  /* Đường gạch ngang phân cách dưới tiêu đề */
+  .divider {
+    height: 2px;
+    background-color: #0b3c5d;
+    margin-bottom: 25px;
+  }
+
+  /* 5. Cỡ chữ và khoảng cách dòng cho nội dung bài viết */
+  .container p, .container li {
+    font-size: 16px;
+    color: #333333;
+    line-height: 1.6;
+    margin-bottom: 15px;
+  }
+
+  /* Tiêu đề mục nhỏ (Nguyên nhân cốt lõi) */
+  .container h3 {
+    color: #e04124;
+    font-size: 18px;
+    margin-top: 25px;
+  }
+
+  /* Nút "Quay lại trang chủ" phía trên cùng */
+  .back-home {
+    font-size: 14px;
+    color: #333;
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 15px;
+    font-weight: 500;
+  }
+  .back-home:hover { text-decoration: underline; }
+</style>
 <meta http-equiv=Content-Type content="text/html; charset=windows-1252">
 <meta name=ProgId content=Word.Document>
 <meta charset="utf-8">
