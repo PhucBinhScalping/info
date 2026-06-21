@@ -5,15 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kiếm được lợi nhuận nhưng KHÔNG giữ được tiền - Phúc Bình Scalping</title>
     <style>
+        /* --- KHỞI TẠO BỐ CỤC ĐỒNG BỘ TOÀN HỆ THỐNG --- */
+        html {
+            scroll-behavior: smooth;
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(to right, #f9c851, #f15238);
+            background: linear-gradient(to right, #f9c851, #f15238); /* Giữ nguyên nền cam vàng */
             margin: 0;
-            padding: 20px 10px;
-            display: flex;
-            justify-content: center;
+            padding: 0;
             min-height: 100vh;
             box-sizing: border-box;
+            color: #000000;
+        }
+
+        /* Khung bọc giữa giúp thanh Menu không bị lỗi hiển thị */
+        .main-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 10px;
+            box-sizing: border-box;
+            width: 100%;
         }
 
         .container {
@@ -26,17 +40,47 @@
             box-sizing: border-box;
         }
 
-        .btn-back {
-            display: inline-block;
-            text-decoration: none;
-            color: #002060;
-            font-weight: bold;
-            margin-bottom: 20px;
-            font-size: 15px;
+        /* --- THANH MENU FIXED CHUẨN ĐỒNG BỘ --- */
+        .navbar {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background: #002060; 
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            padding: 15px 0;
+            box-sizing: border-box;
         }
 
-        .btn-back:hover { text-decoration: underline; }
+        .navbar-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: flex-start;
+        }
 
+        .navbar-menu {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar-item a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            transition: color 0.2s;
+        }
+
+        .navbar-item a:hover, .navbar-item.active a {
+            color: #fff200;
+        }
+
+        /* --- ĐỊNH DẠNG NỘI DUNG BÀI VIẾT --- */
         .main-thumbnail {
             width: 100%;
             height: auto;
@@ -46,13 +90,14 @@
         }
 
         h1 {
-            font-size: 28px;
+            font-size: 26px;
             color: #002060;
             line-height: 1.4;
             margin-top: 0;
             margin-bottom: 20px;
             border-bottom: 2px solid #002060;
             padding-bottom: 15px;
+            text-align: left;
         }
 
         h2 {
@@ -60,6 +105,7 @@
             color: #f15238;
             margin-top: 30px;
             margin-bottom: 15px;
+            text-align: left;
         }
 
         p {
@@ -80,6 +126,7 @@
             line-height: 1.7;
             color: #333333;
             margin-bottom: 10px;
+            text-align: left;
         }
 
         blockquote {
@@ -89,54 +136,191 @@
             padding: 15px 20px;
             font-style: italic;
             border-radius: 0 8px 8px 0;
+            text-align: left;
+        }
+
+        .author-info {
+            border-top: 1px dashed #cccccc;
+            margin-top: 40px;
+            padding-top: 20px;
+        }
+
+        /* --- BUTTON NỔI (STICKY) --- */
+        .sticky-contact-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #002060;
+            color: #ffffff;
+            padding: 15px 25px;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            border: 2px solid #ffffff;
+            cursor: pointer;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.2s, background-color 0.2s;
+            animation: pulseAnimation 2s infinite;
+        }
+
+        .sticky-contact-btn:hover { transform: scale(1.05); background-color: #00103a; }
+
+        @keyframes pulseAnimation {
+            0% { box-shadow: 0 0 0 0 rgba(0, 32, 96, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(0, 32, 96, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 32, 96, 0); }
+        }
+
+        /* --- POP-UP MODAL LIÊN HỆ --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-box { background: #ffffff; padding: 25px; border-radius: 20px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.3); transform: scale(0.8); transition: transform 0.3s ease; position: relative; max-height: 90vh; overflow-y: auto; }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+        .modal-box h3 { margin-top: 0; color: #002060; font-size: 22px; margin-bottom: 20px; }
+        
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; font-weight: bold; color: #002060; margin-bottom: 5px; font-size: 14px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #cccccc; border-radius: 8px; font-size: 15px; box-sizing: border-box; font-family: inherit; }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #002060; box-shadow: 0 0 5px rgba(0, 32, 96, 0.2); }
+        
+        .btn-submit-form { background-color: #002060; color: #ffffff; width: 100%; padding: 12px; font-size: 16px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.15); margin-bottom: 15px; }
+        .btn-close { background-color: #757575; color: #ffffff; font-size: 14px; padding: 8px 25px; border-radius: 20px; border: none; cursor: pointer; font-weight: bold; }
+        .btn-close:hover { background-color: #555555; }
+
+        @media (max-width: 768px) {
+            .navbar-container { justify-content: center; }
+            .navbar-menu { gap: 20px; }
+            .navbar-item a { font-size: 14px; }
+            .container { padding: 20px; }
+            h1 { font-size: 22px; }
+            .sticky-contact-btn { bottom: 20px; right: 20px; padding: 12px 20px; font-size: 14px; }
         }
     </style>
 </head>
 <body>
+    
+    <nav class="navbar">
+        <div class="navbar-container">
+            <ul class="navbar-menu">
+                <li class="navbar-item"><a href="https://phucbinhscalping.online">Trang chủ</a></li>
+                <li class="navbar-item"><a href="dien-bien-thi-truong.html">Diễn biến thị trường</a></li>
+                <li class="navbar-item active"><a href="https://phucbinhscalping.online#bai-viet">Bài Viết</a></li>
+            </ul>
+        </div>
+    </nav>
 
-    <div class="container">
-        <a href="index.html" class="btn-back">⬅ Quay lại Trang chủ</a>
+    <button class="sticky-contact-btn" id="openContactBtn">💬 Liên hệ tư vấn</button>
 
-        <img src="kiem-duoc-tien.jpg" alt="Kiếm được lợi nhuận nhưng không giữ được tiền" class="main-thumbnail">
+    <div class="main-wrapper">
+        <div class="container">
 
-        <h1>KIẾM ĐƯỢC LỢI NHUẬN NHƯNG KHÔNG GIỮ ĐƯỢC TIỀN TRONG CHỨNG KHOÁN PHÁI SINH. TẠI SAO?</h1>
-        
-        <p>Xin chào anh chị nhà đầu tư trên thị trường chứng khoán phái sinh!</p>
-        <p>Có một thực tế mà ai trong chúng ta cũng phải thừa nhận: Trong thị trường phái sinh, phần lớn anh chị đều có thể kiếm được lợi nhuận rất tốt ở những giai đoạn đầu tiên. Thế nhưng, tại sao khi về cuối phiên, kết quả lại đi từ "có lãi" thành "mất tiền"?</p>
-        <p>Do anh chị thiếu kiến thức, kỹ năng chưa đủ, hay do một yếu tố nào khác?</p>
+            <img src="kiem-duoc-tien.jpg" alt="Kiếm được lợi nhuận nhưng không giữ được tiền" class="main-thumbnail">
 
-        <h2>1. Nguyên nhân cốt lõi: Nằm ở "Tâm lý"</h2>
-        <ul>
-            <li><strong>Tâm lý chủ quan khi đang thắng:</strong> Khi vừa kiếm được một khoản lợi nhuận tốt, bộ não sẽ tự động phát tín hiệu "an toàn rồi". Từ đó kích thích anh chị muốn làm thêm một vài lệnh nữa để kiếm nhiều tiền hơn, dẫn đến việc chủ quan và bỏ qua các yếu tố rủi ro.</li>
-            <li><strong>Vòng xoáy gỡ gạc khi bị sai:</strong> Chỉ cần một lệnh sai phát sinh, một phần thành quả trước đó sẽ bay mất. Lúc này, tâm lý muốn lấy lại những gì đã mất sẽ trỗi dậy. Anh chị bắt đầu cuống cuồng tìm kiếm một vị thế mới, để rồi bị cuốn hoàn toàn theo dòng chảy của thị trường, vứt bỏ mọi quy tắc, tín hiệu và kỷ luật đã đề ra.</li>
-        </ul>
+            <h1>KIẾM ĐƯỢC LỢI NHUẬN NHƯNG KHÔNG GIỮ ĐƯỢC TIỀN TRONG CHỨNG KHOÁN PHÁI SINH. TẠI SAO?</h1>
+            
+            <p>Xin chào anh chị nhà đầu tư trên thị trường chứng khoán phái sinh!</p>
+            <p>Có một thực tế mà ai trong chúng ta cũng phải thừa nhận: Trong thị trường phái sinh, phần lớn anh chị đều có thể kiếm được lợi nhuận rất tốt ở những giai đoạn đầu tiên. Thế nhưng, tại sao khi về cuối phiên, kết quả lại đi từ "có lãi" thành "mất tiền"?</p>
+            <p>Do anh chị thiếu kiến thức, kỹ năng chưa đủ, hay do một yếu tố nào khác?</p>
 
-        <blockquote>
-            <strong>Hệ quả tất yếu:</strong> Đến cuối ngày nhìn lại, biên lợi nhuận thực tế vốn đã mỏng nay lại bị tiền thuế và phí giao dịch bào mòn sạch sẽ.
-        </blockquote>
+            <h2>1. Nguyên nhân cốt lõi: Nằm ở "Tâm lý"</h2>
+            <ul>
+                <li><strong>Tâm lý chủ quan khi đang thắng:</strong> Khi vừa kiếm được một khoản lợi nhuận tốt, bộ não sẽ tự động phát tín hiệu "an toàn rồi". Từ đó kích thích anh chị muốn làm thêm một vài lệnh nữa để kiếm nhiều tiền hơn, dẫn đến việc chủ quan và bỏ qua các yếu tố rủi ro.</li>
+                <li><strong>Vòng xoáy gỡ gạc khi bị sai:</strong> Chỉ cần một lệnh sai phát sinh, một phần thành quả trước đó sẽ bay mất. Lúc này, tâm lý muốn lấy lại những gì đã mất sẽ trỗi dậy. Anh chị bắt đầu cuống cuồng tìm kiếm một vị thế mới, để rồi bị cuốn hoàn toàn theo dòng chảy của thị trường, vứt bỏ mọi quy tắc, tín hiệu và kỷ luật đã đề ra.</li>
+            </ul>
 
-        <h2>2. Những sai lầm khi cố gắng kiểm soát tâm lý</h2>
-        <p>Khi nhận ra vấn đề nằm ở tâm lý, nhiều anh chị đã tự đưa ra giải pháp giải quyết nhưng phần lớn đều không đạt hiệu quả. Thực tế đã chứng minh qua số liệu thống kê của em:</p>
-        <ul>
-            <li><strong>Sai lầm 1: "Kiếm đủ 1 lệnh lãi rồi nghỉ"</strong><br><em>Thực tế:</em> Tư duy này dễ khiến anh chị rơi vào trạng thái FOMO (sợ mất cơ hội), dẫn đến việc vào lệnh quá sớm khi thị trường chưa rõ ràng. Khi lệnh sớm bị sai, tâm lý muốn gỡ lại xuất hiện và kịch bản cũ lại lặp lại.</li>
-            <li><strong>Sai lầm 2: "Chờ đợi tín hiệu quá chắc chắn hoặc đợi giá pullback/backtest"</strong><br><em>Thực tế:</em> Thị trường phái sinh biến động cực kỳ nhanh theo từng phút. Việc quá rập khuôn chờ đợi trong một xu hướng mạnh đôi khi sẽ khiến anh chị vào ngay vùng đỉnh ngắn hạn khi giá đảo chiều giảm mạnh (Phiên ngày 03/06/2026 là một ví dụ điển hình).</li>
-            <li><strong>Sai lầm 3: "Chỉ cần duy trì chuỗi thắng liên tục là được"</strong><br><em>Thực tế:</em> Chuỗi thắng liên tục không giải quyết được tâm lý, nó chỉ tạm thời che giấu nó đi. Nó khiến anh chị trở nên quá tự tin, tăng khối lượng hợp đồng vì nghĩ lệnh này "chắc thắng". Để rồi khi gặp phải một lệnh sai, cú sốc tâm lý sẽ nặng nề hơn rất nhiều, khiến bộ não hành động bộc phát để gỡ gạc ngay lập tức.</li>
-        </ul>
+            <blockquote>
+                <strong>Hệ quả tất yếu:</strong> Đến cuối ngày nhìn lại, biên lợi nhuận thực tế vốn đã mỏng nay lại bị tiền thuế và phí giao dịch bào mòn sạch sẽ.
+            </blockquote>
 
-        <h2>3. Giải pháp thực chiến: Chậm - Bình tĩnh - Nói không với tư duy cờ bạc</h2>
-        <p>Nhiều anh chị khi rơi vào giai đoạn thua lỗ nặng trong phiên thường sinh ra tâm lý buông xuôi, mặc kệ: <em>"Nốt lệnh cuối này, thắng thì ăn, thua thì thôi"</em>. Đây là kiểu tư duy cờ bạc cực kỳ nguy hiểm. Để tránh việc rơi vào vết xe đổ đó, chúng ta cần phải làm đúng ngay từ đầu:</p>
-        <ul>
-            <li><strong>Hạn chế vào lệnh quá sớm:</strong> Hãy kiên nhẫn đợi ít nhất 15 – 20 phút đầu phiên để các tín hiệu nến rõ ràng hơn. Khoảng thời gian này đủ để thị trường thiết lập biên độ giá, định hình các vùng hỗ trợ và kháng cự trong ngày.</li>
-            <li><strong>Sử dụng Bot phân tích để xác định biên độ trong ngày -> </strong><a href="https://drive.google.com/file/d/1DyUh3qpm2wFkbvGmwDJjo8aVhiDZZFVT/view" download style="color: #f15238; font-weight: bold; text-decoration: underline;">Tải tại đây</a></li>
-            <li><strong>Tuyệt đối tuân thủ Stoploss (SL) và Take Profit (TP):</strong> Khi vào lệnh, bắt buộc phải cài đặt SL ngay lập tức để bảo vệ tài khoản trước các nhịp quét giá nhanh. Ngược lại, khi giá đã chạm vùng mục tiêu (TP), hãy chủ động chốt lời. Đừng để lòng tham giữ lại để rồi nhìn thị trường quay đầu làm mất đi khoản lãi xương máu.</li>
-            <li><strong>Hạ khối lượng (Volume) ở các lệnh sau:</strong> Khi đã bỏ túi được một khoản lợi nhuận mục tiêu, ưu tiên hàng đầu là bảo vệ thành quả. Nếu muốn giao dịch tiếp, hãy giảm số lượng hợp đồng xuống mức tối thiểu để những biến động sau không làm ảnh hưởng đến số tiền đã kiếm được.</li>
-            <li><strong>Tính toán tỷ lệ RR (Risk/Reward) trước khi vào lệnh:</strong> Luôn giữ sự tỉnh táo và tự đặt câu hỏi trước mỗi vị thế: <em>Nếu lệnh này đúng, mình sẽ lãi bao nhiêu điểm? Nếu lệnh này sai, mình sẽ mất bao nhiêu điểm?</em> Chỉ vào lệnh khi tỷ lệ lợi nhuận xứng đáng với rủi ro bỏ ra.</li>
-        </ul>
+            <h2>2. Những sai lầm khi cố gắng kiểm soát tâm lý</h2>
+            <p>Khi nhận ra vấn đề nằm ở tâm lý, nhiều anh chị đã tự đưa ra giải pháp giải quyết nhưng phần lớn đều không đạt hiệu quả. Thực tế đã chứng minh qua số liệu thống kê của em:</p>
+            <ul>
+                <li><strong>Sai lầm 1: "Kiếm đủ 1 lệnh lãi rồi nghỉ"</strong><br><em>Thực tế:</em> Tư duy này dễ khiến anh chị rơi vào trạng thái FOMO (sợ mất cơ hội), dẫn đến việc vào lệnh quá sớm khi thị trường chưa rõ ràng. Khi lệnh sớm bị sai, tâm lý muốn gỡ lại xuất hiện và kịch bản cũ lại lặp lại.</li>
+                <li><strong>Sai lầm 2: "Chờ đợi tín hiệu quá chắc chắn hoặc đợi giá pullback/backtest"</strong><br><em>Thực tế:</em> Thị trường phái sinh biến động cực kỳ nhanh theo từng phút. Việc quá rập khuôn chờ đợi trong một xu hướng mạnh đôi khi sẽ khiến anh chị vào ngay vùng đỉnh ngắn hạn khi giá đảo chiều giảm mạnh (Phiên ngày 03/06/2026 là một ví dụ điển hình).</li>
+                <li><strong>Sai lầm 3: "Chỉ cần duy trì chuỗi thắng liên tục là được"</strong><br><em>Thực tế:</em> Chuỗi thắng liên tục không giải quyết được tâm lý, nó chỉ tạm thời che giấu nó đi. Nó khiến anh chị trở nên quá tự tin, tăng khối lượng hợp đồng vì nghĩ lệnh này "chắc thắng". Để rồi khi gặp phải một lệnh sai, cú sốc tâm lý sẽ nặng nề hơn rất nhiều, khiến bộ não hành động bộc phát để gỡ gạc ngay lập tức.</li>
+            </ul>
 
-        <p style="text-align: center; margin-top: 40px; font-weight: bold; color: #002060;">Chúc anh chị nhà đầu tư luôn giữ được cái đầu lạnh và giao dịch thành công!</p>
-        <p style="text-align: left; margin-top: 40px; font-weight: bold; color: #002060;">ID VPS: BOR5 - NGUYEN PHUC BINH</p>
-        <p style="text-align: left; margin-top: 40px; font-weight: bold; color: #002060;">SDT: 0853.525.379</p>
+            <h2>3. Giải pháp thực chiến: Chậm - Bình tĩnh - Nói không với tư duy cờ bạc</h2>
+            <p>Nhiều anh chị khi rơi vào giai đoạn thua lỗ nặng trong phiên thường sinh ra tâm lý buông xuôi, mặc kệ: <em>"Nốt lệnh cuối này, thắng thì ăn, thua thì thôi"</em>. Đây là kiểu tư duy cờ bạc cực kỳ nguy hiểm. Để tránh việc rơi vào vết xe đổ đó, chúng ta cần phải làm đúng ngay từ đầu:</p>
+            <ul>
+                <li><strong>Hạn chế vào lệnh quá sớm:</strong> Hãy kiên nhẫn đợi ít nhất 15 – 20 phút đầu phiên để các tín hiệu nến rõ ràng hơn. Khoảng thời gian này đủ để thị trường thiết lập biên độ giá, định hình các vùng hỗ trợ và kháng cự trong ngày.</li>
+                <li><strong>Sử dụng Bot phân tích để xác định biên độ trong ngày -> </strong><a href="https://drive.google.com/file/d/1DyUh3qpm2wFkbvGmwDJjo8aVhiDZZFVT/view" download style="color: #f15238; font-weight: bold; text-decoration: underline;">Tải tại đây</a></li>
+                <li><strong>Tuyệt đối tuân thủ Stoploss (SL) và Take Profit (TP):</strong> Khi vào lệnh, bắt buộc phải cài đặt SL ngay lập tức để bảo vệ tài khoản trước các nhịp quét giá nhanh. Ngược lại, khi giá đã chạm vùng mục tiêu (TP), hãy chủ động chốt lời. Đừng để lòng tham giữ lại để rồi nhìn thị trường quay đầu làm mất đi khoản lãi xương máu.</li>
+                <li><strong>Hạ khối lượng (Volume) ở các lệnh sau:</strong> Khi đã bỏ túi được một khoản lợi nhuận mục tiêu, ưu tiên hàng đầu là bảo vệ thành quả. Nếu muốn giao dịch tiếp, hãy giảm số lượng hợp đồng xuống mức tối thiểu để những biến động sau không làm ảnh hưởng đến số tiền đã kiếm được.</li>
+                <li><strong>Tính toán tỷ lệ RR (Risk/Reward) trước khi vào lệnh:</strong> Luôn giữ sự tỉnh táo và tự đặt câu hỏi trước mỗi vị thế: <em>Nếu lệnh này đúng, mình sẽ lãi bao nhiêu điểm? Nếu lệnh này sai, mình sẽ mất bao nhiêu điểm?</em> Chỉ vào lệnh khi tỷ lệ lợi nhuận xứng đáng với rủi ro bỏ ra.</li>
+            </ul>
+
+            <div class="author-info">
+                <p style="text-align: center; font-weight: bold; color: #002060; margin-bottom: 25px;">Chúc anh chị nhà đầu tư luôn giữ được cái đầu lạnh và giao dịch thành công!</p>
+                <p style="margin: 5px 0; font-weight: bold; color: #002060;">ID VPS: BOR5 - NGUYỄN PHÚC BÌNH</p>
+                <p style="margin: 5px 0; font-weight: bold; color: #002060;">SĐT: 0853.525.379</p>
+            </div>
+        </div>
     </div>
 
+    <div class="modal-overlay" id="contactModal">
+        <div class="modal-box">
+            <h3>💬 Đăng Ký Tư Vấn</h3>
+            <form action="https://formspree.io/f/THAY_ID_FORM_TẠI_ĐÂY" method="POST">
+                <div class="form-group">
+                    <label for="name">Họ và Tên:</label>
+                    <input type="text" id="name" name="Họ Tên" placeholder="Nguyễn Văn A" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Số điện thoại (Zalo):</label>
+                    <input type="tel" id="phone" name="Số Điện Thoại" placeholder="0901234568" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Địa chỉ Gmail:</label>
+                    <input type="email" id="email" name="Gmail" placeholder="name@gmail.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">Nội dung cần hỗ trợ:</label>
+                    <textarea id="message" name="Nội Dung Cần Tư Vấn" rows="3" placeholder="Ví dụ: Cài đặt phần mềm..." required></textarea>
+                </div>
+                <button type="submit" class="btn-submit-form">Gửi Thông Tin Cho AD</button>
+            </form>
+            <button class="btn-close" id="closeContactBtn">Đóng</button>
+        </div>
+    </div>
+
+    <script>
+        const openContactBtn = document.getElementById('openContactBtn');
+        const closeContactBtn = document.getElementById('closeContactBtn');
+        const contactModal = document.getElementById('contactModal');
+
+        openContactBtn.addEventListener('click', () => contactModal.classList.add('active'));
+        closeContactBtn.addEventListener('click', () => contactModal.classList.remove('active'));
+        contactModal.addEventListener('click', (e) => { 
+            if (e.target === contactModal) contactModal.classList.remove('active'); 
+        });
+
+        const contactForm = contactModal.querySelector('form');
+        if (contactForm) {
+            contactForm.addEventListener('submit', () => {
+                setTimeout(() => { contactForm.reset(); }, 100);
+            });
+        }
+    </script>
 </body>
 </html>
