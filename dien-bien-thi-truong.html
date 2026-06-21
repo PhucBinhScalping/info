@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diễn Biến Thị Trường - Phúc Bình Scalping</title>
+    <style>
+        /* --- GIỮ NGUYÊN TÔNG MÀU VÀ GIAO DIỆN TỪ TRANG CHỦ --- */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(to right, #f9c851, #f15238); /* Màu cam vàng đặc trưng */
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            box-sizing: border-box;
+            color: #000000;
+        }
+
+        .main-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            padding: 20px 10px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        /* --- THANH MENU ĐỒNG BỘ --- */
+        .navbar {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background: #002060; 
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            padding: 15px 0;
+            box-sizing: border-box;
+        }
+
+        .navbar-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar-item a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            transition: color 0.2s;
+        }
+
+        .navbar-item a:hover, .navbar-item.active a {
+            color: #fff200; /* Làm nổi bật menu đang chọn */
+        }
+
+        /* --- KHUNG CHỨA NỘI DUNG ĐĂNG ẢNH --- */
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 30px 40px; 
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #002060;
+            margin-top: 0;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .page-subtitle {
+            font-size: 16px;
+            font-weight: 500;
+            color: #ffffff;
+            margin-bottom: 30px;
+            background: rgba(0, 32, 96, 0.6);
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+        }
+
+        /* Khu vực hiển thị hình ảnh buổi trưa */
+        .market-update-box {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            max-width: 800px;
+            margin: 0 auto 20px auto;
+        }
+
+        .market-img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .update-time {
+            font-size: 15px;
+            font-weight: bold;
+            color: #666666;
+            margin-top: 15px;
+            display: block;
+        }
+
+        /* Nút liên hệ tư vấn nổi */
+        .sticky-contact-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #002060;
+            color: #ffffff;
+            padding: 15px 25px;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            border: 2px solid #ffffff;
+            cursor: pointer;
+            z-index: 999;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .navbar-container { justify-content: center; }
+            .navbar-menu { gap: 20px; }
+            .navbar-item a { font-size: 14px; }
+            .page-title { font-size: 24px; }
+            .container { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-container">
+            <ul class="navbar-menu">
+                <li class="navbar-item"><a href="https://phucbinhscalping.online">Trang chủ</a></li>
+                <li class="navbar-item active"><a href="dien-bien-thi-truong.html">Diễn biến thị trường</a></li>
+                <li class="navbar-item"><a href="https://phucbinhscalping.online#bai-viet">Bài Viết</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <a href="https://phucbinhscalping.online" class="sticky-contact-btn">💬 Quay lại Trang Chủ</a>
+
+    <div class="main-wrapper">
+        <div class="container">
+            
+            <h1 class="page-title">📈 Diễn Biến Thị Trường Phái Sinh</h1>
+            <div class="page-subtitle">Cập nhật xu hướng & biên độ mỗi buổi trưa</div>
+
+            <div class="market-update-box">
+                <img src="anh-buoi-trua.jpg" alt="Cập nhật diễn biến thị trường buổi trưa" class="market-img">
+                
+                <span class="update-time">🕒 Cập nhật lúc: 11:45 AM - Ngày hôm nay</span>
+            </div>
+            
+        </div>
+    </div>
+
+</body>
+</html>
