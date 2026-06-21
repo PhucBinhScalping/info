@@ -5,22 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phúc Bình Scalping Phái Sinh</title>
     <style>
-        /* --- MENU ĐIỀU HƯỚNG MỚI (NAVBAR) --- */
+        /* --- ĐIỀU CHỈNH TOÀN TRANG ĐỂ MENU KHÔNG BỊ LỖI --- */
         html {
-            scroll-behavior: smooth; /* Cuộn mượt mà khi bấm menu */
+            scroll-behavior: smooth;
         }
         
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(to right, #f9c851, #f15238);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            box-sizing: border-box;
+            color: #000000;
+        }
+
+        /* Khung bọc toàn bộ nội dung phía dưới Menu để căn giữa chuẩn */
+        .main-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            padding: 20px 10px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        /* --- MENU ĐIỀU HƯỚNG FIXED CHUẨN --- */
         .navbar {
             position: sticky;
             top: 0;
             width: 100%;
-            background: rgba(0, 32, 96, 0.95); /* Màu xanh đậm tiệp với màu chủ đạo */
-            backdrop-filter: blur(5px);
+            background: #002060; /* Màu xanh đậm thương hiệu */
             z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            padding: 15px 0;
+            box-sizing: border-box;
+        }
+
+        .navbar-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
             display: flex;
-            justify-content: center;
-            padding: 12px 0;
+            justify-content: flex-start; /* Căn menu sang trái hoặc chỉnh center nếu muốn */
         }
 
         .navbar-menu {
@@ -37,106 +65,13 @@
             font-size: 16px;
             font-weight: bold;
             transition: color 0.2s;
-            padding: 5px 10px;
         }
 
         .navbar-item a:hover {
-            color: #fff200; /* Đổi sang màu vàng nổi bật khi hover */
+            color: #fff200; /* Hover đổi sang màu vàng */
         }
 
-        /* --- TRANG 3: KHU VỰC BÀI VIẾT CHIA SẺ --- */
-        .blog-section {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .blog-header {
-            font-size: 26px;
-            font-weight: bold;
-            color: #002060;
-            border-bottom: 2px solid #002060;
-            padding-bottom: 10px;
-            margin-bottom: 10px;
-            text-align: left;
-        }
-
-        .blog-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
-        }
-
-        .blog-card {
-            background: #ffffff;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.2s;
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .blog-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-
-        .blog-img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            background: #eee;
-        }
-
-        .blog-content {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            text-align: left;
-        }
-
-        .blog-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #002060;
-            margin: 0 0 10px 0;
-            line-height: 1.4;
-        }
-
-        .blog-excerpt {
-            font-size: 14px;
-            color: #555555;
-            margin: 0 0 20px 0;
-            line-height: 1.5;
-            flex: 1;
-        }
-
-        .blog-date {
-            font-size: 12px;
-            color: #999999;
-            font-weight: 500;
-        }
-
-        /* --- CẤU TRÚC GIAO DIỆN CHÍNH --- */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(to right, #f9c851, #f15238);
-            margin: 0;
-            padding: 0 10px 20px 10px; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 25px; 
-            min-height: 100vh;
-            box-sizing: border-box;
-            color: #000000;
-        }
-
-        /* Target offset để khi cuộn không bị thanh menu che mất tiêu đề */
+        /* --- CÁC CONTAINER NỘI DUNG --- */
         .container {
             max-width: 1100px;
             width: 100%;
@@ -146,8 +81,7 @@
             backdrop-filter: blur(10px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             box-sizing: border-box;
-            margin-top: 0; 
-            scroll-margin-top: 70px; /* Thêm khoảng cách phía trên khi cuộn bằng menu */
+            scroll-margin-top: 80px; /* Khoảng cách an toàn để không bị menu che khi cuộn */
         }
 
         /* --- TRANG 1 --- */
@@ -204,7 +138,6 @@
             margin-bottom: 20px;
         }
 
-        /* Khung Slider tự động lướt ảnh */
         .slider-container {
             width: 100%;
             max-width: 450px;
@@ -302,10 +235,7 @@
             border: none;
         }
 
-        .btn:hover {
-            transform: scale(1.05);
-        }
-
+        .btn:hover { transform: scale(1.05); }
         .btn-download { background-color: #29b6f6; color: #ffffff; }
         .btn-youtube { background-color: #ff0000; color: #ffffff; }
         .btn-link-vps { background-color: #002060; color: #ffffff; font-size: 15px; padding: 10px 20px; border-radius: 20px; }
@@ -371,6 +301,52 @@
         .qr-card-zalo img { border-radius: 15px; }
         .qr-image { width: 100%; height: auto; display: block; }
 
+        /* --- TRANG 3: BÀI VIẾT --- */
+        .blog-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .blog-header {
+            font-size: 26px;
+            font-weight: bold;
+            color: #002060;
+            border-bottom: 2px solid #002060;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .blog-card {
+            background: #ffffff;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .blog-img { width: 100%; height: 180px; object-fit: cover; background: #eee; }
+        .blog-content { padding: 20px; display: flex; flex-direction: column; flex: 1; text-align: left; }
+        .blog-title { font-size: 18px; font-weight: bold; color: #002060; margin: 0 0 10px 0; line-height: 1.4; }
+        .blog-excerpt { font-size: 14px; color: #555555; margin: 0 0 20px 0; line-height: 1.5; flex: 1; }
+        .blog-date { font-size: 12px; color: #999999; font-weight: 500; }
+
         /* --- BUTTON NỔI (STICKY) --- */
         .sticky-contact-btn {
             position: fixed;
@@ -420,22 +396,7 @@
         }
 
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-
-        .modal-box {
-            background: #ffffff;
-            padding: 25px;
-            border-radius: 20px;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-            transform: scale(0.8);
-            transition: transform 0.3s ease;
-            position: relative;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
+        .modal-box { background: #ffffff; padding: 25px; border-radius: 20px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.3); transform: scale(0.8); transition: transform 0.3s ease; position: relative; max-height: 90vh; overflow-y: auto; }
         .modal-overlay.active .modal-box { transform: scale(1); }
         .modal-box h3 { margin-top: 0; color: #002060; font-size: 22px; margin-bottom: 20px; }
         .form-group { margin-bottom: 15px; text-align: left; }
@@ -448,7 +409,8 @@
         .btn-close:hover { background-color: #555555; }
 
         @media (max-width: 768px) {
-            .navbar-menu { gap: 15px; }
+            .navbar-container { justify-content: center; }
+            .navbar-menu { gap: 20px; }
             .navbar-item a { font-size: 14px; }
             .header-section { flex-direction: column; text-align: center; }
             .header-title { font-size: 30px; }
@@ -464,116 +426,116 @@
 </head>
 <body>
 
-    <!-- THANH MENU ĐIỀU HƯỚNG FIXED PHÍA TRÊN -->
     <nav class="navbar">
-        <ul class="navbar-menu">
-            <li class="navbar-item"><a href="#dien-bien">Diễn biến thị trường</a></li>
-            <li class="navbar-item"><a href="#bai-viet">Bài Viết Chia Sẻ Kinh Nghiệm</a></li>
-        </ul>
+        <div class="navbar-container">
+            <ul class="navbar-menu">
+                <li class="navbar-item"><a href="#dien-bien">Diễn biến thị trường</a></li>
+                <li class="navbar-item"><a href="#bai-viet">Bài Viết Chia Sẻ Kinh Nghiệm</a></li>
+            </ul>
+        </div>
     </nav>
 
     <button class="sticky-contact-btn" id="openContactBtn">💬 Liên hệ tư vấn</button>
 
-    <!-- TRANG 1: ĐÃ THÊM ID DIEN-BIEN VÀO ĐÂY -->
-    <div class="container" id="dien-bien">
-        <div class="header-section">
-            <img src="logo.png" alt="Logo" class="avatar">
-            <h1 class="header-title">Phúc Bình Scalping Phái Sinh</h1>
+    <div class="main-wrapper">
+
+        <div class="container" id="dien-bien">
+            <div class="header-section">
+                <img src="logo.png" alt="Logo" class="avatar">
+                <h1 class="header-title">Phúc Bình Scalping Phái Sinh</h1>
+            </div>
+
+            <div class="main-content">
+                <div class="left-column">
+                    <div class="software-title">Phần mềm phân tích biên độ</div>
+                    <div class="software-subtitle">Chứng khoán phái sinh</div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-wrapper">
+                            <img src="phanmem1.png" alt="Phần mềm phân tích phái sinh">
+                            <img src="phanmem2.png" alt="Phần mềm phân tích phái sinh">
+                            <img src="phanmem3.png" alt="Phần mềm phân tích phái sinh">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right-column">
+                    <div class="vps-info">ID VPS: BOR5 - NGUYỄN PHÚC BÌNH</div>
+                    <div class="phone-info">LH: 0853.525.379</div>
+
+                    <ul class="description-list">
+                        <li>Biên độ của Chứng khoán phái sinh trong một ngày là thứ mà khó lòng cho những anh/chị/em nhà đầu tư giao dịch.</li>
+                        <li>Do đó, Phúc Bình Scalping Phái Sinh thiết kế ra Bot/Công cụ để hỗ trợ anh/chị/em xác định được đỉnh/đáy trong ngày của phái sinh.</li>
+                        <li>Để nhà đầu tư có thể giao dịch hiệu quả nhất.</li>
+                    </ul>
+
+                    <div class="buttons-row">
+                        <a href="https://drive.google.com/file/d/1DyUh3qpm2wFkbvGmwDJjo8aVhiDZZFVT/view?usp=drive_link" target="_blank" class="btn btn-download">
+                            Tải Bot
+                        </a>
+                        <a href="https://www.youtube.com/@PhucBinhScalping" target="_blank" class="btn btn-youtube">
+                            YouTube
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="main-content">
-            <div class="left-column">
-                <div class="software-title">Phần mềm phân tích biên độ</div>
-                <div class="software-subtitle">Chứng khoán phái sinh</div>
-                
-                <div class="slider-container">
-                    <div class="slider-wrapper">
-                        <img src="phanmem1.png" alt="Phần mềm phân tích phái sinh">
-                        <img src="phanmem2.png" alt="Phần mềm phân tích phái sinh">
-                        <img src="phanmem3.png" alt="Phần mềm phân tích phái sinh">
+        <div class="container">
+            <div class="qr-section">
+                <div class="qr-block">
+                    <div class="qr-title">Mở tài khoản chứng khoán chỉ 2 phút</div>
+                    <div class="buttons-row">
+                        <a href="https://openaccount.vps.com.vn/linktosmo/?MKTID=BOR5" target="_blank" class="btn btn-link-vps">
+                            Tại đây (Link) hoặc quét mã QR
+                        </a>
+                    </div>
+                    <div class="qr-card-vps">
+                        <img src="qr-vps.png" alt="QR Mở tài khoản VPS" class="qr-image">
+                    </div>
+                </div>
+
+                <div class="qr-block">
+                    <div class="qr-title">Tham gia nhóm Zalo</div>
+                    <div class="qr-card-zalo">
+                        <img src="qr-zalo.png" alt="QR Nhóm Zalo" class="qr-image">
                     </div>
                 </div>
             </div>
 
-            <div class="right-column">
-                <div class="vps-info">ID VPS: BOR5 - NGUYỄN PHÚC BÌNH</div>
-                <div class="phone-info">LH: 0853.525.379</div>
-
-                <ul class="description-list">
-                    <li>Biên độ của Chứng khoán phái sinh trong một ngày là thứ mà khó lòng cho những anh/chị/em nhà đầu tư giao dịch.</li>
-                    <li>Do đó, Phúc Bình Scalping Phái Sinh thiết kế ra Bot/Công cụ để hỗ trợ anh/chị/em xác định được đỉnh/đáy trong ngày của phái sinh.</li>
-                    <li>Để nhà đầu tư có thể giao dịch hiệu quả nhất.</li>
-                </ul>
-
-                <div class="buttons-row">
-                    <a href="https://drive.google.com/file/d/1DyUh3qpm2wFkbvGmwDJjo8aVhiDZZFVT/view?usp=drive_link" target="_blank" class="btn btn-download">
-                        Tải Bot
+            <div class="cafe-section">
+                <button class="btn btn-cafe" id="openCafeBtn">☕ Mời cafe AD</button>
+            </div>
+        </div>
+        
+        <div class="container" id="bai-viet">
+            <div class="blog-section">
+                <div class="blog-header">📚 Bài Viết </div>
+                <div class="blog-grid">
+                    
+                    <a href="kiem-duoc-loi-nhuan-nhung-khong-giu-duoc-tien-tai-sao.html" target="_blank" class="blog-card">
+                        <img src="kiem-duoc-tien.jpg" alt="Tại sao kiếm được lợi nhuận NHƯNG KHÔNG giữ được tiền trong chứng khoán?" class="blog-img">
+                        <div class="blog-content">
+                            <h4 class="blog-title">Tại sao kiếm được lợi nhuận NHƯNG KHÔNG giữ được tiền trong chứng khoán?</h4>
+                            <p class="blog-excerpt">Rất nhiều anh/chị có những phương pháp giúp giao dịch rất tốt, nhưng đều có vấn đề chung là có lợi nhuận nhưng cuối ngày lại mất tiền...</p>
+                            <span class="blog-date">📅 Ngày 21/06/2026</span>
+                        </div>
                     </a>
-                    <a href="https://www.youtube.com/@PhucBinhScalping" target="_blank" class="btn btn-youtube">
-                        YouTube
+                    
+                    <a href="VSA-Uneeb.html" target="_blank" class="blog-card">
+                        <img src="VSA-Wyckoff.png" alt="Phương pháp phân tích Wyckoff và VSA" class="blog-img">
+                        <div class="blog-content">
+                            <h4 class="blog-title">Phương pháp phân tích Wyckoff và VSA</h4>
+                            <p class="blog-excerpt">Có bao giờ mọi người tự hỏi tại sao giá lại bất đầu tăng mạnh thế, vì sao khi đến một điểm giá lại có những vận động sideway? Liệu hành vi giá này có lập lại hay không? Hay chỉ là một sự ngẫu nhiên? Phương pháp Wyckoff sẽ giải thích rõ về...</p>
+                            <span class="blog-date">📅 Ngày 21/06/2026</span>
+                        </div>
                     </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="container">
-        <div class="qr-section">
-            <div class="qr-block">
-                <div class="qr-title">Mở tài khoản chứng khoán chỉ 2 phút</div>
-                <div class="buttons-row">
-                    <a href="https://openaccount.vps.com.vn/linktosmo/?MKTID=BOR5" target="_blank" class="btn btn-link-vps">
-                        Tại đây (Link) hoặc quét mã QR
-                    </a>
-                </div>
-                <div class="qr-card-vps">
-                    <img src="qr-vps.png" alt="QR Mở tài khoản VPS" class="qr-image">
-                </div>
-            </div>
-
-            <div class="qr-block">
-                <div class="qr-title">Tham gia nhóm Zalo</div>
-                <div class="qr-card-zalo">
-                    <img src="qr-zalo.png" alt="QR Nhóm Zalo" class="qr-image">
+                    
                 </div>
             </div>
         </div>
 
-        <div class="cafe-section">
-            <button class="btn btn-cafe" id="openCafeBtn">☕ Mời cafe AD</button>
-        </div>
-    </div>
-    
-    <!-- TRANG 3: ĐÃ THÊM ID BAI-VIET VÀO ĐÂY -->
-    <div class="container" id="bai-viet">
-        <div class="blog-section">
-            <div class="blog-header">📚 Bài Viết </div>
-            <div class="blog-grid">
-                
-                <a href="kiem-duoc-loi-nhuan-nhung-khong-giu-duoc-tien-tai-sao.html" target="_blank" class="blog-card">
-                    <img src="kiem-duoc-tien.jpg" alt="Tại sao kiếm được lợi nhuận NHƯNG KHÔNG giữ được tiền trong chứng khoán?" class="blog-img">
-                    <div class="blog-content">
-                        <h4 class="blog-title">Tại sao kiếm được lợi nhuận NHƯNG KHÔNG giữ được tiền trong chứng khoán?</h4>
-                        <p class="blog-excerpt">Rất nhiều anh/chị có những phương pháp giúp giao dịch rất tốt, nhưng đều có vấn đề chung là có lợi nhuận nhưng cuối ngày lại mất tiền...</p>
-                        <span class="blog-date">📅 Ngày 21/06/2026</span>
-                    </div>
-                </a>
-                
-                <a href="VSA-Uneeb.html" target="_blank" class="blog-card">
-                    <img src="VSA-Wyckoff.png" alt="Phương pháp phân tích Wyckoff và VSA" class="blog-img">
-                    <div class="blog-content">
-                        <h4 class="blog-title">Phương pháp phân tích Wyckoff và VSA</h4>
-                        <p class="blog-excerpt">Có bao giờ mọi người tự hỏi tại sao giá lại bất đầu tăng mạnh thế, vì sao khi đến một điểm giá lại có những vận động sideway? Liệu hành vi giá này có lập lại hay không? Hay chỉ là một sự ngẫu nhiên? Phương pháp Wyckoff sẽ giải thích rõ về...</p>
-                        <span class="blog-date">📅 Ngày 21/06/2026</span>
-                    </div>
-                </a>
-                
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL ĐĂNG KÝ -->
-    <div class="modal-overlay" id="contactModal">
+    </div> <div class="modal-overlay" id="contactModal">
         <div class="modal-box">
             <h3>💬 Đăng Ký Tư Vấn</h3>
             <form action="https://formspree.io/f/THAY_ID_FORM_TẠI_ĐÂY" method="POST">
@@ -599,7 +561,6 @@
         </div>
     </div>
 
-    <!-- MODAL CAFE -->
     <div class="modal-overlay" id="cafeModal">
         <div class="modal-box">
             <h3>Mời Cafe Thêm Động Lực AD</h3>
