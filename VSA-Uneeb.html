@@ -10,39 +10,43 @@ xmlns="http://www.w3.org/TR/REC-html40">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  /* 1. Thiết lập nền tổng thể và cơ chế căn giữa */
+  /* 1. Thay đổi cách căn giữa: Không dùng flex nữa để triệt tiêu trang trắng bên cạnh */
   body {
-    background: linear-gradient(135deg, #febb5b 0%, #f15a24 50%, #ee3a43 100%);
-    margin: 0;
-    padding: 50px 20px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    display: flex;
-    justify-content: center; /* Đẩy toàn bộ nội dung vào chính giữa màn hình */
+    background: linear-gradient(135deg, #febb5b 0%, #f15a24 50%, #ee3a43 100%) !important;
+    margin: 0 !important;
+    padding: 50px 20px !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+    display: block !important; /* Đưa về block truyền thống */
   }
 
-  /* 2. Ép tất cả các thẻ bố cục cũ của Word (bất kể class nào) phải thu gọn vào giữa */
+  /* 2. Dùng margin: 0 auto để tự động gom 12.000 dòng vào một khối dọc duy nhất */
   body > div, .WordSection1, .container {
     background-color: #ffffff !important;
-    max-width: 850px !important; /* Giới hạn độ rộng văn bản chuẩn đẹp */
+    max-width: 850px !important; /* Độ rộng chuẩn, ôm khít văn bản và ảnh */
     width: 100% !important;
-    padding: 40px 50px !important; /* Tạo lề trái/phải 50px cân đối */
+    padding: 40px 50px !important; /* Tạo khoảng trống lề trái/phải 50px cực kỳ cân đối */
     border-radius: 16px !important;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
     box-sizing: border-box !important;
-    margin: 0 auto !important;
-    float: none !important; /* Khử lỗi tràn lề do Word */
+    
+    /* Chìa khóa sửa lỗi: Ép khối chạy dọc chính giữa màn hình */
+    margin: 0 auto 50px auto !important; 
+    float: none !important; 
+    clear: both !important;
   }
 
-  /* 3. Căn đều chữ và giãn dòng thoáng cho tất cả các đoạn văn bản */
+  /* 3. Giữ định dạng chữ căn đều và thoáng mắt */
   p, span, li {
     font-size: 16px !important;
-    line-height: 1.75 !important; /* Giãn cách dòng thoáng, dễ đọc */
-    text-align: justify !important; /* Căn đều hai bên lề thẳng tắp */
+    line-height: 1.8 !important; 
+    text-align: justify !important; /* Chữ căn đều hai bên lề thẳng tắp */
     color: #3a3a3a !important;
   }
 
-  /* 4. Đảm bảo hình ảnh tự co giãn vừa khít lề, không bị tràn khung */
+  /* 4. Định dạng ảnh tự co giãn chuẩn theo lề container */
   img {
     max-width: 100% !important;
     height: auto !important;
