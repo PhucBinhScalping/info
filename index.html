@@ -282,81 +282,43 @@
             display: block;
         }
 
-        /* --- PHẦN FORM LIÊN HỆ / TƯ VẤN --- */
-        .contact-section {
-            margin-top: 40px;
-            border-top: 2px dashed rgba(0, 32, 96, 0.3);
-            padding-top: 30px;
-            width: 100%;
-        }
-
-        .contact-form-box {
-            background: rgba(255, 255, 255, 0.85);
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            box-sizing: border-box;
-        }
-
-        .form-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #002060;
-            text-align: center;
-            margin-top: 0;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: bold;
-            color: #002060;
-            margin-bottom: 5px;
-            font-size: 15px;
-        }
-
-        .form-group input, .form-group textarea {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #cccccc;
-            border-radius: 8px;
-            font-size: 16px;
-            box-sizing: border-box;
-            font-family: inherit;
-        }
-
-        .form-group input:focus, .form-group textarea:focus {
-            outline: none;
-            border-color: #002060;
-            box-shadow: 0 0 5px rgba(0, 32, 96, 0.2);
-        }
-
-        .btn-submit-form {
+        /* --- BUTTON NỔI (STICKY) ĐỂ LIÊN HỆ GÓC MÀN HÌNH --- */
+        .sticky-contact-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
             background-color: #002060;
             color: #ffffff;
-            width: 100%;
-            padding: 12px;
-            font-size: 18px;
-            border-radius: 8px;
+            padding: 15px 25px;
+            border-radius: 40px;
+            font-size: 16px;
             font-weight: bold;
-            border: none;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            border: 2px solid #ffffff;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            transition: background-color 0.2s;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.2s, background-color 0.2s;
         }
 
-        .btn-submit-form:hover {
+        .sticky-contact-btn:hover {
+            transform: scale(1.05);
             background-color: #00103a;
         }
 
-        /* --- GIAO DIỆN HỘP THOẠI POP-UP QR BANK --- */
+        /* Hiệu ứng rung nhẹ tự động thu hút sự chú ý của khách */
+        @keyframes pulseAnimation {
+            0% { box-shadow: 0 0 0 0 rgba(0, 32, 96, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(0, 32, 96, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 32, 96, 0); }
+        }
+        .sticky-contact-btn {
+            animation: pulseAnimation 2s infinite;
+        }
+
+        /* --- HỘP THOẠI CHỨA FORM TƯ VẤN (POP-UP MODAL) --- */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -383,13 +345,15 @@
             background: #ffffff;
             padding: 25px;
             border-radius: 20px;
-            max-width: 320px;
+            max-width: 400px;
             width: 90%;
             text-align: center;
             box-shadow: 0 15px 40px rgba(0,0,0,0.3);
             transform: scale(0.8);
             transition: transform 0.3s ease;
             position: relative;
+            max-height: 90vh;
+            overflow-y: auto; /* Tránh tràn màn hình trên điện thoại nhỏ */
         }
 
         .modal-overlay.active .modal-box {
@@ -399,7 +363,50 @@
         .modal-box h3 {
             margin-top: 0;
             color: #002060;
-            font-size: 20px;
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            color: #002060;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cccccc;
+            border-radius: 8px;
+            font-size: 15px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #002060;
+            box-shadow: 0 0 5px rgba(0, 32, 96, 0.2);
+        }
+
+        .btn-submit-form {
+            background-color: #002060;
+            color: #ffffff;
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
             margin-bottom: 15px;
         }
 
@@ -437,10 +444,13 @@
             .btn { width: 100%; box-sizing: border-box; }
             .qr-section { flex-direction: column; align-items: center; }
             .qr-title { min-height: auto; margin-bottom: 10px; }
+            .sticky-contact-btn { bottom: 20px; left: 20px; padding: 12px 20px; font-size: 14px; }
         }
     </style>
 </head>
 <body>
+
+    <button class="sticky-contact-btn" id="openContactBtn">💬 Liên hệ tư vấn</button>
 
     <div class="container">
         <div class="header-section">
@@ -468,7 +478,7 @@
 
                 <ul class="description-list">
                     <li>Biên độ của Chứng khoán phái sinh trong một ngày là thứ mà khó lòng cho những anh/chị/em nhà đầu tư giao dịch.</li>
-                    <li>Thấu hiểu những điều đó, Phúc Bình Scalping Phái Sinh thiết kế ra Bot/Công cụ để hỗ trợ anh/chị/em xác định được đỉnh/đáy trong ngày của phái sinh.</li>
+                    <li>Do đó, Phúc Bình Scalping Phái Sinh thiết kế ra Bot/Công cụ để hỗ trợ anh/chị/em xác định được đỉnh/đáy trong ngày của phái sinh.</li>
                     <li>Để nhà đầu tư có thể giao dịch hiệu quả nhất.</li>
                 </ul>
 
@@ -507,38 +517,40 @@
             </div>
         </div>
 
-        <div class="contact-section">
-            <div class="contact-form-box">
-                <div class="form-title">💬 Đăng Ký Tư Vấn & Hỗ Trợ Giao Dịch</div>
-                
-                <form action="https://formspree.io/f/xrewzpjl" method="POST">
-                    <div class="form-group">
-                        <label for="name">Họ và Tên của bạn:</label>
-                        <input type="text" id="name" name="Họ Tên" placeholder="Ví dụ: Nguyễn Văn A" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="phone">Số điện thoại (Zalo):</label>
-                        <input type="tel" id="phone" name="Số Điện Thoại" placeholder="Ví dụ: 0901234567" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="email">Địa chỉ Gmail:</label>
-                        <input type="email" id="email" name="Gmail Khách" placeholder="Ví dụ: name@gmail.com" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="message">Thông tin cần tư vấn (Nhu cầu của bạn):</label>
-                        <textarea id="message" name="Nội Dung Cần Tư Vấn" rows="4" placeholder="Ví dụ: Mình cần tư vấn cài đặt Bot phái sinh..." required></textarea>
-                    </div>
-                    
-                    <button type="submit" class="btn-submit-form">Gửi Thông Tin Cho AD</button>
-                </form>
-            </div>
-        </div>
-
         <div class="cafe-section">
             <button class="btn btn-cafe" id="openCafeBtn">☕ Mời cafe AD</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="contactModal">
+        <div class="modal-box">
+            <h3>💬 Đăng Ký Tư Vấn</h3>
+            
+            <form action="https://formspree.io/f/xxxxxxxx" method="POST">
+                <div class="form-group">
+                    <label for="name">Họ và Tên:</label>
+                    <input type="text" id="name" name="Họ Tên" placeholder="Nguyễn Văn A" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Số điện thoại (Zalo):</label>
+                    <input type="tel" id="phone" name="Số Điện Thoại" placeholder="0901234567" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Địa chỉ Gmail:</label>
+                    <input type="email" id="email" name="Gmail" placeholder="name@gmail.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Nội dung cần hỗ trợ:</label>
+                    <textarea id="message" name="Nội Dung Cần Tư Vấn" rows="3" placeholder="Ví dụ: Cài đặt phần mềm..." required></textarea>
+                </div>
+                
+                <button type="submit" class="btn-submit-form">Gửi Thông Tin Cho AD</button>
+            </form>
+            
+            <button class="btn-close" id="closeContactBtn">Đóng</button>
         </div>
     </div>
 
@@ -553,23 +565,25 @@
     </div>
 
     <script>
-        const openBtn = document.getElementById('openCafeBtn');
-        const closeBtn = document.getElementById('closeCafeBtn');
-        const modal = document.getElementById('cafeModal');
+        // Các biến điều khiển Pop-up Cafe
+        const openCafeBtn = document.getElementById('openCafeBtn');
+        const closeCafeBtn = document.getElementById('closeCafeBtn');
+        const cafeModal = document.getElementById('cafeModal');
 
-        openBtn.addEventListener('click', () => {
-            modal.classList.add('active');
-        });
+        // Các biến điều khiển Pop-up Form Tư vấn
+        const openContactBtn = document.getElementById('openContactBtn');
+        const closeContactBtn = document.getElementById('closeContactBtn');
+        const contactModal = document.getElementById('contactModal');
 
-        closeBtn.addEventListener('click', () => {
-            modal.classList.remove('active');
-        });
+        // Logic Pop-up Cafe
+        openCafeBtn.addEventListener('click', () => cafeModal.classList.add('active'));
+        closeCafeBtn.addEventListener('click', () => cafeModal.classList.remove('active'));
+        cafeModal.addEventListener('click', (e) => { if (e.target === cafeModal) cafeModal.classList.remove('active'); });
 
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-            }
-        });
+        // Logic Pop-up Form Tư vấn
+        openContactBtn.addEventListener('click', () => contactModal.classList.add('active'));
+        closeContactBtn.addEventListener('click', () => contactModal.classList.remove('active'));
+        contactModal.addEventListener('click', (e) => { if (e.target === contactModal) contactModal.classList.remove('active'); });
     </script>
 
 </body>
