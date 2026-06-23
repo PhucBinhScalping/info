@@ -2,27 +2,50 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Biểu đồ kỹ thuật VN30F1M</title>
+    <title>Biểu đồ kỹ thuật VN30F1M - Phúc Bình Scalping</title>
     <style>
         body, html {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #131722; overflow: hidden; font-family: Arial, sans-serif;
+        }
+        /* Giao diện chia 3 khung biểu đồ */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr; /* Cột trái rộng gấp đôi cột phải */
+            grid-template-rows: 1fr 1fr;    /* Cột trái chia đôi thành 2 hàng */
             width: 100%;
             height: 100%;
-            overflow: hidden;
-            background-color: #131722;
+            gap: 2px; /* Khoảng cách giữa các biểu đồ */
+            background-color: #2b3040;
+        }
+        .chart-item {
+            width: 100%; height: 100%; background-color: #131722; position: relative;
+        }
+        /* Biểu đồ VNINDEX (Ngày) chiếm trọn cột bên phải */
+        .chart-idx {
+            grid-column: 2;
+            grid-row: 1 / span 2;
+        }
+        iframe {
+            width: 100%; height: 100%; border: none;
         }
     </style>
 </head>
 <body>
 
-    <iframe 
-        src="https://web5.vps.com.vn/?sym=VN30F1M&interval=5&theme=light&lang=vi" 
-        width="100%" 
-        height="100%" 
-        style="border: none;"
-        allowfullscreen>
-    </iframe>
+    <div class="grid-container">
+        <div class="chart-item">
+            <iframe src="https://api.allorigins.win/raw?url=https://web5.vps.com.vn/?sym=VN30F1M%26interval=5%26theme=dark%26lang=vi"></iframe>
+        </div>
+
+        <div class="chart-item">
+            <iframe src="https://api.allorigins.win/raw?url=https://web5.vps.com.vn/?sym=VN30F1M%26interval=15%26theme=dark%26lang=vi"></iframe>
+        </div>
+
+        <div class="chart-item chart-idx">
+            <iframe src="https://api.allorigins.win/raw?url=https://web5.vps.com.vn/?sym=VNINDEX%26interval=D%26theme=dark%26lang=vi"></iframe>
+        </div>
+    </div>
 
 </body>
 </html>
