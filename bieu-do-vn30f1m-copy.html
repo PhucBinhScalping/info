@@ -81,7 +81,7 @@
         .info-label { color: #707a8a; }
         .info-value { font-weight: 600; color: #1e222d; }
         
-        /* Màu sắc chuẩn bảng điện */
+        /* Màu sắc chuẩn sàn */
         .color-up { color: #00c853 !important; }     
         .color-down { color: #d50000 !important; }   
         .color-ref { color: #ffaa00 !important; }    
@@ -91,13 +91,14 @@
 
         iframe { width: 100%; height: 100%; border: none; }
     </style>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body>
 
     <div class="header">
         <a href="index.html" class="back-link" style="flex: 1; text-align: left; color: #e65100;">⬅ Quay lại Trang chủ</a>
         <div style="flex: 2; text-align: center; font-size: 18px; font-weight: bold; color: #e65100; letter-spacing: 0.5px;">
-             Dữ liệu lấy trực tiếp từ hệ thống Bảng giá VPS API
+             Dữ liệu đồng bộ trực tiếp từ Cổng WebSocket TradingView VPS
         </div>
         <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #e65100;">
             SĐT: 0853.525.379 - ID VPS: BOR5
@@ -129,7 +130,7 @@
             <div id="display_change" class="vps-change">--.-- (--.--%)</div>
             
             <div class="depth-container">
-                <div class="depth-title">Độ sâu thị trường (Bước giá & KL chuẩn từ sàn)</div>
+                <div class="depth-title">Độ sâu thị trường (Bước giá & KL từ Realtime Feed)</div>
                 <table class="depth-table">
                     <tr style="border-bottom: 1px solid #e0e3eb;">
                         <th style="text-align: left; width: 25%;">KL MUA</th>
@@ -172,18 +173,51 @@
 
     <script>
         let currentSymbol = 'VN30F1M';
-        let apiInterval = null;
-        let lastLoggedPrice = null;
-        let lastLoggedVol = null;
-
-        // Định nghĩa các biến mốc giá trần/sàn/tham chiếu toàn cục
-        let refPrice = 0, ceilPrice = 0, floorPrice = 0;
+        let vpsSocket = null;
+        
+        let refPrice = 0;
+        let ceilPrice = 0;
+        let floorPrice = 0;
+        let lastSeq = -1;
 
         window.onload = function() {
-            loadVPSDataFeed();
-            // Cập nhật real-time dữ liệu sổ lệnh và bước giá mỗi 1 giây
-            apiInterval = setInterval(loadVPSDataFeed, 1000);
+            connectToVPSTradingViewSocket();
         };
+
+        function connectToVPSTradingViewSocket() {
+            // Khởi tạo kết nối SocketIO thẳng tới domain chứa đường dẫn WSS bạn tìm được
+            vpsSocket = io('https://tradingviewrealtime.vps.com.vn', {
+                transports: ['polling', 'websocket'], // Bắt đầu bằng polling và tự upgrade lên websocket
+                forceNew: true,
+                rejectUnauthorized: false
+            });
+
+            vpsSocket.on('connect', () => {
+                console.log("Đã thông suốt kết nối với Máy chủ Realtime VPS!");
+                // Gửi sự kiện yêu cầu theo dõi dữ liệu của Mã hiện tại
+                subscribeSymbol(currentSymbol);
+            });
+
+            // Lắng nghe sự kiện trả về dữ liệu bảng điện từ máy chủ VPS
+            // Tên sự kiện 'realtimeData' là kênh chuẩn của hệ thống TradingView VPS
+            vpsSocket.on('realtimeData', (payload) => {
+                if (payload && payload.symbol === currentSymbol) {
+                    parseAndRenderData(payload);
+                }
+            });
+
+            vpsSocket.on('disconnect', () => {
+                console.log("Mất tín hiệu kết nối Socket, đang tự động thiết lập lại...");
+            });
+        }
+
+        function subscribeSymbol(symbol) {
+            if (vpsSocket && vpsSocket.connected) {
+                // Gửi tín hiệu gia nhập phòng (room) nhận dữ liệu của mã cụ thể
+                vpsSocket.emit('join', symbol);
+                vpsSocket.emit('subscribe', { symbols: [symbol] });
+            }
+        }
 
         function switchTab(event, blockId, symbol) {
             document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
@@ -191,99 +225,87 @@
             document.querySelectorAll('.tab-content-block').forEach(block => block.classList.remove('active'));
             document.getElementById(blockId).classList.add('active');
             
+            // Hủy đăng ký mã cũ, đăng ký mã mới
+            if (vpsSocket && vpsSocket.connected) {
+                vpsSocket.emit('unsubscribe', { symbols: [currentSymbol] });
+            }
+
             currentSymbol = symbol;
             document.getElementById('display_symbol').innerText = symbol;
             document.getElementById('display_desc').innerText = symbol === 'VN30F1M' ? "Hợp đồng tương lai chỉ số VN30" : "Chỉ số VN-Index Việt Nam";
             document.getElementById('matchHistoryList').innerHTML = ""; 
             
-            lastLoggedPrice = null;
-            lastLoggedVol = null;
-            
-            loadVPSDataFeed();
+            subscribeSymbol(currentSymbol);
         }
 
-        // Gọi trực tiếp cổng API Restful của bảng điện VPS để lấy trọn vẹn snapshot chính xác 100%
-        async function loadVPSDataFeed() {
-            try {
-                // Endpoint API chính thức phân tách mã của VPS
-                const url = `https://banggia.vps.com.vn/api/snapshot?symbols=${currentSymbol}`;
-                const response = await fetch(url);
-                const results = await response.json();
+        // Hàm phân tích gói dữ liệu nhị phân/JSON thực tế trả về từ luồng WSS
+        function parseAndRenderData(data) {
+            refPrice = data.referencePrice || data.r || 0;
+            ceilPrice = data.ceilingPrice || data.c || 0;
+            floorPrice = data.floorPrice || data.f || 0;
+
+            const currentPrice = data.lastPrice || refPrice;
+            const changeValue = data.change || 0;
+            const changePct = data.changePercent || 0;
+            
+            let colorClass = getPriceColor(currentPrice);
+            const prefix = changeValue > 0 ? "↑ +" : (changeValue < 0 ? "↓ " : "");
+
+            // Hiển thị giá chính và % tăng giảm tức thời
+            document.getElementById('display_price').innerText = currentPrice.toFixed(2);
+            document.getElementById('display_price').className = `vps-main-price ${colorClass}`;
+            document.getElementById('display_symbol').className = `vps-widget-header ${colorClass}`;
+            document.getElementById('display_change').innerText = `${prefix}${Math.abs(changeValue).toFixed(2)} (${changePct.toFixed(2)}%)`;
+            document.getElementById('display_change').className = `vps-change ${colorClass}`;
+
+            // Điền các ô thông số kỹ thuật dưới đáy sidebar
+            document.getElementById('val_open').innerText = data.openPrice ? data.openPrice.toFixed(2) : (data.open ? data.open.toFixed(2) : "---.--");
+            document.getElementById('val_high').innerText = data.highestPrice ? data.highestPrice.toFixed(2) : (data.high ? data.high.toFixed(2) : "---.--");
+            document.getElementById('val_low').innerText = data.lowestPrice ? data.lowestPrice.toFixed(2) : (data.low ? data.low.toFixed(2) : "---.--");
+            document.getElementById('val_prev').innerText = refPrice.toFixed(2);
+
+            // CẬP NHẬT 3 BƯỚC GIÁ SỔ LỆNH THỜI GIAN THỰC
+            // Gói tin chuẩn thường cấu trúc dạng mảng (Best Bid / Best Ask) hoặc các trường bp1, bv1...
+            updateRow('bid_p1', 'bid_v1', data.bp1 || data.bidPrice1, data.bv1 || data.bidVol1);
+            updateRow('bid_p2', 'bid_v2', data.bp2 || data.bidPrice2, data.bv2 || data.bidVol2);
+            updateRow('bid_p3', 'bid_v3', data.bp3 || data.bidPrice3, data.bv3 || data.bidVol3);
+
+            updateRow('ask_p1', 'ask_v1', data.ap1 || data.askPrice1, data.av1 || data.askVol1);
+            updateRow('ask_p2', 'ask_v2', data.ap2 || data.askPrice2, data.av2 || data.askVol2);
+            updateRow('ask_p3', 'ask_v3', data.ap3 || data.askPrice3, data.av3 || data.askVol3);
+
+            // ĐỒNG BỘ NHẬT KÝ KHỚP LỆNH TỨC THỜI (TIME & SALES)
+            // Kiểm tra nếu có khối lượng khớp lệnh phát sinh ở tích tắc hiện tại
+            const currentVol = data.lastVolume || data.lastVol || 0;
+            const currentSeq = data.sequence || data.seq || Date.now(); 
+
+            if (currentPrice > 0 && currentVol > 0 && currentSeq !== lastSeq) {
+                lastSeq = currentSeq;
+                const historyList = document.getElementById('matchHistoryList');
+                const timeString = data.time || new Date().toLocaleTimeString('vi-VN', { hour12: false });
                 
-                if (results && results.length > 0) {
-                    const data = results[0];
-                    
-                    // Lưu các mốc giá cơ sở để tính màu sắc
-                    refPrice = data.r || 0;
-                    ceilPrice = data.c || 0;
-                    floorPrice = data.f || 0;
-
-                    const currentPrice = data.lastPrice || refPrice;
-                    const changeValue = data.change || 0;
-                    const changePct = data.changePercent || 0;
-                    
-                    // Cập nhật giá chính và màu sắc thay đổi
-                    let colorClass = getPriceColor(currentPrice);
-                    const prefix = changeValue > 0 ? "↑ +" : (changeValue < 0 ? "↓ " : "");
-
-                    document.getElementById('display_price').innerText = currentPrice.toFixed(2);
-                    document.getElementById('display_price').className = `vps-main-price ${colorClass}`;
-                    document.getElementById('display_symbol').className = `vps-widget-header ${colorClass}`;
-                    document.getElementById('display_change').innerText = `${prefix}${Math.abs(changeValue).toFixed(2)} (${changePct.toFixed(2)}%)`;
-                    document.getElementById('display_change').className = `vps-change ${colorClass}`;
-
-                    // Điền dữ liệu 4 thông số cơ bản ở đáy Sidebar
-                    document.getElementById('val_open').innerText = data.open ? data.open.toFixed(2) : "---.--";
-                    document.getElementById('val_high').innerText = data.high ? data.high.toFixed(2) : "---.--";
-                    document.getElementById('val_low').innerText = data.low ? data.low.toFixed(2) : "---.--";
-                    document.getElementById('val_prev').innerText = refPrice.toFixed(2);
-
-                    // ĐIỀN ĐỘ SÂU THỊ TRƯỜNG (3 BƯỚC GIÁ MUA / BÁN CHUẨN)
-                    // Bên Mua (Bid)
-                    updateCellData('bid_p1', 'bid_v1', data.bp1, data.bv1);
-                    updateCellData('bid_p2', 'bid_v2', data.bp2, data.bv2);
-                    updateCellData('bid_p3', 'bid_v3', data.bp3, data.bv3);
-                    
-                    // Bên Bán (Ask)
-                    updateCellData('ask_p1', 'ask_v1', data.ap1, data.av1);
-                    updateCellData('ask_p2', 'ask_v2', data.ap2, data.av2);
-                    updateCellData('ask_p3', 'ask_v3', data.ap3, data.av3);
-
-                    // ĐẨY NHẬT KÝ KHỚP LỆNH REAL-TIME (TIME & SALES CHUẨN)
-                    if (data.lastPrice && data.lastVol && (currentPrice !== lastLoggedPrice || data.lastVol !== lastLoggedVol)) {
-                        lastLoggedPrice = currentPrice;
-                        lastLoggedVol = data.lastVol;
-
-                        const historyList = document.getElementById('matchHistoryList');
-                        const timeString = new Date().toLocaleTimeString('vi-VN', { hour12: false });
-                        
-                        const newRow = `
-                            <div class="history-row">
-                                <span style="color:#707a8a;">${timeString}</span>
-                                <span class="${colorClass}" style="font-weight:bold;">${currentPrice.toFixed(2)}</span>
-                                <span class="${colorClass}" style="font-weight:normal;">${data.lastVol.toLocaleString('vi-VN')}</span>
-                            </div>
-                        `;
-                        historyList.insertAdjacentHTML('afterbegin', newRow);
-                        
-                        // Giữ lại tối đa 15 dòng để màn hình live-stream luôn gọn gàng
-                        if (historyList.children.length > 15) {
-                            historyList.removeChild(historyList.lastChild);
-                        }
-                    }
+                const newRow = `
+                    <div class="history-row">
+                        <span style="color:#707a8a;">${timeString}</span>
+                        <span class="${colorClass}" style="font-weight:bold;">${currentPrice.toFixed(2)}</span>
+                        <span class="${colorClass}" style="font-weight:normal;">${currentVol.toLocaleString('vi-VN')}</span>
+                    </div>
+                `;
+                historyList.insertAdjacentHTML('afterbegin', newRow);
+                
+                if (historyList.children.length > 15) {
+                    historyList.removeChild(historyList.lastChild);
                 }
-            } catch (error) {
-                console.error("Lỗi khi đồng bộ dữ liệu Snapshot từ bảng giá VPS:", error);
             }
         }
 
-        function updateCellData(priceId, volId, price, vol) {
-            const pCell = document.getElementById(priceId);
-            const vCell = document.getElementById(volId);
+        function updateRow(pId, vId, price, vol) {
+            const pCell = document.getElementById(pId);
+            const vCell = document.getElementById(vId);
             if (price && price > 0) {
-                pCell.innerText = price.toFixed(2);
+                pCell.innerText = parseFloat(price).toFixed(2);
                 pCell.className = getPriceColor(price);
-                vCell.innerText = vol ? vol.toLocaleString('vi-VN') : "0";
+                vCell.innerText = vol ? parseInt(vol).toLocaleString('vi-VN') : "0";
             } else {
                 pCell.innerText = "---.-";
                 pCell.className = "";
@@ -291,7 +313,6 @@
             }
         }
 
-        // Định dạng màu chữ chuẩn sàn chứng khoán
         function getPriceColor(price) {
             if (price === refPrice) return "color-ref";
             if (price >= ceilPrice && ceilPrice > 0) return "color-ceil";
