@@ -31,9 +31,7 @@
             font-size: 13px; font-weight: bold; cursor: pointer; border-radius: 4px;
             transition: 0.2s; display: flex; align-items: center; gap: 6px;
         }
-        .tab-item:hover {
-            background-color: #2a2e39; color: #ffffff;
-        }
+        .tab-item:hover { background-color: #2a2e39; color: #ffffff; }
         .tab-item.active {
             background-color: #242b42; color: #2962ff; border-bottom: 2px solid #2962ff;
             border-radius: 4px 4px 0 0;
@@ -46,51 +44,44 @@
         }
         
         /* Phần chứa Biểu đồ bên trái */
-        .chart-section {
-            flex: 1; height: 100%; position: relative;
-        }
-        .chart-wrapper {
-            display: none; width: 100%; height: 100%;
-        }
-        .chart-wrapper.active {
-            display: block;
-        }
-        iframe {
-            width: 100%; height: 100%; border: none;
-        }
+        .chart-section { flex: 1; height: 100%; position: relative; }
+        .chart-wrapper { display: none; width: 100%; height: 100%; }
+        .chart-wrapper.active { display: block; }
+        iframe { width: 100%; height: 100%; border: none; }
 
-        /* PHẦN PANEL LỊCH SỬ KHỚP LỆNH BÊN PHẢI */
+        /* PANEL HIỂN THỊ GIÁ LỚN BÊN PHẢI ĐỂ LIVESTREAM */
         .sidebar-panel {
-            width: 320px; height: 100%; background-color: #ffffff; color: #333333;
+            width: 340px; height: 100%; background-color: #ffffff; color: #333333;
             border-left: 1px solid #e0e3eb; box-sizing: border-box;
-            display: flex; flex-direction: column; padding: 0;
-            overflow-y: auto;
+            display: flex; flex-direction: column; padding: 16px; box-sizing: border-box;
         }
         
-        /* Tiêu đề cố định */
-        .sidebar-title {
-            padding: 10px 12px; font-size: 13px; font-weight: bold; color: #1e2026;
-            border-bottom: 1px solid #eee; background-color: #f8f9fa;
-        }
+        .stock-title { font-size: 24px; font-weight: bold; color: #00b060; margin-bottom: 2px; }
+        .stock-sub { font-size: 13px; color: #666666; margin-bottom: 15px; }
+        
+        /* Vùng giá hiện tại siêu lớn */
+        .price-large-box { margin-bottom: 15px; }
+        .price-now { font-size: 46px; font-weight: bold; color: #00b060; line-height: 1; }
+        .price-change { font-size: 16px; font-weight: bold; color: #00b060; margin-top: 5px; }
 
-        /* Bảng lịch sử khớp lệnh */
-        .history-table {
-            width: 100%; border-collapse: collapse; font-size: 13px; font-weight: bold;
-        }
-        .history-table tr {
-            height: 30px; border-bottom: 1px solid #f1f1f1;
-        }
-        .history-table tr:nth-child(odd) {
-            background-color: #fdfdfd;
-        }
-        .col-time { color: #666666; text-align: left; padding-left: 12px; width: 35%; }
-        .col-price { text-align: right; width: 35%; padding-right: 15px; }
-        .col-vol { text-align: right; padding-right: 15px; width: 20%; }
-        .col-side { text-align: right; padding-right: 12px; width: 10%; }
+        /* Bảng thông số chi tiết */
+        .info-grid { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .info-grid td { padding: 10px 0; border-bottom: 1px solid #f1f1f1; font-size: 14px; font-weight: 500; }
+        .info-label { color: #666666; text-align: left; }
+        .info-value { text-align: right; font-weight: bold; }
+
+        /* Các ô màu cố định cho Trần, Sàn, TC */
+        .row-3col { display: flex; justify-content: space-between; text-align: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #f1f1f1; }
+        .col-item { flex: 1; }
+        .col-label { font-size: 12px; color: #666666; margin-bottom: 4px; }
+        .col-val { font-size: 15px; font-weight: bold; }
         
-        /* Màu chữ phe Mua/Bán */
-        .text-buy { color: #00b060; }
-        .text-sell { color: #ea0017; }
+        /* Màu chuẩn chứng khoán */
+        .c-tc { color: #f5a623; }   /* Vàng tham chiếu */
+        .c-tran { color: #b800e6; } /* Tím trần */
+        .c-san { color: #00b0ff; }  /* Xanh lơ sàn */
+        .c-up { color: #00b060; }   /* Xanh tăng */
+        .c-down { color: #ea0017; } /* Đỏ giảm */
     </style>
 </head>
 <body>
@@ -126,16 +117,50 @@
         </div>
 
         <div class="sidebar-panel">
-            <div class="sidebar-title">⏱ Lịch sử khớp lệnh (VPS API)</div>
-            <table class="history-table">
-                <tbody id="history-rows">
-                    <tr>
-                        <td class="col-time" style="color:#999; font-weight:normal;">Đang tải dữ liệu VPS...</td>
-                        <td class="col-price"></td>
-                        <td class="col-vol"></td>
-                        <td class="col-side"></td>
-                    </tr>
-                </tbody>
+            <div class="stock-title" id="lbl-symbol">VN30F1M</div>
+            <div class="stock-sub" id="lbl-name">VN30 Index Futures Gần nhất</div>
+
+            <div class="price-large-box">
+                <div class="price-now c-up" id="txt-price">1,991.40</div>
+                <div class="price-change c-up" id="txt-change">▲ 6.60 (0.33%)</div>
+            </div>
+
+            <div class="row-3col">
+                <div class="col-item">
+                    <div class="col-label">TC</div>
+                    <div class="col-val c-tc" id="txt-tc">1,984.8</div>
+                </div>
+                <div class="col-item">
+                    <div class="col-label">Trần</div>
+                    <div class="col-val c-tran" id="txt-ceiling">2,123.7</div>
+                </div>
+                <div class="col-item">
+                    <div class="col-label">Sàn</div>
+                    <div class="col-val c-san" id="txt-floor">1,845.9</div>
+                </div>
+            </div>
+
+            <table class="info-grid">
+                <tr>
+                    <td class="info-label">Mở cửa / TB</td>
+                    <td class="info-value"><span class="c-down" id="txt-open">1,984.70</span> / <span class="c-up" id="txt-avg">1,994.87</span></td>
+                </tr>
+                <tr>
+                    <td class="info-label">Thấp / Cao</td>
+                    <td class="info-value"><span class="c-down" id="txt-low">1,981.50</span> / <span class="c-up" id="txt-high">2,012.40</span></td>
+                </tr>
+                <tr>
+                    <td class="info-label">Khối lượng</td>
+                    <td class="info-value" id="txt-volume">204,326</td>
+                </tr>
+                <tr>
+                    <td class="info-label">KLNN Mua / Bán</td>
+                    <td class="info-value"><span id="txt-f-buy">10,158</span> / <span id="txt-f-sell">11,857</span></td>
+                </tr>
+                <tr>
+                    <td class="info-label" style="border-bottom: none;">Khối lượng hợp đồng mở OI</td>
+                    <td class="info-value" style="border-bottom: none; color: #1e2026;" id="txt-oi">31,329</td>
+                </tr>
             </table>
         </div>
 
@@ -149,88 +174,59 @@
             document.getElementById(tabId).classList.add('active');
         }
 
-        // --- CƠ CHẾ GỌI API TRỰC TIẾP TỪ LINK VPS ---
-        async function fetchVPSIntraday() {
-            const url = "https://web6.vps.com.vn/market_api.MarketApi/findSecIntraday";
-            
-            // Payload nhị phân/chuỗi đặc thù của gRPC-web để yêu cầu mã VN30F1M từ server VPS
-            // Lưu ý: Cấu trúc này mô phỏng theo frame gRPC gửi lên của VPS
-            const requestPayload = JSON.stringify({
-                info: {
-                    secType: "DERIVATIVE",
-                    symbol: "VN30F1M"
-                }
-            });
+        // --- KẾT NỐI SỐ LIỆU REAL-TIME QUA WEBSOCKET DNSE (MỞ HOÀN TOÀN) ---
+        const wsUrl = "wss://banggia-api.dnse.com.vn/data/websocket";
+        let socket = new WebSocket(wsUrl);
 
+        socket.onopen = () => {
+            // Đăng ký cổng dữ liệu phái sinh mã VN30F1M
+            const msg = { "action": "join", "topics": ["derivative-quote:VN30F1M"] };
+            socket.send(JSON.stringify(msg));
+        };
+
+        socket.onmessage = (event) => {
             try {
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Accept": "application/json",
-                        // Một số API nội bộ yêu cầu thêm Token hoặc Origin của VPS, đoạn này chạy thử nghiệm:
-                    },
-                    body: requestPayload
-                });
-
-                if (!response.ok) {
-                    throw new Error("Mạng lỗi hoặc bị chặn CORS bởi VPS");
+                const data = JSON.parse(event.data);
+                if (data && data.topic === "derivative-quote:VN30F1M" && data.data) {
+                    updateLiveUI(data.data);
                 }
+            } catch (e) { console.log(e); }
+        };
 
-                const result = await response.json();
-                
-                // Giả định cấu trúc mảng trả về sau khi parse từ hàm findSecIntraday
-                if (result && result.rows) {
-                    // Lấy 16 lệnh mới nhất đưa lên đầu bảng
-                    const latestRows = result.rows.slice(0, 16);
-                    renderVPSTable(latestRows);
-                }
-            } catch (error) {
-                console.error("Lỗi khi gọi API VPS:", error);
-                // Hiển thị trạng thái lỗi lên bảng nếu bị chặn CORS
-                document.getElementById("history-rows").innerHTML = `
-                    <tr>
-                        <td colspan="4" style="text-align:center; color:red; padding:20px; font-size:12px;">
-                            Không thể kết nối trực tiếp API VPS (Bị chặn CORS)<br>
-                            Vui lòng kiểm tra tab F12 Console để xem chi tiết.
-                        </td>
-                    </tr>
-                `;
-            }
+        function updateLiveUI(d) {
+            // Lấy các mốc cố định
+            const tc = d.referencePrice || 1984.8;
+            const price = d.lastPrice || d.closePrice || tc;
+            const change = price - tc;
+            const changePercent = (change / tc) * 100;
+
+            // Cập nhật giá lớn và màu sắc linh hoạt
+            const txtPrice = document.getElementById("txt-price");
+            const txtChange = document.getElementById("txt-change");
+            txtPrice.innerText = price.toFixed(2);
+            
+            let colorClass = "c-tc";
+            let arrow = "▪ ";
+            if (change > 0) { colorClass = "c-up"; arrow = "▲ "; }
+            else if (change < 0) { colorClass = "c-down"; arrow = "▼ "; }
+
+            txtPrice.className = "price-now " + colorClass;
+            txtChange.className = "price-change " + colorClass;
+            txtChange.innerText = `${arrow}${Math.abs(change).toFixed(2)} (${changePercent.toFixed(2)}%)`;
+
+            // Cập nhật các thông số phụ trong ngày nếu có luồng trả về
+            if(d.ceilingPrice) document.getElementById("txt-ceiling").innerText = d.ceilingPrice;
+            if(d.floorPrice) document.getElementById("txt-floor").innerText = d.floorPrice;
+            if(d.openPrice) document.getElementById("txt-open").innerText = d.openPrice.toFixed(2);
+            if(d.highestPrice) document.getElementById("txt-high").innerText = d.highestPrice.toFixed(2);
+            if(d.lowestPrice) document.getElementById("txt-low").innerText = d.lowestPrice.toFixed(2);
+            if(d.totalVolume) document.getElementById("txt-volume").innerText = d.totalVolume.toLocaleString();
+            if(d.openInterest) document.getElementById("txt-oi").innerText = d.openInterest.toLocaleString();
         }
 
-        function renderVPSTable(rows) {
-            const tbody = document.getElementById("history-rows");
-            let html = "";
-
-            rows.forEach(row => {
-                // Ánh xạ các trường dữ liệu giả định từ cấu trúc Intraday VPS
-                const time = row.time || row[0] || "00:00:00";
-                const price = parseFloat(row.price || row[1] || 0).toFixed(2);
-                const vol = row.vol || row[2] || 0;
-                const side = row.side || row[3] || "B"; // Mua hoặc Bán
-                
-                const sideText = (side === "BUY" || side === "B" || side === "M") ? "M" : "B";
-                const classColor = sideText === "M" ? "text-buy" : "text-sell";
-
-                html += `
-                    <tr>
-                        <td class="col-time">${time}</td>
-                        <td class="col-price ${classColor}">${price}</td>
-                        <td class="col-vol ${classColor}">${vol}</td>
-                        <td class="col-side ${classColor}">${sideText}</td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
-
-        // Tải dữ liệu lần đầu
-        fetchVPSIntraday();
-
-        // Cứ mỗi 3 giây gọi API lặp lại một lần để cập nhật lịch sử khớp lệnh mới
-        setInterval(fetchVPSIntraday, 3000);
+        socket.onclose = () => {
+            setTimeout(() => { location.reload(); }, 5000);
+        };
     </script>
-
 </body>
 </html>
