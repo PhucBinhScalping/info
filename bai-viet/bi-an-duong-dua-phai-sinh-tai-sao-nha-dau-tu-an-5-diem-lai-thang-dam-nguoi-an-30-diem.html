@@ -1,0 +1,335 @@
+html_content = """<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="keywords" content="Tai sao kiem duoc loi nhuan nhung khong giu duoc tien?, Tại sao kiếm được lợi nhuận nhưng không giữ được tiền?, Chứng khoán phái sinh, Scalping, Phúc Bình Scalping">
+    <title>Bí Ẩn Đường Đua Phái Sinh: Tại Sao Nhà Đầu Tư Ăn 5 Điểm Lại "Thắng Đậm" Người Ăn 30 Điểm? - Phúc Bình Scalping</title>
+    <style>
+        /* --- KHỞI TẠO BỐ CỤC ĐỒNG BỘ TOÀN HỆ THỐNG --- */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(to right, #f9c851, #f15238); /* Giữ nguyên nền cam vàng */
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            box-sizing: border-box;
+            color: #000000;
+        }
+
+        /* Khung bọc giữa giúp thanh Menu không bị lỗi hiển thị */
+        .main-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 10px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-sizing: border-box;
+        }
+
+        /* --- THANH MENU FIXED CHUẨN ĐỒNG BỘ --- */
+        .navbar {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background: #002060; 
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            padding: 15px 0;
+            box-sizing: border-box;
+        }
+
+        .navbar-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar-item a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            transition: color 0.2s;
+        }
+
+        .navbar-item a:hover, .navbar-item.active a {
+            color: #fff200;
+        }
+
+        /* --- ĐỊNH DẠNG NỘI DUNG BÀI VIẾT --- */
+        .main-thumbnail {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 26px;
+            color: #002060;
+            line-height: 1.4;
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #002060;
+            padding-bottom: 15px;
+            text-align: left;
+        }
+
+        h2 {
+            font-size: 20px;
+            color: #f15238;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        h3 {
+            font-size: 17px;
+            color: #002060;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #333333;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #333333;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        blockquote {
+            background: #f9f9f9;
+            border-left: 5px solid #002060;
+            margin: 20px 0;
+            padding: 15px 20px;
+            font-style: italic;
+            border-radius: 0 8px 8px 0;
+            text-align: left;
+        }
+
+        .author-info {
+            border-top: 1px dashed #cccccc;
+            margin-top: 40px;
+            padding-top: 20px;
+        }
+
+        /* --- BUTTON NỔI (STICKY) --- */
+        .sticky-contact-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #002060;
+            color: #ffffff;
+            padding: 15px 25px;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            border: 2px solid #ffffff;
+            cursor: pointer;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.2s, background-color 0.2s;
+            animation: pulseAnimation 2s infinite;
+        }
+
+        .sticky-contact-btn:hover { transform: scale(1.05); background-color: #00103a; }
+
+        @keyframes pulseAnimation {
+            0% { box-shadow: 0 0 0 0 rgba(0, 32, 96, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(0, 32, 96, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 32, 96, 0); }
+        }
+
+        /* --- POP-UP MODAL LIÊN HỆ --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-box { background: #ffffff; padding: 25px; border-radius: 20px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.3); transform: scale(0.8); transition: transform 0.3s ease; position: relative; max-height: 90vh; overflow-y: auto; }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+        .modal-box h3 { margin-top: 0; color: #002060; font-size: 22px; margin-bottom: 20px; }
+        
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; font-weight: bold; color: #002060; margin-bottom: 5px; font-size: 14px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #cccccc; border-radius: 8px; font-size: 15px; box-sizing: border-box; font-family: inherit; }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #002060; box-shadow: 0 0 5px rgba(0, 32, 96, 0.2); }
+        
+        .btn-submit-form { background-color: #002060; color: #ffffff; width: 100%; padding: 12px; font-size: 16px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.15); margin-bottom: 15px; }
+        .btn-close { background-color: #757575; color: #ffffff; font-size: 14px; padding: 8px 25px; border-radius: 20px; border: none; cursor: pointer; font-weight: bold; }
+        .btn-close:hover { background-color: #555555; }
+
+        @media (max-width: 768px) {
+            .navbar-container { justify-content: center; }
+            .navbar-menu { gap: 20px; }
+            .navbar-item a { font-size: 14px; }
+            .container { padding: 20px; }
+            h1 { font-size: 22px; }
+            .sticky-contact-btn { bottom: 20px; right: 20px; padding: 12px 20px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    
+    <nav class="navbar">
+        <div class="navbar-container">
+            <ul class="navbar-menu">
+                <li class="navbar-item"><a href="https://phucbinhscalping.online">Trang chủ</a></li>
+                <li class="navbar-item"><a href="dien-bien-thi-truong.html">Diễn biến thị trường</a></li>
+		<li class="navbar-item"><a href="bieu-do-vn30f1m.html" onclick="showSection('bieudo')">Biểu đồ kỹ thuật</a</li>
+                <li class="navbar-item active"><a href="https://phucbinhscalping.online#bai-viet">Bài Viết</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <button class="sticky-contact-btn" id="openContactBtn">💬 Liên hệ tư vấn</button>
+
+    <div class="main-wrapper">
+        <div class="container">
+
+            <img src="bi-an-duong-dua-phai-sinh.jpg" alt="Bí Ẩn Đường Đua Phái Sinh: Tại Sao Nhà Đầu Tư Ăn 5 Điểm Lại Thắng Đậm Người Ăn 30 Điểm?" class="main-thumbnail">
+
+            <h1>BÍ ẨN ĐƯỜNG ĐUA PHÁI SINH: TẠI SAO NHÀ ĐẦU TƯ ĂN 5 ĐIỂM LẠI "THẮNG ĐẬM" NGƯỜI ĂN 30 ĐIỂM?</h1>
+            
+            <p>Trong thị trường chứng khoán phái sinh, có một nghịch lý mà rất nhiều nhà đầu tư (NĐT) từng chứng kiến: NĐT A trading thăng hoa kiếm được tới 30 điểm trong phiên, nhưng khi tổng kết tháng, hiệu suất lợi nhuận lại thua xa NĐT B – người chỉ thầm lặng nhặt nhạnh 5 điểm mỗi ngày. Liệu có sự gian lận nào từ hệ thống? Câu trả lời là không. Sự khác biệt sống còn ở đây nằm ở hai chữ: "Ổn định" và "Kỷ luật".</p>
+
+            <h2>1. Bản chất thị trường: 80% thời gian là Sideway</h2>
+            <p>Chiến thắng 30 điểm của NĐT A thường chỉ xuất hiện trong những phiên thị trường có xu hướng (trend) rõ ràng và biên độ dao động mạnh. Tuy nhiên, thực tế khốc liệt là những phiên "tặng quà" như vậy không nhiều. Bản chất của thị trường phái sinh có đến 80% thời gian là đi ngang tích lũy (sideway), và chỉ có 20% thời gian là bùng nổ xu hướng.</p>
+            <p>Do đó, việc kỳ vọng ngày nào cũng "ăn trọn" một lệnh 30 điểm là điều bất khả thi. Khi thị trường trả về trạng thái đi ngang, phong cách giao dịch của NĐT A rất dễ bị "bào" tài khoản.</p>
+            <p>Ngược lại, NĐT B lựa chọn trường phái Scalping (chiến thuật đánh ngắn, vào nhanh ra nhanh). Trong bối cảnh biên độ dao động trung bình hiện tại của thị trường thường rơi vào khoảng 10 - 15 điểm/ngày, mục tiêu kiếm 5 điểm là hoàn toàn khả thi và có xác suất trúng cao hơn rất nhiều. Bằng cách nương theo những con sóng nhỏ, NĐT B duy trì được mức lợi nhuận đều đặn qua từng ngày, bất kể thị trường có trend hay đang sideway.</p>
+
+            <h2>2. Bẫy tâm lý sau một chiến thắng lớn</h2>
+            <p>Sự khác biệt lớn nhất giữa hai nhà đầu tư không chỉ nằm ở phương pháp, mà là ở khả năng kiểm soát tâm lý và quản trị tài khoản sau khi đóng lệnh.</p>
+            
+            <h3>NĐT A: Bản lĩnh phiêu lưu hay "say mồi" thị trường?</h3>
+            <p>Những người kiếm được 30 điểm thường mang dòng máu thích mạo hiểm. Khi vị thế đang có lãi lớn, họ thường có xu hướng "gồng thêm" với kỳ vọng ăn trọn chân sóng thay vì chủ động chốt lời từng phần. Tuy nhiên, phái sinh là chiến trường biến động liên tục. Việc một vị thế đang lãi đậm đột ngột đảo chiều giảm mạnh ngay trong phiên là "chuyện thường ngày ở huyện". Phiên giao dịch ngày 23-06-2026 chính là một minh chứng rõ nét khi nhìn vào biểu đồ VN30F1M ở khung đồ thị 5 phút.</p>
+            <p>Chưa dừng lại ở đó, dư vị của chiến thắng 30 điểm hôm trước dễ tạo ra ảo tưởng vào ngày hôm sau. NĐT A bước vào phiên mới với tâm lý muốn "ăn to" như cũ. Nỗi sợ mất cơ hội (FOMO) thúc đẩy họ vào lệnh quá sớm khi vị thế chưa rõ ràng. Khi thị trường đi ngược kỳ vọng, thay vì cắt lỗ, họ lại chọn cách trung bình giá xuống (gồng lỗ) ở những vùng lửng lơ. Kết cục thường thấy là họ phải cắt lỗ ngay đúng đỉnh hoặc đúng đáy khi sức chịu đựng của tài khoản đã chạm giới hạn.</p>
+
+            <h3>NĐT B: Biết đủ làm nên sự khác biệt</h3>
+            <p>Ở chiều ngược lại, NĐT B cực kỳ kỷ luật. Khi giá đạt mục tiêu 5 điểm, họ chủ động chốt lời toàn bộ hoặc chỉ để lại một phần rất nhỏ để tracking theo xu hướng, tuyệt đối tuân thủ nguyên tắc stop-loss (cắt lỗ) và take-profit (chốt lời).</p>
+            <p>Nhìn bảng điện thấy thị trường chạy tiếp, NĐT B có thể tiếc nuối, nhưng họ kiểm soát được hành vi và không bao giờ FOMO đuổi theo. Họ hiểu rằng: Thị trường còn đó, cơ hội còn nhiều, điều giúp họ tồn tại lâu dài là sự kỷ luật chứ không phải một vài cú "ăn may" ngắn hạn.</p>
+            <p>Trong khi NĐT A nghĩ mình đã có 30 điểm làm vốn để tiếp tục mạo hiểm và giao dịch liên tục (quá tải lệnh), thì NĐT B chọn cách đứng ngoài để giữ nguyên vẹn thành quả.</p>
+
+            <h2>Lời kết: Đồ thị tài khoản của bạn hình gì?</h2>
+            <p>Kết quả sau cùng phản ánh rất rõ tư duy của mỗi người:</p>
+            <ul>
+                <li><strong>NĐT B:</strong> Chọn sự ổn định, áp dụng nhuần nhuyễn chiến thuật đánh ngắn, tài khoản tăng trưởng bền vững theo mô hình cuốn chiếu.</li>
+                <li><strong>NĐT A:</strong> Thích phiêu lưu, tìm kiếm biên độ lớn, kết quả là đồ thị tài khoản trồi sụt liên tục như hình sin — "trả lại hết cho thị trường" vào những ngày sideway.</li>
+            </ul>
+            <p>Trong chứng khoán phái sinh, người chiến thắng sau cùng không phải là người kiếm được nhiều điểm nhất trong một phiên, mà là người giữ được tiền và mang được tiền về nhà một cách đều đặn nhất.</p>
+
+            <div class="author-info">
+                <p style="text-align: center; font-weight: bold; color: #002060; margin-bottom: 25px;">Để hiểu rõ hơn về phương pháp kiểm soát tâm lý, chiến thuật Scalping hiệu quả và nhận hỗ trợ tư vấn đầu tư phái sinh trực tiếp, Quý nhà đầu tư vui lòng liên hệ với AD nhé!</p>
+                <p style="margin: 5px 0; font-weight: bold; color: #002060;">• ID VPS: BOR5</p>
+                <p style="margin: 5px 0; font-weight: bold; color: #002060;">• Số điện thoại: 0853.525.379</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="contactModal">
+        <div class="modal-box">
+            <h3>💬 Đăng Ký Tư Vấn</h3>
+            <form action="https://formspree.io/f/THAY_ID_FORM_TẠI_ĐÂY" method="POST">
+                <div class="form-group">
+                    <label for="name">Họ và Tên:</label>
+                    <input type="text" id="name" name="Họ Tên" placeholder="Nguyễn Văn A" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Số điện thoại (Zalo):</label>
+                    <input type="tel" id="phone" name="Số Điện Thoại" placeholder="0901234568" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Địa chỉ Gmail:</label>
+                    <input type="email" id="email" name="Gmail" placeholder="name@gmail.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">Nội dung cần hỗ trợ:</label>
+                    <textarea id="message" name="Nội Dung Cần Tư Vấn" rows="3" placeholder="Ví dụ: Cài đặt phần mềm..." required></textarea>
+                </div>
+                <button type="submit" class="btn-submit-form">Gửi Thông Tin Cho AD</button>
+            </form>
+            <button class="btn-close" id="closeContactBtn">Đóng</button>
+        </div>
+    </div>
+
+    <script>
+        const openContactBtn = document.getElementById('openContactBtn');
+        const closeContactBtn = document.getElementById('closeContactBtn');
+        const contactModal = document.getElementById('contactModal');
+
+        openContactBtn.addEventListener('click', () => contactModal.classList.add('active'));
+        closeContactBtn.addEventListener('click', () => contactModal.classList.remove('active'));
+        contactModal.addEventListener('click', (e) => { 
+            if (e.target === contactModal) contactModal.classList.remove('active'); 
+        });
+
+        const contactForm = contactModal.querySelector('form');
+        if (contactForm) {
+            contactForm.addEventListener('submit', () => {
+                setTimeout(() => { contactForm.reset(); }, 100);
+            });
+        }
+    </script>
+</body>
+</html>"""
+
+with open("index-v2.html", "w", encoding="utf-8") as f:
+    f.write(html_content)
+print("File index-v2.html generated successfully.")
