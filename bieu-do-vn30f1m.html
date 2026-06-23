@@ -43,7 +43,7 @@
             display: flex; flex-direction: row; background-color: #131722;
         }
         
-        /* Cấu trúc hiển thị các phân vùng nội dung theo Tab */
+        /* Phân vùng Tab */
         .tab-content-block {
             display: none; width: 100%; height: 100%; flex-direction: row;
         }
@@ -54,10 +54,10 @@
         /* KHU VỰC BIỂU ĐỒ BÊN TRÁI */
         .chart-section { flex: 1; height: 100%; }
 
-        /* KHU VỰC BẢNG GIÁ LỚN BÊN PHẢI (Nhúng trực tiếp widget từ VPS) */
-        .sidebar-section { width: 350px; height: 100%; border-left: 1px solid #2b3040; }
+        /* KHU VỰC BẢNG GIÁ REAL-TIME BÊN PHẢI */
+        .sidebar-section { width: 360px; height: 100%; border-left: 1px solid #2b3040; background-color: #131722; }
         
-        iframe { width: 100%; height: 100%; border: none; background-color: #131722; }
+        iframe { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
@@ -65,7 +65,7 @@
     <div class="header">
         <a href="index.html" class="back-link" style="flex: 1; text-align: left;">⬅ Quay lại Trang chủ</a>
         <div style="flex: 2; text-align: center; font-size: 18px; font-weight: 500; color: #ffb700; letter-spacing: 0.5px;">
-             Dữ liệu được lấy từ Công ty Cổ phần Chứng khoán VPS
+             Dữ liệu lấy từ Công ty Cổ phần Chứng khoán VPS
         </div>
         <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #ffb700;">
             SĐT: 0853.525.379 - ID VPS: BOR5
@@ -82,28 +82,64 @@
         
         <div id="block_vn30f1m_5m" class="tab-content-block active">
             <div class="chart-section">
-                <iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=5&theme=dark&lang=vi"></iframe>
+                <iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=5&theme=light&lang=vi"></iframe>
             </div>
             <div class="sidebar-section">
-                <iframe src="https://web5.vps.com.vn/market_api.MarketApi/findSecIntraday?sym=VN30F1M&theme=dark"></iframe>
+                <div class="tradingview-widget-container" style="height: 100%;">
+                    <div class="tradingview-widget-container__widget"></div>
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-symbol-info.js" async>
+                    {
+                        "symbol": "HNX:VN30F1M",
+                        "width": "100%",
+                        "height": "100%",
+                        "locale": "vi_VN",
+                        "colorTheme": "dark",
+                        "isTransparent": false
+                    }
+                    </script>
+                </div>
             </div>
         </div>
 
         <div id="block_vn30f1m_15m" class="tab-content-block">
             <div class="chart-section">
-                <iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=15&theme=dark&lang=vi"></iframe>
+                <iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=15&theme=light&lang=vi"></iframe>
             </div>
             <div class="sidebar-section">
-                <iframe src="https://web5.vps.com.vn/market_api.MarketApi/findSecIntraday?sym=VN30F1M&theme=dark"></iframe>
+                <div class="tradingview-widget-container" style="height: 100%;">
+                    <div class="tradingview-widget-container__widget"></div>
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-symbol-info.js" async>
+                    {
+                        "symbol": "HNX:VN30F1M",
+                        "width": "100%",
+                        "height": "100%",
+                        "locale": "vi_VN",
+                        "colorTheme": "dark",
+                        "isTransparent": false
+                    }
+                    </script>
+                </div>
             </div>
         </div>
 
         <div id="block_vnindex" class="tab-content-block">
             <div class="chart-section">
-                <iframe src="https://web5.vps.com.vn/?sym=VNINDEX&interval=D&theme=dark&lang=vi"></iframe>
+                <iframe src="https://web5.vps.com.vn/?sym=VNINDEX&interval=D&theme=light&lang=vi"></iframe>
             </div>
             <div class="sidebar-section">
-                <iframe src="https://web5.vps.com.vn/market_api.MarketApi/findSecIntraday?sym=VNINDEX&theme=dark"></iframe>
+                <div class="tradingview-widget-container" style="height: 100%;">
+                    <div class="tradingview-widget-container__widget"></div>
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-symbol-info.js" async>
+                    {
+                        "symbol": "HOSE:VNINDEX",
+                        "width": "100%",
+                        "height": "100%",
+                        "locale": "vi_VN",
+                        "colorTheme": "dark",
+                        "isTransparent": false
+                    }
+                    </script>
+                </div>
             </div>
         </div>
 
@@ -111,11 +147,11 @@
 
     <script>
         function switchTab(event, blockId) {
-            // 1. Đổi màu trạng thái active cho nút tab được chọn
+            // 1. Thay đổi trạng thái active của nút Tab
             document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
             event.currentTarget.classList.add('active');
             
-            // 2. Ẩn toàn bộ các khối nội dung và chỉ hiển thị đúng khối được click
+            // 2. Chuyển đổi hiển thị cặp Biểu đồ và Giá lớn tương ứng mà không cần reload trang
             document.querySelectorAll('.tab-content-block').forEach(block => block.classList.remove('active'));
             document.getElementById(blockId).classList.add('active');
         }
