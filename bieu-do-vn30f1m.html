@@ -59,9 +59,8 @@
             width: 360px; 
             height: 100%; 
             border-left: 1px solid #2b3040; 
-            background-color: #1c2030; 
+            background-color: #131722; 
             box-sizing: border-box;
-            padding: 10px;
         }
         
         iframe { width: 100%; height: 100%; border: none; }
@@ -89,18 +88,32 @@
         
         <div id="block_vn30f1m_5m" class="tab-content-block active">
             <div class="chart-section">
-                <iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=5&theme=dark&lang=vi"></iframe>
+                <iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=5&theme=light&lang=vi"></iframe>
             </div>
             <div class="sidebar-section">
-                <div class="tradingview-widget-container">
+                <div class="tradingview-widget-container" style="height: 100%;">
                     <div class="tradingview-widget-container__widget"></div>
-                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
                     {
-                        "symbol": "VN30F1M",
-                        "width": "100%",
-                        "colorTheme": "dark",
-                        "isTransparent": false,
-                        "locale": "vi_VN"
+                      "colorTheme": "light",
+                      "dateRange": "12M",
+                      "showChart": false,
+                      "locale": "vi_VN",
+                      "width": "100%",
+                      "height": "100%",
+                      "largeChartUrl": "",
+                      "isTransparent": false,
+                      "showSymbolLogo": true,
+                      "tabs": [
+                        {
+                          "title": "Giá Phái Sinh Real-time",
+                          "symbols": [
+                            {
+                              "s": "HNX:VN30F1M"
+                            }
+                          ]
+                        }
+                      ]
                     }
                     </script>
                 </div>
@@ -109,18 +122,32 @@
 
         <div id="block_vn30f1m_15m" class="tab-content-block">
             <div class="chart-section">
-                <iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=15&theme=dark&lang=vi"></iframe>
+                <iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=15&theme=light&lang=vi"></iframe>
             </div>
             <div class="sidebar-section">
-                <div class="tradingview-widget-container">
+                <div class="tradingview-widget-container" style="height: 100%;">
                     <div class="tradingview-widget-container__widget"></div>
-                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
                     {
-                        "symbol": "VN30F1M",
-                        "width": "100%",
-                        "colorTheme": "dark",
-                        "isTransparent": false,
-                        "locale": "vi_VN"
+                      "colorTheme": "light",
+                      "dateRange": "12M",
+                      "showChart": false,
+                      "locale": "vi_VN",
+                      "width": "100%",
+                      "height": "100%",
+                      "largeChartUrl": "",
+                      "isTransparent": false,
+                      "showSymbolLogo": true,
+                      "tabs": [
+                        {
+                          "title": "Giá Phái Sinh Real-time",
+                          "symbols": [
+                            {
+                              "s": "HNX:VN30F1M"
+                            }
+                          ]
+                        }
+                      ]
                     }
                     </script>
                 </div>
@@ -129,18 +156,32 @@
 
         <div id="block_vnindex" class="tab-content-block">
             <div class="chart-section">
-                <iframe src="https://web5.vps.com.vn/?sym=VNINDEX&interval=D&theme=dark&lang=vi"></iframe>
+                <iframe src="https://web5.vps.com.vn/?sym=VNINDEX&interval=D&theme=light&lang=vi"></iframe>
             </div>
             <div class="sidebar-section">
-                <div class="tradingview-widget-container">
+                <div class="tradingview-widget-container" style="height: 100%;">
                     <div class="tradingview-widget-container__widget"></div>
-                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
                     {
-                        "symbol": "INDEX:VNINDEX",
-                        "width": "100%",
-                        "colorTheme": "dark",
-                        "isTransparent": false,
-                        "locale": "vi_VN"
+                      "colorTheme": "light",
+                      "dateRange": "12M",
+                      "showChart": false,
+                      "locale": "vi_VN",
+                      "width": "100%",
+                      "height": "100%",
+                      "largeChartUrl": "",
+                      "isTransparent": false,
+                      "showSymbolLogo": true,
+                      "tabs": [
+                        {
+                          "title": "Chỉ số Thị trường",
+                          "symbols": [
+                            {
+                              "s": "HOSE:VNINDEX"
+                            }
+                          ]
+                        }
+                      ]
                     }
                     </script>
                 </div>
