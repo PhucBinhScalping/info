@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tất Cả Bài Viết - Phúc Bình Scalping</title>
+    <style>
+        /* --- ĐỒNG BỘ STYLE HỆ THỐNG PHÚC BÌNH SCALPING --- */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(to right, #f9c851, #f15238);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            box-sizing: border-box;
+            color: #000000;
+        }
+
+        .main-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 10px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-sizing: border-box;
+        }
+
+        /* --- NAVBAR STYLE --- */
+        .navbar {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background: #002060; 
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            padding: 15px 0;
+            box-sizing: border-box;
+        }
+
+        .navbar-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar-item a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            transition: color 0.2s;
+        }
+
+        .navbar-item a:hover, .navbar-item.active a {
+            color: #fff200;
+        }
+
+        /* --- BLOG CARDS STYLE --- */
+        .blog-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .blog-card {
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            gap: 20px;
+            border: 1px solid #eeeeee;
+            padding: 15px;
+            border-radius: 12px;
+            background: #ffffff;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
+            align-items: center;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-color: #002060;
+        }
+
+        .blog-img {
+            width: 150px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .blog-content {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .blog-title {
+            margin: 0;
+            font-size: 16px;
+            color: #002060;
+            line-height: 1.4;
+        }
+
+        .blog-excerpt {
+            margin: 0;
+            font-size: 14px;
+            color: #666666;
+            line-height: 1.5;
+        }
+
+        .blog-date {
+            font-size: 12px;
+            color: #999999;
+        }
+
+        /* --- STICKY BUTTON STYLE --- */
+        .sticky-contact-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #002060;
+            color: #ffffff;
+            padding: 15px 25px;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            border: 2px solid #ffffff;
+            cursor: pointer;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.2s, background-color 0.2s;
+            animation: pulseAnimation 2s infinite;
+        }
+
+        .sticky-contact-btn:hover { transform: scale(1.05); background-color: #00103a; }
+
+        @keyframes pulseAnimation {
+            0% { box-shadow: 0 0 0 0 rgba(0, 32, 96, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(0, 32, 96, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 32, 96, 0); }
+        }
+
+        /* --- POP-UP MODAL STYLE --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-box { background: #ffffff; padding: 25px; border-radius: 20px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.3); transform: scale(0.8); transition: transform 0.3s ease; position: relative; max-height: 90vh; overflow-y: auto; }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+        .modal-box h3 { margin-top: 0; color: #002060; font-size: 22px; margin-bottom: 20px; }
+        
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; font-weight: bold; color: #002060; margin-bottom: 5px; font-size: 14px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #cccccc; border-radius: 8px; font-size: 15px; box-sizing: border-box; font-family: inherit; }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #002060; box-shadow: 0 0 5px rgba(0, 32, 96, 0.2); }
+        
+        .btn-submit-form { background-color: #002060; color: #ffffff; width: 100%; padding: 12px; font-size: 16px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.15); margin-bottom: 15px; }
+        .btn-close { background-color: #757575; color: #ffffff; font-size: 14px; padding: 8px 25px; border-radius: 20px; border: none; cursor: pointer; font-weight: bold; }
+        .btn-close:hover { background-color: #555555; }
+
+        @media (max-width: 768px) {
+            .navbar-container { justify-content: center; }
+            .navbar-menu { gap: 20px; }
+            .navbar-item a { font-size: 14px; }
+            .container { padding: 20px; }
+            .blog-card { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .blog-img { width: 100%; height: 160px; }
+            .sticky-contact-btn { bottom: 20px; right: 20px; padding: 12px 20px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Thanh Menu điều hướng -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <ul class="navbar-menu">
+                <li class="navbar-item"><a href="index.html">Trang chủ</a></li>
+                <li class="navbar-item"><a href="dien-bien-thi-truong.html">Diễn biến thị trường</a></li>
+                <li class="navbar-item"><a href="bieu-do-vn30f1m.html">Biểu đồ kỹ thuật</a></li>
+                <li class="navbar-item active"><a href="tat-ca-bai-viet.html">Bài Viết</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Nút liên hệ nổi bật cố định -->
+    <button class="sticky-contact-btn" id="openContactBtn">💬 Liên hệ tư vấn</button>
+
+    <div class="main-wrapper">
+        <div class="container">
+            <h1 style="border-bottom: 2px solid #002060; padding-bottom: 15px; color: #002060; margin-top: 0; font-size: 24px;">DANH SÁCH BÀI VIẾT</h1>
+            
+            <div class="blog-grid">
+                
+                <!-- BÀI 1: BÀI MỚI NHẤT (Xếp lên đầu tiên) -->
+                <a href="bai-viet/bi-an-duong-dua-phai-sinh-tai-sao-nha-dau-tu-an-5-diem-lai-thang-dam-nguoi-an-30-diem.html" class="blog-card">
+                    <img src="bi-an-duong-dua-phai-sinh.jpg" alt="Bí ẩn đường đua phái sinh" class="blog-img">
+                    <div class="blog-content">
+                        <h4 class="blog-title">BÍ ẨN ĐƯỜNG ĐUA PHÁI SINH: TẠI SAO NHÀ ĐẦU TƯ ĂN 5 ĐIỂM LẠI "THẮNG ĐẬM" NGƯỜI ĂN 30 ĐIỂM?</h4>
+                        <p class="blog-excerpt">Trong thị trường chứng khoán phái sinh, có một nghịch lý mà rất nhiều nhà đầu tư (NĐT) từng chứng kiến: NĐT A trading thăng hoa kiếm được tới 30 điểm trong phiên, nhưng khi tổng kết tháng, hiệu suất lợi nhuận lại thua xa NĐT B – người chỉ thầm lặng nhặt nhạnh 5 điểm mỗi ngày. Liệu có sự gian lận nào từ hệ thống...</p>
+                        <span class="blog-date">📅 Ngày 23/06/2026</span>
+                    </div>
+                </a>
+
+                <!-- BÀI 2: CŨ HƠN -->
+                <a href="kiem-duoc-loi-nhuan-nhung-khong-giu-duoc-tien-tai-sao.html" class="blog-card">
+                    <img src="kiem-duoc-tien.jpg" alt="Tại sao kiếm được lợi nhuận NHƯNG KHÔNG giữ được tiền" class="blog-img">
+                    <div class="blog-content">
+                        <h4 class="blog-title">Tại sao kiếm được lợi nhuận NHƯNG KHÔNG giữ được tiền trong chứng khoán?</h4>
+                        <p class="blog-excerpt">Rất nhiều anh/chị có những phương pháp giúp giao dịch rất tốt, nhưng đều có vấn đề chung là có lợi nhuận nhưng cuối ngày lại mất tiền...</p>
+                        <span class="blog-date">📅 Ngày 21/06/2026</span>
+                    </div>
+                </a>
+
+                <!-- BÀI 3: CŨ NHẤT -->
+                <a href="VSA-Uneeb.html" class="blog-card">
+                    <img src="VSA-Wyckoff.png" alt="Phương pháp phân tích Wyckoff và VSA" class="blog-img">
+                    <div class="blog-content">
+                        <h4 class="blog-title">Phương pháp phân tích Wyckoff và VSA</h4>
+                        <p class="blog-excerpt">Có bao giờ mọi người tự hỏi tại sao giá lại bắt đầu tăng mạnh thế, vì sao khi đến một điểm giá lại có những vận động sideway? Liệu hành vi giá này có lập lại hay không? Hay chỉ là một sự ngẫu nhiên? Phương pháp Wyckoff sẽ giải thích rõ về...</p>
+                        <span class="blog-date">📅 Ngày 21/06/2026</span>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Cửa sổ Pop-up Form Đăng Ký Tư Vấn -->
+    <div class="modal-overlay" id="contactModal">
+        <div class="modal-box">
+            <h3>💬 Đăng Ký Tư Vấn</h3>
+            <form action="https://formspree.io/f/THAY_ID_FORM_TẠI_ĐÂY" method="POST">
+                <div class="form-group">
+                    <label for="name">Họ và Tên:</label>
+                    <input type="text" id="name" name="Họ Tên" placeholder="Nguyễn Văn A" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Số điện thoại (Zalo):</label>
+                    <input type="tel" id="phone" name="Số Điện Thoại" placeholder="0901234568" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Địa chỉ Gmail:</label>
+                    <input type="email" id="email" name="Gmail" placeholder="name@gmail.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">Nội dung cần hỗ trợ:</label>
+                    <textarea id="message" name="Nội Dung Cần Tư Vấn" rows="3" placeholder="Ví dụ: Cài đặt phần mềm..." required></textarea>
+                </div>
+                <button type="submit" class="btn-submit-form">Gửi Thông Tin Cho AD</button>
+            </form>
+            <button class="btn-close" id="closeContactBtn">Đóng</button>
+        </div>
+    </div>
+
+    <!-- Script điều khiển Đóng/Mở Form Đăng ký -->
+    <script>
+        const openContactBtn = document.getElementById('openContactBtn');
+        const closeContactBtn = document.getElementById('closeContactBtn');
+        const contactModal = document.getElementById('contactModal');
+
+        openContactBtn.addEventListener('click', () => contactModal.classList.add('active'));
+        closeContactBtn.addEventListener('click', () => contactModal.classList.remove('active'));
+        contactModal.addEventListener('click', (e) => { 
+            if (e.target === contactModal) contactModal.classList.remove('active'); 
+        });
+
+        const contactForm = contactModal.querySelector('form');
+        if (contactForm) {
+            contactForm.addEventListener('submit', () => {
+                setTimeout(() => { contactForm.reset(); }, 100);
+            });
+        }
+    </script>
+</body>
+</html>
