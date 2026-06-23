@@ -7,40 +7,40 @@
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: #131722; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background-color: #ffffff; color: #131722; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             display: flex; flex-direction: column; overflow: hidden;
         }
-        /* Thanh Header chính */
+        /* Thanh Header chính - Giao diện sáng */
         .header {
-            height: 45px; background-color: #1c2030; display: flex;
+            height: 45px; background-color: #f0f3fa; display: flex;
             align-items: center; padding: 0 20px; justify-content: space-between;
-            border-bottom: 1px solid #2b3040; box-sizing: border-box;
+            border-bottom: 1px solid #e0e3eb; box-sizing: border-box;
         }
         .header .back-link {
             text-decoration: none; font-weight: bold; font-size: 14px;
         }
         
-        /* Thanh Menu Tab Con */
+        /* Thanh Menu Tab Con - Giao diện sáng */
         .tab-menu {
-            height: 40px; background-color: #171b26; display: flex;
+            height: 40px; background-color: #ffffff; display: flex;
             align-items: center; padding: 0 10px; gap: 5px;
-            border-bottom: 1px solid #232733; box-sizing: border-box;
+            border-bottom: 1px solid #e0e3eb; box-sizing: border-box;
         }
         .tab-item {
-            background: none; border: none; color: #d1d4dc; padding: 8px 16px;
+            background: none; border: none; color: #474f66; padding: 8px 16px;
             font-size: 13px; font-weight: bold; cursor: pointer; border-radius: 4px;
             transition: 0.2s; display: flex; align-items: center; gap: 6px;
         }
-        .tab-item:hover { background-color: #2a2e39; color: #ffffff; }
+        .tab-item:hover { background-color: #f0f3fa; color: #131722; }
         .tab-item.active {
-            background-color: #242b42; color: #2962ff; border-bottom: 2px solid #2962ff;
+            background-color: #e3f2fd; color: #1565c0; border-bottom: 2px solid #1565c0;
             border-radius: 4px 4px 0 0;
         }
 
         /* Vùng nội dung chia đôi */
         .content-container {
             flex: 1; width: 100%; height: calc(100% - 85px); 
-            display: flex; flex-direction: row; background-color: #131722;
+            display: flex; flex-direction: row; background-color: #ffffff;
         }
         
         /* Phân vùng Tab */
@@ -54,42 +54,42 @@
         /* KHU VỰC BIỂU ĐỒ BÊN TRÁI */
         .chart-section { flex: 1; height: 100%; }
 
-        /* KHU VỰC HIỂN THỊ WIDGET BÊN PHẢI (THEME TỐI) */
+        /* KHU VỰC HIỂN THỊ WIDGET BÊN PHẢI (THEME SÁNG) */
         .sidebar-section { 
-            width: 360px; height: 100%; border-left: 1px solid #2b3040; 
-            background-color: #171b26; box-sizing: border-box;
+            width: 360px; height: 100%; border-left: 1px solid #e0e3eb; 
+            background-color: #ffffff; box-sizing: border-box;
             padding: 25px 20px; display: flex; flex-direction: column;
         }
         
         .vps-widget-header {
-            font-size: 32px; font-weight: bold; color: #00e676; margin-bottom: 4px;
+            font-size: 32px; font-weight: bold; color: #00c853; margin-bottom: 4px;
         }
         .vps-widget-sub {
-            font-size: 13px; color: #848e9c; margin-bottom: 20px;
+            font-size: 13px; color: #707a8a; margin-bottom: 20px;
         }
         
-        /* Định dạng số mảnh chuẩn phong cách TradingView */
+        /* Định dạng số mảnh chuẩn phong cách TradingView Light */
         .vps-main-price {
-            font-size: 52px; font-weight: 500; color: #00e676; 
+            font-size: 52px; font-weight: 500; color: #00c853; 
             font-family: -apple-system, BlinkMacSystemFont, "Trebuchet MS", Roboto, sans-serif;
             margin-bottom: 5px; letter-spacing: -1px;
         }
         .vps-change {
-            font-size: 16px; font-weight: bold; color: #00e676; margin-bottom: 30px;
+            font-size: 16px; font-weight: bold; color: #00c853; margin-bottom: 30px;
         }
         
         /* Danh sách thông số chi tiết bóc tách từ Datafeed */
         .info-row {
             display: flex; justify-content: space-between; padding: 12px 0;
-            border-bottom: 1px solid #232733; font-size: 14px;
+            border-bottom: 1px solid #f0f3fa; font-size: 14px;
         }
-        .info-label { color: #848e9c; }
-        .info-value { font-weight: 600; color: #e1e3e6; }
+        .info-label { color: #707a8a; }
+        .info-value { font-weight: 600; color: #1e222d; }
         
-        /* Bảng màu chuẩn kỹ thuật sàn chứng khoán */
-        .color-up { color: #00e676 !important; text-shadow: 0px 0px 10px rgba(0,230,118,0.2); }     
-        .color-down { color: #ff3d00 !important; text-shadow: 0px 0px 10px rgba(255,61,0,0.2); }   
-        .color-ref { color: #ffb700 !important; }    
+        /* Bảng màu chuẩn kỹ thuật sàn chứng khoán - Khớp cho nền sáng */
+        .color-up { color: #00c853 !important; }     
+        .color-down { color: #d50000 !important; }   
+        .color-ref { color: #ffaa00 !important; }    
 
         iframe { width: 100%; height: 100%; border: none; }
     </style>
@@ -97,11 +97,11 @@
 <body>
 
     <div class="header">
-        <a href="index.html" class="back-link" style="flex: 1; text-align: left; color: #e65100;">⬅ Quay lại Trang chủ</a>
-        <div style="flex: 2; text-align: center; font-size: 18px; font-weight: bold; color: #e65100; letter-spacing: 0.5px;">
+        <a href="index.html" class="back-link" style="flex: 1; text-align: left; color: #ffb700;">⬅ Quay lại Trang chủ</a>
+        <div style="flex: 2; text-align: center; font-size: 18px; font-weight: bold; color: #ffb700; letter-spacing: 0.5px;">
              Dữ liệu được lấy trực tiếp từ Công ty Cổ phần Chứng khoán VPS
         </div>
-        <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #e65100;">
+        <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #ffb700;">
             SĐT: 0853.525.379 - ID VPS: BOR5
         </div>
     </div>
@@ -155,7 +155,7 @@
                 <span class="info-label">Tham chiếu</span>
                 <span id="val_prev" class="info-value">---.--</span>
             </div>
-            <div style="font-size: 11px; color: #474f66; text-align: center; margin-top: 30px;">
+            <div style="font-size: 11px; color: #707a8a; text-align: center; margin-top: 30px;">
                 ● Kết nối trực tiếp DataFeed VPS real-time
             </div>
         </div>
