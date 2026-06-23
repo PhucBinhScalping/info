@@ -1,204 +1,213 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
+
 <html lang="vi">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Biểu đồ kỹ thuật Phái sinh - Phúc Bình Scalping</title>
+
     <style>
+
         body, html {
+
             margin: 0; padding: 0; width: 100%; height: 100%;
+
             background-color: #131722; color: #ffffff; font-family: Arial, sans-serif;
+
             display: flex; flex-direction: column; overflow: hidden;
+
         }
+
+        /* Thanh Header chính */
+
         .header {
+
             height: 45px; background-color: #1c2030; display: flex;
+
             align-items: center; padding: 0 20px; justify-content: space-between;
+
             border-bottom: 1px solid #2b3040; box-sizing: border-box;
+
         }
-        .header .back-link { color: #ff9800; text-decoration: none; font-weight: bold; font-size: 14px; }
+
+        .header .back-link {
+
+            color: #ff9800; text-decoration: none; font-weight: bold; font-size: 14px;
+
+        }
+
         
+
+        /* Thanh Menu 3 Tab Con */
+
         .tab-menu {
+
             height: 40px; background-color: #171b26; display: flex;
+
             align-items: center; padding: 0 10px; gap: 5px;
+
             border-bottom: 1px solid #232733; box-sizing: border-box;
+
         }
+
         .tab-item {
+
             background: none; border: none; color: #d1d4dc; padding: 8px 16px;
+
             font-size: 13px; font-weight: bold; cursor: pointer; border-radius: 4px;
+
             transition: 0.2s; display: flex; align-items: center; gap: 6px;
+
         }
-        .tab-item:hover { background-color: #2a2e39; color: #ffffff; }
+
+        .tab-item:hover {
+
+            background-color: #2a2e39; color: #ffffff;
+
+        }
+
+        /* Tab đang được chọn kích hoạt */
+
         .tab-item.active {
+
             background-color: #242b42; color: #2962ff; border-bottom: 2px solid #2962ff;
+
             border-radius: 4px 4px 0 0;
+
         }
 
-        /* Bố cục chia đôi: Biểu đồ trái - Bước giá phải */
+
+        /* Vùng nội dung hiển thị biểu đồ phủ kín phần còn lại */
+
         .content-container {
-            flex: 1; width: 100%; height: calc(100% - 85px);
-            display: flex; flex-direction: row; background-color: #131722;
-        }
-        .chart-section { flex: 1; height: 100%; }
-        .chart-wrapper { display: none; width: 100%; height: 100%; }
-        .chart-wrapper.active { display: block; }
-        iframe { width: 100%; height: 100%; border: none; }
 
-        /* Khu vực bảng bước giá bên phải */
-        .sidebar-panel {
-            width: 350px; height: 100%; background-color: #1c2030;
-            border-left: 1px solid #2b3040; box-sizing: border-box;
-            display: flex; flex-direction: column; padding: 10px;
-        }
-        .sidebar-tabs { display: flex; background-color: #131722; border-radius: 6px; padding: 3px; gap: 4px; }
-        .sidebar-tab-btn {
-            flex: 1; background: none; border: none; color: #848e9c; padding: 6px 0;
-            font-size: 12px; font-weight: bold; cursor: pointer; border-radius: 4px; text-align: center;
-        }
-        .sidebar-tab-btn.active { background-color: #8338ec; color: #ffffff; }
-        
-        .ratio-bar {
-            display: flex; height: 20px; border-radius: 4px; overflow: hidden; margin: 12px 0;
-            font-size: 11px; font-weight: bold; line-height: 20px; text-align: center;
-        }
-        .ratio-buy { background-color: #2ebd85; color: white; width: 50%; transition: width 0.3s; padding-left: 5px; text-align: left;}
-        .ratio-sell { background-color: #f6465d; color: white; width: 50%; transition: width 0.3s; padding-right: 5px; text-align: right;}
+            flex: 1; width: 100%; height: calc(100% - 85px); position: relative;
 
-        .orderbook-table { width: 100%; border-collapse: collapse; font-size: 13px; font-weight: bold; }
-        .orderbook-table tr { height: 26px; border-bottom: 1px solid #24293e; }
-        .orderbook-table td { padding: 0 6px; width: 25%; }
-        .col-vol-bid { color: #b7bdc6; text-align: left; }
-        .col-price-bid { color: #2ebd85; text-align: right; padding-right: 10px; }
-        .col-price-ask { color: #f6465d; text-align: left; padding-left: 10px; }
-        .col-vol-ask { color: #b7bdc6; text-align: right; }
+            background-color: #131722;
+
+        }
+
+        .chart-wrapper {
+
+            display: none; width: 100%; height: 100%;
+
+        }
+
+        .chart-wrapper.active {
+
+            display: block;
+
+        }
+
+        iframe {
+
+            width: 100%; height: 100%; border: none;
+
+        }
+
     </style>
+
 </head>
+
 <body>
 
+
+    
+
     <div class="header">
+
         <a href="index.html" class="back-link" style="flex: 1; text-align: left;">⬅ Quay lại Trang chủ</a>
-        <div style="flex: 2; text-align: center; font-size: 18px; font-weight: 500; color: #e5ff00;">
+
+        
+
+        <div style="flex: 2; text-align: center; font-size: 18px; font-weight: 500; color: #ffb700; letter-spacing: 0.5px;">
+
              Dữ liệu được lấy trực tiếp từ Công ty Cổ phần Chứng khoán VPS
+
         </div>
-        <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #e5ff00;">
+
+        
+
+        <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #ffb700;">
+
             SĐT: 0853.525.379 - ID VPS: BOR5
+
         </div>
+
     </div>
+
+
+    
 
     <div class="tab-menu">
+
         <button class="tab-item active" onclick="switchTab(event, 'vn30f1m_5m')">📊 VN30F1M (5 Phút)</button>
+
         <button class="tab-item" onclick="switchTab(event, 'vn30f1m_15m')">📊 VN30F1M (15 Phút)</button>
+
         <button class="tab-item" onclick="switchTab(event, 'vnindex')">📈 VNINDEX (Ngày)</button>
+
     </div>
+
 
     <div class="content-container">
-        <div class="chart-section">
-            <div id="vn30f1m_5m" class="chart-wrapper active">
-                <iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=5&theme=light&lang=vi"></iframe>
-            </div>
-            <div id="vn30f1m_15m" class="chart-wrapper">
-                <iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=15&theme=light&lang=vi"></iframe>
-            </div>
-            <div id="vnindex" class="chart-wrapper">
-                <iframe src="https://web5.vps.com.vn/?sym=VNINDEX&interval=D&theme=light&lang=vi"></iframe>
-            </div>
+
+        
+
+        <div id="vn30f1m_5m" class="chart-wrapper active">
+
+            <iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=5&theme=light&lang=vi"></iframe>
+
         </div>
 
-        <div class="sidebar-panel">
-            <div class="sidebar-tabs">
-                <button class="sidebar-tab-btn active">Bước giá</button>
-                <button class="sidebar-tab-btn">Lịch sử KL</button>
-                <button class="sidebar-tab-btn">Mức giá KL</button>
-            </div>
 
-            <div class="ratio-bar">
-                <div id="lbl-ratio-buy" class="ratio-buy">50%</div>
-                <div id="lbl-ratio-sell" class="ratio-sell">50%</div>
-            </div>
+        <div id="vn30f1m_15m" class="chart-wrapper">
 
-            <table class="orderbook-table">
-                <tbody id="orderbook-rows">
-                    </tbody>
-            </table>
+            <iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=15&theme=light&lang=vi"></iframe>
+
         </div>
+
+
+        <div id="vnindex" class="chart-wrapper">
+
+            <iframe src="https://web5.vps.com.vn/?sym=VNINDEX&interval=D&theme=light&lang=vi"></iframe>
+
+        </div>
+
+
     </div>
 
+
     <script>
-        // Hàm chuyển đổi tab biểu đồ
+
         function switchTab(event, tabId) {
-            document.querySelectorAll('.tab-menu .tab-item').forEach(btn => btn.classList.remove('active'));
+
+            // Loại bỏ class active ở các nút tab cũ
+
+            document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
+
+            // Thêm active vào nút vừa bấm
+
             event.currentTarget.classList.add('active');
+
+
+            // Ẩn toàn bộ các khung biểu đồ
+
             document.querySelectorAll('.chart-wrapper').forEach(chart => chart.classList.remove('active'));
+
+            // Hiển thị đúng khung biểu đồ của tab được chọn
+
             document.getElementById(tabId).classList.add('active');
+
         }
 
-        // --- KHỞI TẠO KẾT NỐI WEBSOCKET LẤY DỮ LIỆU BƯỚC GIÁ REAL-TIME ---
-        const wsUrl = "wss://stream.entrade.com.vn/socket.io/?EIO=3&transport=websocket";
-        let ws = new WebSocket(wsUrl);
-
-        ws.onopen = () => {
-            // Gửi lệnh đăng ký luồng dữ liệu bước giá mã VN30F1M
-            ws.send('42["subscribe",["en_quotes_derivative_v2:VN30F1M"]]');
-        };
-
-        ws.onmessage = (event) => {
-            const dataStr = event.data;
-            // Kiểm tra nếu có dữ liệu hợp lệ trả về
-            if (dataStr.startsWith('42["update"')) {
-                const cleanJson = dataStr.substring(2); 
-                const dataObj = JSON.parse(cleanJson);
-                const updateData = dataObj[1];
-
-                if (updateData && updateData.bids && updateData.asks) {
-                    updateOrderBook(updateData.bids, updateData.asks);
-                }
-            }
-        };
-
-        function updateOrderBook(bids, asks) {
-            const tbody = document.getElementById("orderbook-rows");
-            let htmlContent = "";
-            
-            let totalBidVol = 0;
-            let totalAskVol = 0;
-
-            // Render tối đa 10 mức giá
-            for (let i = 0; i < 10; i++) {
-                let bidPrice = bids[i] ? bids[i].price.toFixed(1) : "-";
-                let bidVol = bids[i] ? bids[i].volume : "-";
-                let askPrice = asks[i] ? asks[i].price.toFixed(1) : "-";
-                let askVol = asks[i] ? asks[i].volume : "-";
-
-                if(bids[i]) totalBidVol += bids[i].volume;
-                if(asks[i]) totalAskVol += asks[i].volume;
-
-                htmlContent += `
-                    <tr>
-                        <td class="col-vol-bid">${bidVol}</td>
-                        <td class="col-price-bid">${bidPrice}</td>
-                        <td class="col-price-ask">${askPrice}</td>
-                        <td class="col-vol-ask">${askVol}</td>
-                    </tr>
-                `;
-            }
-            tbody.innerHTML = htmlContent;
-
-            // Cập nhật thanh tỉ lệ % mua bán công tâm theo khối lượng thực tế
-            let total = totalBidVol + totalAskVol;
-            if (total > 0) {
-                let buyPercent = ((totalBidVol / total) * 100).toFixed(1);
-                let sellPercent = (100 - buyPercent).toFixed(1);
-                
-                document.getElementById("lbl-ratio-buy").style.width = buyPercent + "%";
-                document.getElementById("lbl-ratio-buy").innerText = buyPercent + "%";
-                document.getElementById("lbl-ratio-sell").style.width = sellPercent + "%";
-                document.getElementById("lbl-ratio-sell").innerText = sellPercent + "%";
-            }
-        }
-
-        ws.onclose = () => {
-            // Tự động kết nối lại nếu rớt mạng
-            setTimeout(() => { location.reload(); }, 5000);
-        };
     </script>
+
+
 </body>
-</html>
+
+</html> 
