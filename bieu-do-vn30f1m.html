@@ -37,51 +37,27 @@
             border-radius: 4px 4px 0 0;
         }
 
-        /* Vùng nội dung chia đôi theo chiều ngang */
+        /* Vùng nội dung chia đôi */
         .content-container {
             flex: 1; width: 100%; height: calc(100% - 85px); 
             display: flex; flex-direction: row; background-color: #131722;
         }
         
-        /* Phần chứa Biểu đồ bên trái */
-        .chart-section { flex: 1; height: 100%; position: relative; }
-        .chart-wrapper { display: none; width: 100%; height: 100%; }
-        .chart-wrapper.active { display: block; }
-        iframe { width: 100%; height: 100%; border: none; }
-
-        /* PANEL HIỂN THỊ GIÁ LỚN BÊN PHẢI ĐỂ LIVESTREAM */
-        .sidebar-panel {
-            width: 340px; height: 100%; background-color: #ffffff; color: #333333;
-            border-left: 1px solid #e0e3eb; box-sizing: border-box;
-            display: flex; flex-direction: column; padding: 16px; box-sizing: border-box;
+        /* Cấu trúc hiển thị các phân vùng nội dung theo Tab */
+        .tab-content-block {
+            display: none; width: 100%; height: 100%; flex-direction: row;
         }
-        
-        .stock-title { font-size: 24px; font-weight: bold; color: #00b060; margin-bottom: 2px; }
-        .stock-sub { font-size: 13px; color: #666666; margin-bottom: 15px; }
-        
-        /* Vùng giá hiện tại siêu lớn */
-        .price-large-box { margin-bottom: 15px; }
-        .price-now { font-size: 46px; font-weight: bold; color: #00b060; line-height: 1; }
-        .price-change { font-size: 16px; font-weight: bold; color: #00b060; margin-top: 5px; }
+        .tab-content-block.active {
+            display: flex;
+        }
 
-        /* Bảng thông số chi tiết */
-        .info-grid { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .info-grid td { padding: 10px 0; border-bottom: 1px solid #f1f1f1; font-size: 14px; font-weight: 500; }
-        .info-label { color: #666666; text-align: left; }
-        .info-value { text-align: right; font-weight: bold; }
+        /* KHU VỰC BIỂU ĐỒ BÊN TRÁI */
+        .chart-section { flex: 1; height: 100%; }
 
-        /* Các ô màu cố định cho Trần, Sàn, TC */
-        .row-3col { display: flex; justify-content: space-between; text-align: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #f1f1f1; }
-        .col-item { flex: 1; }
-        .col-label { font-size: 12px; color: #666666; margin-bottom: 4px; }
-        .col-val { font-size: 15px; font-weight: bold; }
+        /* KHU VỰC BẢNG GIÁ LỚN BÊN PHẢI (Nhúng trực tiếp widget từ VPS) */
+        .sidebar-section { width: 350px; height: 100%; border-left: 1px solid #2b3040; }
         
-        /* Màu chuẩn chứng khoán */
-        .c-tc { color: #f5a623; }   /* Vàng tham chiếu */
-        .c-tran { color: #b800e6; } /* Tím trần */
-        .c-san { color: #00b0ff; }  /* Xanh lơ sàn */
-        .c-up { color: #00b060; }   /* Xanh tăng */
-        .c-down { color: #ea0017; } /* Đỏ giảm */
+        iframe { width: 100%; height: 100%; border: none; background-color: #131722; }
     </style>
 </head>
 <body>
@@ -89,7 +65,7 @@
     <div class="header">
         <a href="index.html" class="back-link" style="flex: 1; text-align: left;">⬅ Quay lại Trang chủ</a>
         <div style="flex: 2; text-align: center; font-size: 18px; font-weight: 500; color: #ffb700; letter-spacing: 0.5px;">
-             Dữ liệu được lấy từ Công ty Cổ phần Chứng khoán VPS và DNSE
+             Dữ liệu được lấy từ Công ty Cổ phần Chứng khoán VPS
         </div>
         <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #ffb700;">
             SĐT: 0853.525.379 - ID VPS: BOR5
@@ -97,189 +73,52 @@
     </div>
 
     <div class="tab-menu">
-        <button class="tab-item active" data-symbol="VN30F1M" onclick="switchTab(event, 'vn30f1m_5m')">📊 VN30F1M (5 Phút)</button>
-        <button class="tab-item" data-symbol="VN30F1M" onclick="switchTab(event, 'vn30f1m_15m')">📊 VN30F1M (15 Phút)</button>
-        <button class="tab-item" data-symbol="VNINDEX" onclick="switchTab(event, 'vnindex')">📈 VNINDEX (Ngày)</button>
+        <button class="tab-item active" onclick="switchTab(event, 'block_vn30f1m_5m')">📊 VN30F1M (5 Phút)</button>
+        <button class="tab-item" onclick="switchTab(event, 'block_vn30f1m_15m')">📊 VN30F1M (15 Phút)</button>
+        <button class="tab-item" onclick="switchTab(event, 'block_vnindex')">📈 VNINDEX (Ngày)</button>
     </div>
 
     <div class="content-container">
         
-        <div class="chart-section">
-            <div id="vn30f1m_5m" class="chart-wrapper active">
-                <iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=5&theme=light&lang=vi"></iframe>
+        <div id="block_vn30f1m_5m" class="tab-content-block active">
+            <div class="chart-section">
+                <iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=5&theme=dark&lang=vi"></iframe>
             </div>
-            <div id="vn30f1m_15m" class="chart-wrapper">
-                <iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=15&theme=light&lang=vi"></iframe>
-            </div>
-            <div id="vnindex" class="chart-wrapper">
-                <iframe src="https://web5.vps.com.vn/?sym=VNINDEX&interval=D&theme=light&lang=vi"></iframe>
+            <div class="sidebar-section">
+                <iframe src="https://web5.vps.com.vn/market_api.MarketApi/findSecIntraday?sym=VN30F1M&theme=dark"></iframe>
             </div>
         </div>
 
-        <div class="sidebar-panel">
-            <div class="stock-title" id="lbl-symbol">VN30F1M</div>
-            <div class="stock-sub" id="lbl-name">VN30 Index Futures Gần nhất</div>
-
-            <div class="price-large-box">
-                <div class="price-now c-tc" id="txt-price">Đang tải...</div>
-                <div class="price-change c-tc" id="txt-change">--.--</div>
+        <div id="block_vn30f1m_15m" class="tab-content-block">
+            <div class="chart-section">
+                <iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=15&theme=dark&lang=vi"></iframe>
             </div>
-
-            <div class="row-3col">
-                <div class="col-item">
-                    <div class="col-label">TC</div>
-                    <div class="col-val c-tc" id="txt-tc">--.-</div>
-                </div>
-                <div class="col-item">
-                    <div class="col-label">Trần</div>
-                    <div class="col-val c-tran" id="txt-ceiling">--.-</div>
-                </div>
-                <div class="col-item">
-                    <div class="col-label">Sàn</div>
-                    <div class="col-val c-san" id="txt-floor">--.-</div>
-                </div>
+            <div class="sidebar-section">
+                <iframe src="https://web5.vps.com.vn/market_api.MarketApi/findSecIntraday?sym=VN30F1M&theme=dark"></iframe>
             </div>
+        </div>
 
-            <table class="info-grid">
-                <tr>
-                    <td class="info-label">Mở cửa / TB</td>
-                    <td class="info-value"><span class="c-tc" id="txt-open">--.-</span> / <span class="c-tc" id="txt-avg">--.-</span></td>
-                </tr>
-                <tr>
-                    <td class="info-label">Thấp / Cao</td>
-                    <td class="info-value"><span class="c-tc" id="txt-low">--.-</span> / <span class="c-tc" id="txt-high">--.-</span></td>
-                </tr>
-                <tr>
-                    <td class="info-label">Khối lượng tổng</td>
-                    <td class="info-value" id="txt-volume">--</td>
-                </tr>
-                <tr id="row-foreign">
-                    <td class="info-label">KLNN Mua / Bán</td>
-                    <td class="info-value"><span id="txt-f-buy">--</span> / <span id="txt-f-sell">--</span></td>
-                </tr>
-                <tr id="row-oi">
-                    <td class="info-label" style="border-bottom: none;">Khối lượng HĐ mở OI</td>
-                    <td class="info-value" style="border-bottom: none; color: #1e2026;" id="txt-oi">--</td>
-                </tr>
-            </table>
+        <div id="block_vnindex" class="tab-content-block">
+            <div class="chart-section">
+                <iframe src="https://web5.vps.com.vn/?sym=VNINDEX&interval=D&theme=dark&lang=vi"></iframe>
+            </div>
+            <div class="sidebar-section">
+                <iframe src="https://web5.vps.com.vn/market_api.MarketApi/findSecIntraday?sym=VNINDEX&theme=dark"></iframe>
+            </div>
         </div>
 
     </div>
 
     <script>
-        let currentActiveSymbol = "VN30F1M";
-
-        function switchTab(event, tabId) {
+        function switchTab(event, blockId) {
+            // 1. Đổi màu trạng thái active cho nút tab được chọn
             document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
             event.currentTarget.classList.add('active');
-            document.querySelectorAll('.chart-wrapper').forEach(chart => chart.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-
-            const targetSymbol = event.currentTarget.getAttribute('data-symbol');
             
-            if (targetSymbol !== currentActiveSymbol) {
-                currentActiveSymbol = targetSymbol;
-                
-                // Cập nhật tên tiêu đề nhanh
-                document.getElementById("lbl-symbol").innerText = currentActiveSymbol;
-                document.getElementById("lbl-name").innerText = currentActiveSymbol === "VN30F1M" ? "VN30 Index Futures Gần nhất" : "Chỉ số VN-INDEX Sàn HOSE";
-                document.getElementById("txt-price").innerText = "Đang tải...";
-                document.getElementById("txt-change").innerText = "--.--";
-
-                if (currentActiveSymbol === "VNINDEX") {
-                    document.getElementById("row-oi").style.display = "none";
-                    document.getElementById("row-foreign").style.display = "none";
-                } else {
-                    document.getElementById("row-oi").style.display = "table-row";
-                    document.getElementById("row-foreign").style.display = "table-row";
-                }
-
-                fetchLivePriceData();
-            }
+            // 2. Ẩn toàn bộ các khối nội dung và chỉ hiển thị đúng khối được click
+            document.querySelectorAll('.tab-content-block').forEach(block => block.classList.remove('active'));
+            document.getElementById(blockId).classList.add('active');
         }
-
-        // --- CƠ CHẾ GỌI API AN TOÀN TỪ DNSE (KHÔNG CHẶN CORS) ---
-        async function fetchLivePriceData() {
-            try {
-                let apiUrl = "";
-                if (currentActiveSymbol === "VN30F1M") {
-                    // API lấy chi tiết mã phái sinh của DNSE
-                    apiUrl = "https://banggia-api.dnse.com.vn/data/symbols/VN30F1M";
-                } else {
-                    // API lấy chi tiết mã chỉ số VNINDEX của DNSE
-                    apiUrl = "https://banggia-api.dnse.com.vn/data/symbols/VNINDEX";
-                }
-
-                const response = await fetch(apiUrl);
-                if (!response.ok) return;
-                const d = await response.json();
-                
-                if (d) {
-                    updateLiveUI(d);
-                }
-            } catch (error) {
-                console.log("Đang tải lại luồng giá...", error);
-            }
-        }
-
-        function updateLiveUI(d) {
-            // Ánh xạ chính xác các trường dữ liệu thực tế từ máy chủ DNSE
-            const tc = d.referencePrice || 0; 
-            const price = d.lastPrice || d.closePrice || tc; 
-            const change = price - tc;
-            const changePercent = tc > 0 ? (change / tc) * 100 : 0;
-
-            const txtPrice = document.getElementById("txt-price");
-            const txtChange = document.getElementById("txt-change");
-            
-            txtPrice.innerText = price.toLocaleString('vi-VN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            
-            let colorClass = "c-tc";
-            let arrow = "▪ ";
-            if (change > 0) { colorClass = "c-up"; arrow = "▲ "; }
-            else if (change < 0) { colorClass = "c-down"; arrow = "▼ "; }
-
-            txtPrice.className = "price-now " + colorClass;
-            txtChange.className = "price-change " + colorClass;
-            txtChange.innerText = `${arrow}${Math.abs(change).toFixed(2)} (${changePercent.toFixed(2)}%)`;
-
-            // Nạp dữ liệu 3 cột chính
-            document.getElementById("txt-tc").innerText = tc > 0 ? tc.toFixed(1) : "--";
-            document.getElementById("txt-ceiling").innerText = d.ceilingPrice ? d.ceilingPrice.toFixed(1) : "--";
-            document.getElementById("txt-floor").innerText = d.floorPrice ? d.floorPrice.toFixed(1) : "--";
-            
-            // Nạp các thông số kỹ thuật bên dưới
-            const open = d.openPrice || 0;
-            const high = d.highestPrice || 0;
-            const low = d.lowestPrice || 0;
-            const volume = d.totalVolume || d.accumulatedVolume || 0;
-
-            document.getElementById("txt-open").innerText = open > 0 ? open.toFixed(2) : "--";
-            document.getElementById("txt-high").innerText = high > 0 ? high.toFixed(2) : "--";
-            document.getElementById("txt-low").innerText = low > 0 ? low.toFixed(2) : "--";
-            if (high > 0 && low > 0) {
-                document.getElementById("txt-avg").innerText = ((high + low) / 2).toFixed(2);
-            }
-            
-            document.getElementById("txt-volume").innerText = volume > 0 ? volume.toLocaleString() : "--";
-            
-            // Chỉ hiển thị OI và dữ liệu Nước ngoài đối với phái sinh VN30F1M
-            if (currentActiveSymbol === "VN30F1M") {
-                const oi = d.openInterest || 0;
-                const fBuy = d.foreignBuyVolume || d.foreignBuy || 0;
-                const fSell = d.foreignSellVolume || d.foreignSell || 0;
-
-                document.getElementById("txt-oi").innerText = oi > 0 ? oi.toLocaleString() : "--";
-                document.getElementById("txt-f-buy").innerText = fBuy > 0 ? fBuy.toLocaleString() : "0";
-                document.getElementById("txt-f-sell").innerText = fSell > 0 ? fSell.toLocaleString() : "0";
-            }
-        }
-
-        // Chạy ngay khi mở trang
-        fetchLivePriceData();
-
-        // Thiết lập quét định kỳ 2 giây/lần cực kỳ nhẹ và ổn định
-        setInterval(fetchLivePriceData, 200);
     </script>
 </body>
 </html>
