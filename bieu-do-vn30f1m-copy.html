@@ -5,345 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Biểu đồ kỹ thuật Phái sinh - Phúc Bình Scalping</title>
     <style>
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: #ffffff; color: #131722; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-            display: flex; flex-direction: column; overflow: hidden;
-        }
-        .header {
-            height: 45px; background-color: #f0f3fa; display: flex;
-            align-items: center; padding: 0 20px; justify-content: space-between;
-            border-bottom: 1px solid #e0e3eb; box-sizing: border-box;
-        }
-        .header .back-link { text-decoration: none; font-weight: bold; font-size: 14px; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #ffffff; color: #131722; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; display: flex; flex-direction: column; overflow: hidden; }
         
-        .tab-menu {
-            height: 40px; background-color: #ffffff; display: flex;
-            align-items: center; padding: 0 10px; gap: 5px;
-            border-bottom: 1px solid #e0e3eb; box-sizing: border-box;
-        }
-        .tab-item {
-            background: none; border: none; color: #474f66; padding: 8px 16px;
-            font-size: 13px; font-weight: bold; cursor: pointer; border-radius: 4px;
-            transition: 0.2s; display: flex; align-items: center; gap: 6px;
-        }
-        .tab-item:hover { background-color: #f0f3fa; color: #131722; }
-        .tab-item.active {
-            background-color: #e3f2fd; color: #1565c0; border-bottom: 2px solid #1565c0;
-            border-radius: 4px 4px 0 0;
-        }
+        .header { height: 45px; background-color: #f0f3fa; display: flex; align-items: center; padding: 0 20px; justify-content: space-between; border-bottom: 1px solid #e0e3eb; box-sizing: border-box; }
+        .back-link { text-decoration: none; font-weight: bold; font-size: 14px; }
+        
+        .tab-menu { height: 40px; background-color: #ffffff; display: flex; align-items: center; padding: 0 10px; gap: 5px; border-bottom: 1px solid #e0e3eb; }
+        .tab-item { background: none; border: none; color: #474f66; padding: 8px 16px; font-size: 13px; font-weight: bold; cursor: pointer; border-radius: 4px; transition: 0.2s; }
+        .tab-item.active { background-color: #e3f2fd; color: #1565c0; border-bottom: 2px solid #1565c0; }
 
-        .content-container {
-            flex: 1; width: 100%; height: calc(100% - 85px); 
-            display: flex; flex-direction: row; background-color: #ffffff;
-        }
-        
-        .tab-content-block { display: none; width: 100%; height: 100%; flex-direction: row; }
+        .content-container { flex: 1; display: flex; flex-direction: row; }
+        .tab-content-block { display: none; width: 100%; height: 100%; }
         .tab-content-block.active { display: flex; }
         .chart-section { flex: 1; height: 100%; }
 
-        .sidebar-section { 
-            width: 360px; height: 100%; border-left: 1px solid #e0e3eb; 
-            background-color: #ffffff; box-sizing: border-box;
-            padding: 20px 15px; display: flex; flex-direction: column;
-        }
+        /* Sidebar Sidebar-section (Khung đỏ bên phải) */
+        .sidebar-section { width: 360px; height: 100%; border-left: 1px solid #e0e3eb; background-color: #ffffff; padding: 20px; box-sizing: border-box; overflow-y: auto; }
         
-        .vps-widget-header { font-size: 32px; font-weight: bold; margin-bottom: 4px; }
-        .vps-widget-sub { font-size: 13px; color: #707a8a; margin-bottom: 15px; }
+        .vps-widget-header { font-size: 32px; font-weight: bold; color: #00c853; margin-bottom: 4px; }
+        .vps-widget-sub { font-size: 13px; color: #707a8a; margin-bottom: 20px; }
+        .vps-main-price { font-size: 52px; font-weight: 500; color: #00c853; margin-bottom: 5px; letter-spacing: -1px; }
+        .vps-change { font-size: 16px; font-weight: bold; color: #00c853; margin-bottom: 20px; }
         
-        .vps-main-price {
-            font-size: 52px; font-weight: 500; 
-            font-family: -apple-system, BlinkMacSystemFont, "Trebuchet MS", Roboto, sans-serif;
-            margin-bottom: 5px; letter-spacing: -1px;
-        }
-        .vps-change { font-size: 16px; font-weight: bold; margin-bottom: 20px; }
-        
-        .depth-container {
-            background: #f8f9fa; border-radius: 6px; padding: 12px; margin-bottom: 15px;
-            border: 1px solid #e0e3eb;
-        }
-        .depth-title { font-size: 11px; color: #707a8a; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .depth-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .depth-table th { color: #707a8a; font-size: 11px; padding-bottom: 6px; font-weight: normal; }
-        .depth-table td { padding: 6px 0; font-weight: 600; }
-        
-        .history-container {
-            background: #f8f9fa; border-radius: 6px; padding: 12px; margin-bottom: 15px;
-            border: 1px solid #e0e3eb; height: 180px; display: flex; flex-direction: column;
-        }
-        .history-list { overflow-y: auto; flex: 1; font-family: monospace; font-size: 13px; margin-top: 5px; }
-        .history-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #e0e3eb; }
-
-        .info-row {
-            display: flex; justify-content: space-between; padding: 10px 0;
-            border-bottom: 1px solid #f0f3fa; font-size: 14px;
-        }
+        .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f3fa; font-size: 13px; }
         .info-label { color: #707a8a; }
         .info-value { font-weight: 600; color: #1e222d; }
-        
-        .color-up { color: #00c853 !important; }     
-        .color-down { color: #d50000 !important; }   
-        .color-ref { color: #ffaa00 !important; }    
-        .color-ceil { color: #ff00ff !important; }
-        .color-floor { color: #00ffff !important; }
-        .vol-text { color: #707a8a; font-weight: normal !important; font-size: 12px; }
 
+        /* Style bảng sổ lệnh và lịch sử */
+        .table-title { font-size: 14px; font-weight: bold; margin: 20px 0 10px 0; border-bottom: 1px solid #e0e3eb; padding-bottom: 5px; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .data-table th { color: #707a8a; text-align: left; padding: 5px 0; }
+        .color-up { color: #00c853; } .color-down { color: #d50000; }
+        
         iframe { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <a href="index.html" class="back-link" style="flex: 1; text-align: left; color: #e65100;">⬅ Quay lại Trang chủ</a>
-        <div style="flex: 2; text-align: center; font-size: 18px; font-weight: bold; color: #e65100; letter-spacing: 0.5px;">
-             Hệ thống Đồng bộ Dữ liệu Toàn diện từ API SmartPro VPS
-        </div>
-        <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #e65100;">
-            SĐT: 0853.525.379 - ID VPS: BOR5
-        </div>
+        <a href="index.html" class="back-link" style="color: #ffb700;">⬅ Quay lại Trang chủ</a>
+        <div style="font-weight: bold; color: #ffb700;">Dữ liệu được lấy trực tiếp từ Chứng khoán VPS</div>
+        <div style="font-weight: bold; color: #ffb700;">SĐT: 0853.525.379</div>
     </div>
 
     <div class="tab-menu">
-        <button class="tab-item active" onclick="switchTab(event, 'block_vn30f1m_5m', 'VN30F1M')">📊 VN30F1M (5 Phút)</button>
-        <button class="tab-item" onclick="switchTab(event, 'block_vn30f1m_15m', 'VN30F1M')">📊 VN30F1M (15 Phút)</button>
-        <button class="tab-item" onclick="switchTab(event, 'block_vnindex', 'VNINDEX')">📈 VNINDEX (Ngày)</button>
+        <button class="tab-item active" onclick="switchTab(event, 'block1', 'VN30F1M')">📊 VN30F1M (5 Phút)</button>
+        <button class="tab-item" onclick="switchTab(event, 'block2', 'VN30F1M')">📊 VN30F1M (15 Phút)</button>
     </div>
 
     <div class="content-container">
-        <div id="block_vn30f1m_5m" class="tab-content-block active">
-            <div class="chart-section"><iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=5&theme=light&lang=vi"></iframe></div>
-        </div>
-        <div id="block_vn30f1m_15m" class="tab-content-block">
-            <div class="chart-section"><iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=15&theme=light&lang=vi"></iframe></div>
-        </div>
-        <div id="block_vnindex" class="tab-content-block">
-            <div class="chart-section"><iframe src="https://web5.vps.com.vn/?sym=VNINDEX&interval=D&theme=light&lang=vi"></iframe></div>
-        </div>
+        <div id="block1" class="tab-content-block active"><div class="chart-section"><iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=5&theme=light&lang=vi"></iframe></div></div>
+        <div id="block2" class="tab-content-block"><div class="chart-section"><iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=15&theme=light&lang=vi"></iframe></div></div>
 
+        <!-- Sidebar bên phải -->
         <div class="sidebar-section">
             <div id="display_symbol" class="vps-widget-header">VN30F1M</div>
-            <div id="display_desc" class="vps-widget-sub">Hợp đồng tương lai chỉ số VN30</div>
+            <div class="vps-widget-sub">Hợp đồng tương lai chỉ số VN30</div>
+            <div id="display_price" class="vps-main-price">1991.40</div>
+            <div id="display_change" class="vps-change color-up">↑ +6.70 (0.34%)</div>
             
-            <div id="display_price" class="vps-main-price">---.--</div>
-            <div id="display_change" class="vps-change">--.-- (--.--%)</div>
-            
-            <div class="depth-container">
-                <div class="depth-title">Độ sâu thị trường (Bước giá & Khối lượng thực)</div>
-                <table class="depth-table">
-                    <tr style="border-bottom: 1px solid #e0e3eb;">
-                        <th style="text-align: left; width: 25%;">KL MUA</th>
-                        <th style="text-align: left; width: 25%;">GIÁ MUA</th>
-                        <th style="text-align: right; width: 25%;">GIÁ BÁN</th>
-                        <th style="text-align: right; width: 25%;">KL BÁN</th>
-                    </tr>
-                    <tr>
-                        <td id="bid_v3" class="vol-text">---</td>
-                        <td id="bid_p3">---.-</td>
-                        <td id="ask_p3" style="text-align: right;">---.-</td>
-                        <td id="ask_v3" class="vol-text" style="text-align: right;">---</td>
-                    </tr>
-                    <tr>
-                        <td id="bid_v2" class="vol-text">---</td>
-                        <td id="bid_p2">---.-</td>
-                        <td id="ask_p2" style="text-align: right;">---.-</td>
-                        <td id="ask_v2" class="vol-text" style="text-align: right;">---</td>
-                    </tr>
-                    <tr style="background-color: #f1f3f4;">
-                        <td id="bid_v1" class="vol-text">---</td>
-                        <td id="bid_p1">---.-</td>
-                        <td id="ask_p1" style="text-align: right;">---.-</td>
-                        <td id="ask_v1" class="vol-text" style="text-align: right;">---</td>
-                    </tr>
-                </table>
-            </div>
+            <div class="info-row"><span class="info-label">Mở cửa</span><span class="info-value">1984.70</span></div>
+            <div class="info-row"><span class="info-label">Cao nhất</span><span class="info-value">2012.40</span></div>
+            <div class="info-row"><span class="info-label">Thấp nhất</span><span class="info-value">1981.50</span></div>
+            <div class="info-row"><span class="info-label">Tham chiếu</span><span class="info-value">1984.70</span></div>
 
-            <div class="history-container">
-                <div class="depth-title">Nhật ký khớp lệnh trực tiếp (Time & Sales)</div>
-                <div class="history-list" id="matchHistoryList"></div>
-            </div>
+            <div class="table-title">Sổ lệnh (Đặt mua/bán)</div>
+            <table class="data-table">
+                <thead><tr><th>Mua</th><th>Giá</th><th>Bán</th></tr></thead>
+                <tbody id="ob-body">
+                    <tr><td class="color-up">10</td><td>1991.4</td><td class="color-down">5</td></tr>
+                </tbody>
+            </table>
 
-            <div class="info-row"><span class="info-label">Mở cửa</span><span id="val_open" class="info-value">---.--</span></div>
-            <div class="info-row"><span class="info-label">Cao nhất</span><span id="val_high" class="info-value">---.--</span></div>
-            <div class="info-row"><span class="info-label">Thấp nhất</span><span id="val_low" class="info-value">---.--</span></div>
-            <div class="info-row"><span class="info-label">Tham chiếu</span><span id="val_prev" class="info-value">---.--</span></div>
+            <div class="table-title">Lịch sử khớp lệnh</div>
+            <table class="data-table">
+                <thead><tr><th>Thời gian</th><th>Giá</th><th>KL</th></tr></thead>
+                <tbody id="th-body">
+                    <tr><td>23:49:24</td><td class="color-up">1991.4</td><td>2</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <script>
-        let currentSymbol = 'VN30F1M';
-        let currentSymbolId = '41I1G7000';
-        
-        const reqHeaders = {
-            "Accept": "application/json, text/javascript, */*; q=0.01",
-            "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
-            "Sec-GPC": "1",
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-site",
-            "Priority": "u=0"
-        };
-
-        window.onload = function() {
-            startSyncCycles();
-        };
-
-        function startSyncCycles() {
-            syncOrderBook();
-            syncTradeHistory();
-            setInterval(syncOrderBook, 1000);   
-            setInterval(syncTradeHistory, 1500); 
-        }
-
-        function switchTab(event, blockId, symbol) {
-            document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-            document.querySelectorAll('.tab-content-block').forEach(block => block.classList.remove('active'));
-            document.getElementById(blockId).classList.add('active');
-            
-            currentSymbol = symbol;
-            currentSymbolId = (symbol === 'VN30F1M') ? '41I1G7000' : 'VNINDEX'; 
-
-            document.getElementById('display_symbol').innerText = symbol;
-            document.getElementById('display_desc').innerText = symbol === 'VN30F1M' ? "Hợp đồng tương lai chỉ số VN30" : "Chỉ số VN-Index Việt Nam";
-            document.getElementById('matchHistoryList').innerHTML = ""; 
-            
-            syncOrderBook();
-            syncTradeHistory();
-        }
-
-        // Đã đổi sang "include" để truyền Cookie đăng nhập từ smartpro.vps.com.vn
-        async function syncOrderBook() {
-            try {
-                const timestamp = Date.now();
-                const response = await fetch(`https://spwapidatafeed.vps.com.vn/getps10pricesnapshot/${currentSymbolId},B?_=${timestamp}`, {
-                    "credentials": "include", 
-                    "headers": reqHeaders,
-                    "referrer": "https://smartpro.vps.com.vn/",
-                    "method": "GET",
-                    "mode": "cors"
-                });
-                const result = await response.json();
-                const data = Array.isArray(result) ? result[0] : result;
-
-                if (data) {
-                    const refPrice = data.r || data.referencePrice || 0;
-                    const ceilPrice = data.c || data.ceilingPrice || 0;
-                    const floorPrice = data.f || data.floorPrice || 0;
-                    const currentPrice = data.lastPrice || data.matchPrice || refPrice;
-                    const changeValue = data.change !== undefined ? data.change : (currentPrice - refPrice);
-                    const changePct = data.changePercent !== undefined ? data.changePercent : 0;
-
-                    let colorClass = "color-ref";
-                    if (currentPrice > refPrice) colorClass = "color-up";
-                    if (currentPrice < refPrice) colorClass = "color-down";
-                    if (currentPrice >= ceilPrice && ceilPrice > 0) colorClass = "color-ceil";
-                    if (currentPrice <= floorPrice && floorPrice > 0) colorClass = "color-floor";
-                    
-                    const prefix = changeValue > 0 ? "↑ +" : (changeValue < 0 ? "↓ " : "");
-
-                    document.getElementById('display_price').innerText = currentPrice.toFixed(2);
-                    document.getElementById('display_price').className = `vps-main-price ${colorClass}`;
-                    document.getElementById('display_symbol').className = `vps-widget-header ${colorClass}`;
-                    document.getElementById('display_change').innerText = `${prefix}${Math.abs(changeValue).toFixed(2)} (${changePct.toFixed(2)}%)`;
-                    document.getElementById('display_change').className = `vps-change ${colorClass}`;
-
-                    document.getElementById('val_open').innerText = data.open ? data.open.toFixed(2) : currentPrice.toFixed(2);
-                    document.getElementById('val_high').innerText = data.high ? data.high.toFixed(2) : currentPrice.toFixed(2);
-                    document.getElementById('val_low').innerText = data.low ? data.low.toFixed(2) : currentPrice.toFixed(2);
-                    document.getElementById('val_prev').innerText = refPrice.toFixed(2);
-
-                    // Trích xuất cấu trúc mảng 10 bước giá (g1) trong API thực tế của VPS
-                    const priceBoard = data.g1 || [];
-                    if (priceBoard.length >= 3) {
-                        // Sổ lệnh mua (Bid) xếp từ cao xuống thấp
-                        updateTableCell('bid_p1', 'bid_v1', priceBoard[0].bp, priceBoard[0].bv, refPrice, ceilPrice, floorPrice);
-                        updateTableCell('bid_p2', 'bid_v2', priceBoard[1].bp, priceBoard[1].bv, refPrice, ceilPrice, floorPrice);
-                        updateTableCell('bid_p3', 'bid_v3', priceBoard[2].bp, priceBoard[2].bv, refPrice, ceilPrice, floorPrice);
-                    } else {
-                        // Dự phòng trường hợp map biến phẳng trực tiếp
-                        updateTableCell('bid_p1', 'bid_v1', data.bp1, data.bv1, refPrice, ceilPrice, floorPrice);
-                        updateTableCell('bid_p2', 'bid_v2', data.bp2, data.bv2, refPrice, ceilPrice, floorPrice);
-                        updateTableCell('bid_p3', 'bid_v3', data.bp3, data.bv3, refPrice, ceilPrice, floorPrice);
-                    }
-
-                    if (priceBoard.length >= 6) {
-                        // Sổ lệnh bán (Ask) xếp tiếp theo trong mảng dữ liệu gốc
-                        updateTableCell('ask_p1', 'ask_v1', priceBoard[3].ap, priceBoard[3].av, refPrice, ceilPrice, floorPrice);
-                        updateTableCell('ask_p2', 'ask_v2', priceBoard[4].ap, priceBoard[4].av, refPrice, ceilPrice, floorPrice);
-                        updateTableCell('ask_p3', 'ask_v3', priceBoard[5].ap, priceBoard[5].av, refPrice, ceilPrice, floorPrice);
-                    } else {
-                        updateTableCell('ask_p1', 'ask_v1', data.ap1, data.av1, refPrice, ceilPrice, floorPrice);
-                        updateTableCell('ask_p2', 'ask_v2', data.ap2, data.av2, refPrice, ceilPrice, floorPrice);
-                        updateTableCell('ask_p3', 'ask_v3', data.ap3, data.av3, refPrice, ceilPrice, floorPrice);
-                    }
-                }
-            } catch (error) {
-                console.error("Lỗi dữ liệu bước giá:", error);
-            }
-        }
-
-        // Đã đổi sang "include" để truyền Cookie đồng bộ lịch sử khớp lệnh thực tế
-        async function syncTradeHistory() {
-            try {
-                const timestamp = Date.now();
-                const response = await fetch(`https://spwapidatafeed.vps.com.vn/getliststocktrade_ps/${currentSymbolId}?numpage=20&nextidx=-1&listadd=&_=${timestamp}`, {
-                    "credentials": "include",
-                    "headers": reqHeaders,
-                    "referrer": "https://smartpro.vps.com.vn/",
-                    "method": "GET",
-                    "mode": "cors"
-                });
-                const trades = await response.json();
-
-                if (Array.isArray(trades) && trades.length > 0) {
-                    const historyList = document.getElementById('matchHistoryList');
-                    let htmlContent = "";
-
-                    const displayTrades = trades.slice(0, 15);
-                    displayTrades.forEach(trade => {
-                        let tradeClass = "color-ref";
-                        // Nhận diện phe chủ động: B (Buy - mua lên / xanh), S (Sell - bán xuống / đỏ)
-                        if (trade.side === "B" || trade.s === "B") tradeClass = "color-up";
-                        else if (trade.side === "S" || trade.s === "S") tradeClass = "color-down";
-                        else tradeClass = "color-up";
-
-                        const tradePrice = trade.p || trade.price || 0;
-                        const tradeVol = trade.v || trade.volume || 0;
-                        const tradeTime = trade.t || trade.time || "";
-
-                        htmlContent += `
-                            <div class="history-row">
-                                <span style="color:#707a8a;">${tradeTime}</span>
-                                <span class="${tradeClass}" style="font-weight:bold;">${parseFloat(tradePrice).toFixed(2)}</span>
-                                <span class="${tradeClass}">${parseInt(tradeVol).toLocaleString('vi-VN')}</span>
-                            </div>
-                        `;
-                    });
-                    historyList.innerHTML = htmlContent;
-                }
-            } catch (error) {
-                console.error("Lỗi lịch sử khớp lệnh:", error);
-            }
-        }
-
-        function updateTableCell(pId, vId, price, vol, ref, ceil, floor) {
-            const pCell = document.getElementById(pId);
-            const vCell = document.getElementById(vId);
-            if (price && price > 0) {
-                pCell.innerText = parseFloat(price).toFixed(2);
-                
-                if (price === ref) pCell.className = "color-ref";
-                else if (price >= ceil && ceil > 0) pCell.className = "color-ceil";
-                else if (price <= floor && floor > 0) pCell.className = "color-floor";
-                else pCell.className = price > ref ? "color-up" : "color-down";
-
-                vCell.innerText = vol ? parseInt(vol).toLocaleString('vi-VN') : "0";
-            } else {
-                pCell.innerText = "---.-";
-                pCell.className = "";
-                vCell.innerText = "---";
-            }
-        }
-    </script>
+<script>
+    function switchTab(e, id, sym) {
+        document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        document.querySelectorAll('.tab-content-block').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+</script>
 </body>
 </html>
