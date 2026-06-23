@@ -81,7 +81,6 @@
         .info-label { color: #707a8a; }
         .info-value { font-weight: 600; color: #1e222d; }
         
-        /* Bảng màu chuẩn của sàn VPS */
         .color-up { color: #00c853 !important; }     
         .color-down { color: #d50000 !important; }   
         .color-ref { color: #ffaa00 !important; }    
@@ -97,7 +96,7 @@
     <div class="header">
         <a href="index.html" class="back-link" style="flex: 1; text-align: left; color: #e65100;">⬅ Quay lại Trang chủ</a>
         <div style="flex: 2; text-align: center; font-size: 18px; font-weight: bold; color: #e65100; letter-spacing: 0.5px;">
-             Hệ thống Đồng bộ Dữ liệu Realtime từ API Lõi SmartPro VPS
+             Hệ thống Đồng bộ Dữ liệu Toàn diện từ API SmartPro VPS
         </div>
         <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #e65100;">
             SĐT: 0853.525.379 - ID VPS: BOR5
@@ -129,7 +128,7 @@
             <div id="display_change" class="vps-change">--.-- (--.--%)</div>
             
             <div class="depth-container">
-                <div class="depth-title">Độ sâu thị trường (Mức giá & KL tốt nhất)</div>
+                <div class="depth-title">Độ sâu thị trường (Bước giá & Khối lượng thực)</div>
                 <table class="depth-table">
                     <tr style="border-bottom: 1px solid #e0e3eb;">
                         <th style="text-align: left; width: 25%;">KL MUA</th>
@@ -172,15 +171,32 @@
 
     <script>
         let currentSymbol = 'VN30F1M';
-        let currentSymbolId = '41I1G7000'; // Token nội bộ của VN30F1M trên SmartPro
-        let lastLoggedPrice = null;
-        let lastLoggedVol = null;
+        let currentSymbolId = '41I1G7000';
+        
+        // Cấu hình Headers chuẩn y hệt gói fetch bạn bắt được từ trình duyệt
+        const reqHeaders = {
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
+            "Sec-GPC": "1",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-site",
+            "Priority": "u=0"
+        };
 
         window.onload = function() {
-            loadSmartProData();
-            // Thiết lập chu kỳ quét 1 giây một lần để lấy giá scalping không bị trễ
-            setInterval(loadSmartProData, 1000);
+            startSyncCycles();
         };
+
+        function startSyncCycles() {
+            // Chạy ngay lập tức lần đầu
+            syncOrderBook();
+            syncTradeHistory();
+
+            // Thiết lập vòng lặp quét dữ liệu liên tục cho Scalping
+            setInterval(syncOrderBook, 1000);   // Quét bước giá mỗi 1 giây
+            setInterval(syncTradeHistory, 2000); // Quét lịch sử khớp lệnh mỗi 2 giây
+        }
 
         function switchTab(event, blockId, symbol) {
             document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
@@ -189,108 +205,129 @@
             document.getElementById(blockId).classList.add('active');
             
             currentSymbol = symbol;
-            // Thay đổi mã Token ID tương ứng khi chuyển đổi tab
             currentSymbolId = (symbol === 'VN30F1M') ? '41I1G7000' : 'VNINDEX'; 
 
             document.getElementById('display_symbol').innerText = symbol;
             document.getElementById('display_desc').innerText = symbol === 'VN30F1M' ? "Hợp đồng tương lai chỉ số VN30" : "Chỉ số VN-Index Việt Nam";
             document.getElementById('matchHistoryList').innerHTML = ""; 
             
-            lastLoggedPrice = null;
-            lastLoggedVol = null;
-            
-            loadSmartProData();
+            syncOrderBook();
+            syncTradeHistory();
         }
 
-        async function loadSmartProData() {
+        // HÀM 1: Lấy và hiển thị Giá chính + 3 Bước giá chuyên sâu (,B)
+        async function syncOrderBook() {
             try {
                 const timestamp = Date.now();
-                // Gọi API lấy dữ liệu Snapshot chuyên dụng từ luồng hệ thống SmartPro bạn tìm thấy
-                const response = await fetch(`https://spwapidatafeed.vps.com.vn/getps10pricesnapshot/${currentSymbolId},S?_=${timestamp}`);
+                const response = await fetch(`https://spwapidatafeed.vps.com.vn/getps10pricesnapshot/${currentSymbolId},B?_=${timestamp}`, {
+                    "credentials": "omit",
+                    "headers": reqHeaders,
+                    "referrer": "https://smartpro.vps.com.vn/",
+                    "method": "GET",
+                    "mode": "cors"
+                });
                 const result = await response.json();
-                
-                // Chuẩn hóa cấu trúc object trả về từ hệ thống
                 const data = Array.isArray(result) ? result[0] : result;
-                
+
                 if (data) {
-                    // Trích xuất các mốc giá tham chiếu cơ bản
-                    const refPrice = data.r || data.referencePrice || 1984.70;
-                    const ceilPrice = data.c || data.ceilingPrice || 2123.70;
-                    const floorPrice = data.f || data.floorPrice || 1845.90;
+                    const refPrice = data.r || data.referencePrice || 0;
+                    const ceilPrice = data.c || data.ceilingPrice || 0;
+                    const floorPrice = data.f || data.floorPrice || 0;
                     const currentPrice = data.lastPrice || data.matchPrice || refPrice;
                     const changeValue = data.change !== undefined ? data.change : (currentPrice - refPrice);
-                    const changePct = data.changePercent !== undefined ? data.changePercent : ((changeValue / refPrice) * 100);
+                    const changePct = data.changePercent !== undefined ? data.changePercent : 0;
 
-                    // Thiết lập màu sắc hiển thị chủ đạo của mã chứng khoán
                     let colorClass = "color-ref";
                     if (currentPrice > refPrice) colorClass = "color-up";
                     if (currentPrice < refPrice) colorClass = "color-down";
-                    if (currentPrice >= ceilPrice) colorClass = "color-ceil";
-                    if (currentPrice <= floorPrice) colorClass = "color-floor";
+                    if (currentPrice >= ceilPrice && ceilPrice > 0) colorClass = "color-ceil";
+                    if (currentPrice <= floorPrice && floorPrice > 0) colorClass = "color-floor";
                     
                     const prefix = changeValue > 0 ? "↑ +" : (changeValue < 0 ? "↓ " : "");
 
-                    // Kết xuất dữ liệu lên giao diện chính
+                    // Render khu vực Giá lớn trên cùng
                     document.getElementById('display_price').innerText = currentPrice.toFixed(2);
                     document.getElementById('display_price').className = `vps-main-price ${colorClass}`;
                     document.getElementById('display_symbol').className = `vps-widget-header ${colorClass}`;
                     document.getElementById('display_change').innerText = `${prefix}${Math.abs(changeValue).toFixed(2)} (${changePct.toFixed(2)}%)`;
                     document.getElementById('display_change').className = `vps-change ${colorClass}`;
 
-                    // Ghi đè thông số tổng hợp dưới đáy Sidebar
+                    // Ghi thông số OHLC dưới đáy
                     document.getElementById('val_open').innerText = data.open ? data.open.toFixed(2) : currentPrice.toFixed(2);
                     document.getElementById('val_high').innerText = data.high ? data.high.toFixed(2) : currentPrice.toFixed(2);
                     document.getElementById('val_low').innerText = data.low ? data.low.toFixed(2) : currentPrice.toFixed(2);
                     document.getElementById('val_prev').innerText = refPrice.toFixed(2);
 
-                    // Cập nhật Sổ lệnh 3 Bước giá phái sinh thời gian thực
-                    updateCell('bid_p1', 'bid_v1', data.bp1, data.bv1, refPrice, ceilPrice, floorPrice);
-                    updateCell('bid_p2', 'bid_v2', data.bp2, data.bv2, refPrice, ceilPrice, floorPrice);
-                    updateCell('bid_p3', 'bid_v3', data.bp3, data.bv3, refPrice, ceilPrice, floorPrice);
+                    // Đổ dữ liệu thật vào 3 bước Giá Mua và Khối Lượng Mua (Bid)
+                    updateTableCell('bid_p1', 'bid_v1', data.bp1, data.bv1, refPrice, ceilPrice, floorPrice);
+                    updateTableCell('bid_p2', 'bid_v2', data.bp2, data.bv2, refPrice, ceilPrice, floorPrice);
+                    updateTableCell('bid_p3', 'bid_v3', data.bp3, data.bv3, refPrice, ceilPrice, floorPrice);
 
-                    updateCell('ask_p1', 'ask_v1', data.ap1, data.av1, refPrice, ceilPrice, floorPrice);
-                    updateCell('ask_p2', 'ask_v2', data.ap2, data.av2, refPrice, ceilPrice, floorPrice);
-                    updateCell('ask_p3', 'ask_v3', data.ap3, data.av3, refPrice, ceilPrice, floorPrice);
-
-                    // Xử lý tạo dòng mới cho Nhật ký khớp lệnh (Time & Sales)
-                    const lastVol = data.lastVolume || data.lastVol || 0;
-                    if (currentPrice > 0 && (currentPrice !== lastLoggedPrice || lastVol !== lastLoggedVol)) {
-                        lastLoggedPrice = currentPrice;
-                        lastLoggedVol = lastVol;
-
-                        const historyList = document.getElementById('matchHistoryList');
-                        const timeString = new Date().toLocaleTimeString('vi-VN', { hour12: false });
-                        
-                        const newRow = `
-                            <div class="history-row">
-                                <span style="color:#707a8a;">${timeString}</span>
-                                <span class="${colorClass}" style="font-weight:bold;">${currentPrice.toFixed(2)}</span>
-                                <span class="${colorClass}">${lastVol > 0 ? lastVol.toLocaleString('vi-VN') : '+1'}</span>
-                            </div>
-                        `;
-                        historyList.insertAdjacentHTML('afterbegin', newRow);
-                        
-                        // Khống chế danh sách hiển thị tối đa 15 dòng để tránh cuộn trang dài
-                        if (historyList.children.length > 15) {
-                            historyList.removeChild(historyList.lastChild);
-                        }
-                    }
+                    // Đổ dữ liệu thật vào 3 bước Giá Bán và Khối Lượng Bán (Ask)
+                    updateTableCell('ask_p1', 'ask_v1', data.ap1, data.av1, refPrice, ceilPrice, floorPrice);
+                    updateTableCell('ask_p2', 'ask_v2', data.ap2, data.av2, refPrice, ceilPrice, floorPrice);
+                    updateTableCell('ask_p3', 'ask_v3', data.ap3, data.av3, refPrice, ceilPrice, floorPrice);
                 }
             } catch (error) {
-                console.error("Lỗi đồng bộ dữ liệu SmartPro API:", error);
+                console.error("Lỗi đồng bộ bước giá:", error);
             }
         }
 
-        function updateCell(pId, vId, price, vol, ref, ceil, floor) {
+        // HÀM 2: Lấy nhật ký danh sách khớp lệnh thực tế từ sàn
+        async function syncTradeHistory() {
+            try {
+                const timestamp = Date.now();
+                const response = await fetch(`https://spwapidatafeed.vps.com.vn/getliststocktrade_ps/${currentSymbolId}?numpage=20&nextidx=-1&listadd=&_=${timestamp}`, {
+                    "credentials": "omit",
+                    "headers": reqHeaders,
+                    "referrer": "https://smartpro.vps.com.vn/",
+                    "method": "GET",
+                    "mode": "cors"
+                });
+                const trades = await response.json();
+
+                if (Array.isArray(trades) && trades.length > 0) {
+                    const historyList = document.getElementById('matchHistoryList');
+                    let htmlContent = "";
+
+                    // Duyệt qua tối đa 15 lệnh vừa khớp mới nhất trả về từ API dữ liệu gốc
+                    const displayTrades = trades.slice(0, 15);
+                    displayTrades.forEach(trade => {
+                        // Tùy biến biến động màu dựa vào tính chất lệnh (Mua lên = xanh, Bán xuống = đỏ)
+                        // Thông thường API trả về trường 'Side' (S/B) hoặc dựa vào so sánh giá
+                        let tradeColor = "color-ref";
+                        if (trade.side === "B" || trade.s === "B") tradeClass = "color-up";
+                        else if (trade.side === "S" || trade.s === "S") tradeClass = "color-down";
+                        else tradeClass = "color-up";
+
+                        const tradePrice = trade.p || trade.price || 0;
+                        const tradeVol = trade.v || trade.volume || 0;
+                        const tradeTime = trade.t || trade.time || new Date().toLocaleTimeString('vi-VN', { hour12: false });
+
+                        htmlContent += `
+                            <div class="history-row">
+                                <span style="color:#707a8a;">${tradeTime}</span>
+                                <span class="${tradeClass}" style="font-weight:bold;">${parseFloat(tradePrice).toFixed(2)}</span>
+                                <span class="${tradeClass}">${parseInt(tradeVol).toLocaleString('vi-VN')}</span>
+                            </div>
+                        `;
+                    });
+                    historyList.innerHTML = htmlContent;
+                }
+            } catch (error) {
+                console.error("Lỗi cập nhật nhật ký khớp lệnh:", error);
+            }
+        }
+
+        function updateTableCell(pId, vId, price, vol, ref, ceil, floor) {
             const pCell = document.getElementById(pId);
             const vCell = document.getElementById(vId);
             if (price && price > 0) {
                 pCell.innerText = parseFloat(price).toFixed(2);
                 
-                // Xác định màu sắc cụ thể cho từng bước giá trong sổ lệnh
                 if (price === ref) pCell.className = "color-ref";
-                else if (price >= ceil) pCell.className = "color-ceil";
-                else if (price <= floor) pCell.className = "color-floor";
+                else if (price >= ceil && ceil > 0) pCell.className = "color-ceil";
+                else if (price <= floor && floor > 0) pCell.className = "color-floor";
                 else pCell.className = price > ref ? "color-up" : "color-down";
 
                 vCell.innerText = vol ? parseInt(vol).toLocaleString('vi-VN') : "0";
