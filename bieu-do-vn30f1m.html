@@ -86,28 +86,24 @@
 </head>
 <body>
 
-    <!-- Thanh Header chính -->
     <div class="header">
         <a href="index.html" class="back-link" style="flex: 1; text-align: left;">⬅ Quay lại Trang chủ</a>
         <div style="flex: 2; text-align: center; font-size: 18px; font-weight: 500; color: #ffb700; letter-spacing: 0.5px;">
-             Hệ thống Theo dõi Dữ liệu Phái sinh Real-time
+             Dữ liệu được lấy từ Công ty Cổ phần Chứng khoán VPS và DNSE
         </div>
         <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #ffb700;">
             SĐT: 0853.525.379 - ID VPS: BOR5
         </div>
     </div>
 
-    <!-- Thanh Menu 3 Tab Con (Có gắn thêm mã định danh data-symbol) -->
     <div class="tab-menu">
         <button class="tab-item active" data-symbol="VN30F1M" onclick="switchTab(event, 'vn30f1m_5m')">📊 VN30F1M (5 Phút)</button>
         <button class="tab-item" data-symbol="VN30F1M" onclick="switchTab(event, 'vn30f1m_15m')">📊 VN30F1M (15 Phút)</button>
         <button class="tab-item" data-symbol="VNINDEX" onclick="switchTab(event, 'vnindex')">📈 VNINDEX (Ngày)</button>
     </div>
 
-    <!-- Vùng nội dung chính -->
     <div class="content-container">
         
-        <!-- BÊN TRÁI: Khu vực chứa biểu đồ -->
         <div class="chart-section">
             <div id="vn30f1m_5m" class="chart-wrapper active">
                 <iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=5&theme=light&lang=vi"></iframe>
@@ -120,17 +116,15 @@
             </div>
         </div>
 
-        <!-- BÊN PHẢI: BẢNG GIÁ BIẾN ĐỔI THEO TAB ĐANG CHỌN -->
         <div class="sidebar-panel">
             <div class="stock-title" id="lbl-symbol">VN30F1M</div>
             <div class="stock-sub" id="lbl-name">VN30 Index Futures Gần nhất</div>
 
             <div class="price-large-box">
-                <div class="price-now c-tc" id="txt-price">--.--</div>
+                <div class="price-now c-tc" id="txt-price">Đang tải...</div>
                 <div class="price-change c-tc" id="txt-change">--.--</div>
             </div>
 
-            <!-- Hàng 3 cột chính: TC - Trần - Sàn -->
             <div class="row-3col">
                 <div class="col-item">
                     <div class="col-label">TC</div>
@@ -146,7 +140,6 @@
                 </div>
             </div>
 
-            <!-- Bảng thông số chi tiết phía dưới -->
             <table class="info-grid">
                 <tr>
                     <td class="info-label">Mở cửa / TB</td>
@@ -174,30 +167,25 @@
     </div>
 
     <script>
-        // Biến toàn cục lưu trữ mã chứng khoán hiện tại đang xem (mặc định mở lên là phái sinh)
         let currentActiveSymbol = "VN30F1M";
 
-        // Hàm xử lý khi người dùng Click đổi Tab
         function switchTab(event, tabId) {
-            // 1. Đổi active class cho nút bấm và hiển thị đúng Chart
             document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
             event.currentTarget.classList.add('active');
             document.querySelectorAll('.chart-wrapper').forEach(chart => chart.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
 
-            // 2. Đọc xem tab này yêu cầu hiển thị giá mã nào (VN30F1M hay VNINDEX)
             const targetSymbol = event.currentTarget.getAttribute('data-symbol');
             
             if (targetSymbol !== currentActiveSymbol) {
                 currentActiveSymbol = targetSymbol;
                 
-                // Reset nhanh giao diện về trạng thái chờ để người xem live biết hệ thống đang đổi mã
+                // Cập nhật tên tiêu đề nhanh
                 document.getElementById("lbl-symbol").innerText = currentActiveSymbol;
                 document.getElementById("lbl-name").innerText = currentActiveSymbol === "VN30F1M" ? "VN30 Index Futures Gần nhất" : "Chỉ số VN-INDEX Sàn HOSE";
-                document.getElementById("txt-price").innerText = "--.--";
+                document.getElementById("txt-price").innerText = "Đang tải...";
                 document.getElementById("txt-change").innerText = "--.--";
 
-                // Ẩn bớt hàng OI và KLNN nếu là VNINDEX (vì VNINDEX là chỉ số chung không có chỉ số này)
                 if (currentActiveSymbol === "VNINDEX") {
                     document.getElementById("row-oi").style.display = "none";
                     document.getElementById("row-foreign").style.display = "none";
@@ -206,52 +194,45 @@
                     document.getElementById("row-foreign").style.display = "table-row";
                 }
 
-                // Gọi cập nhật giá mới ngay lập tức không cần đợi bộ đếm setInterval
                 fetchLivePriceData();
             }
         }
 
-        // --- HÀM QUÉT GIÁ LINH HOẠT THEO MÃ ĐANG CHỌN ---
+        // --- CƠ CHẾ GỌI API AN TOÀN TỪ DNSE (KHÔNG CHẶN CORS) ---
         async function fetchLivePriceData() {
             try {
                 let apiUrl = "";
                 if (currentActiveSymbol === "VN30F1M") {
-                    // Cổng gọi danh sách phái sinh
-                    apiUrl = "https://iboardquery.ssi.com.vn/v2/stock/exchange/DERIVATIVE";
+                    // API lấy chi tiết mã phái sinh của DNSE
+                    apiUrl = "https://banggia-api.dnse.com.vn/data/symbols/VN30F1M";
                 } else {
-                    // Cổng gọi danh sách chỉ số (Index) bao gồm cả VNINDEX
-                    apiUrl = "https://iboardquery.ssi.com.vn/v2/stock/exchange/INDEX";
+                    // API lấy chi tiết mã chỉ số VNINDEX của DNSE
+                    apiUrl = "https://banggia-api.dnse.com.vn/data/symbols/VNINDEX";
                 }
 
                 const response = await fetch(apiUrl);
                 if (!response.ok) return;
-                const result = await response.json();
+                const d = await response.json();
                 
-                if (result && result.data) {
-                    // Tìm đúng mã mục tiêu trong mảng dữ liệu trả về từ SSI
-                    // Cấu trúc SSI: Phái sinh dùng trường "ss", Chỉ số Index dùng trường "mc"
-                    const d = result.data.find(item => (item.ss === currentActiveSymbol || item.mc === currentActiveSymbol));
-                    if (d) {
-                        updateLiveUI(d);
-                    }
+                if (d) {
+                    updateLiveUI(d);
                 }
             } catch (error) {
-                console.log("Đang đồng bộ lại giá...", error);
+                console.log("Đang tải lại luồng giá...", error);
             }
         }
 
         function updateLiveUI(d) {
-            // Chuẩn hóa biến (SSI: Phái sinh và Cơ sở có ký hiệu trường hơi khác nhau đôi chút)
-            const tc = d.c || d.vReference || 0; // Giá tham chiếu
-            const price = d.lastPrice || d.vIndexValue || tc; // Giá hiện tại
-            const change = d.vIndexChange !== undefined ? d.vIndexChange : (price - tc);
-            const changePercent = d.vIndexChangePercent !== undefined ? d.vIndexChangePercent : (tc > 0 ? (change / tc) * 100 : 0);
+            // Ánh xạ chính xác các trường dữ liệu thực tế từ máy chủ DNSE
+            const tc = d.referencePrice || 0; 
+            const price = d.lastPrice || d.closePrice || tc; 
+            const change = price - tc;
+            const changePercent = tc > 0 ? (change / tc) * 100 : 0;
 
             const txtPrice = document.getElementById("txt-price");
             const txtChange = document.getElementById("txt-change");
             
-            // 1. Hiển thị Giá lớn (VNINDEX thường không có phần thập phân hoặc chỉ có 2 chữ số)
-            txtPrice.innerText = currentActiveSymbol === "VN30F1M" ? price.toFixed(2) : price.toFixed(2);
+            txtPrice.innerText = price.toLocaleString('vi-VN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             
             let colorClass = "c-tc";
             let arrow = "▪ ";
@@ -262,19 +243,16 @@
             txtChange.className = "price-change " + colorClass;
             txtChange.innerText = `${arrow}${Math.abs(change).toFixed(2)} (${changePercent.toFixed(2)}%)`;
 
-            // 2. Điền các mốc thông số 3 cột (Trần - Sàn - TC)
-            const ceiling = d.ce || d.vCeiling || 0;
-            const floor = d.f || d.vFloor || 0;
-            
+            // Nạp dữ liệu 3 cột chính
             document.getElementById("txt-tc").innerText = tc > 0 ? tc.toFixed(1) : "--";
-            document.getElementById("txt-ceiling").innerText = ceiling > 0 ? ceiling.toFixed(1) : "--";
-            document.getElementById("txt-floor").innerText = floor > 0 ? floor.toFixed(1) : "--";
+            document.getElementById("txt-ceiling").innerText = d.ceilingPrice ? d.ceilingPrice.toFixed(1) : "--";
+            document.getElementById("txt-floor").innerText = d.floorPrice ? d.floorPrice.toFixed(1) : "--";
             
-            // 3. Điền thông số bảng dưới
-            const open = d.o || d.vOpen || 0;
-            const high = d.h || d.vHighest || 0;
-            const low = d.l || d.vLowest || 0;
-            const volume = d.v || d.vTotalVolume || 0;
+            // Nạp các thông số kỹ thuật bên dưới
+            const open = d.openPrice || 0;
+            const high = d.highestPrice || 0;
+            const low = d.lowestPrice || 0;
+            const volume = d.totalVolume || d.accumulatedVolume || 0;
 
             document.getElementById("txt-open").innerText = open > 0 ? open.toFixed(2) : "--";
             document.getElementById("txt-high").innerText = high > 0 ? high.toFixed(2) : "--";
@@ -285,18 +263,22 @@
             
             document.getElementById("txt-volume").innerText = volume > 0 ? volume.toLocaleString() : "--";
             
-            // Riêng đối với Phái sinh VN30F1M mới nạp thêm dữ liệu OI và Nước ngoài
+            // Chỉ hiển thị OI và dữ liệu Nước ngoài đối với phái sinh VN30F1M
             if (currentActiveSymbol === "VN30F1M") {
-                if(d.oi) document.getElementById("txt-oi").innerText = d.oi.toLocaleString();
-                if(d.fb) document.getElementById("txt-f-buy").innerText = d.fb.toLocaleString();
-                if(d.fs) document.getElementById("txt-f-sell").innerText = d.fs.toLocaleString();
+                const oi = d.openInterest || 0;
+                const fBuy = d.foreignBuyVolume || d.foreignBuy || 0;
+                const fSell = d.foreignSellVolume || d.foreignSell || 0;
+
+                document.getElementById("txt-oi").innerText = oi > 0 ? oi.toLocaleString() : "--";
+                document.getElementById("txt-f-buy").innerText = fBuy > 0 ? fBuy.toLocaleString() : "0";
+                document.getElementById("txt-f-sell").innerText = fSell > 0 ? fSell.toLocaleString() : "0";
             }
         }
 
-        // Khởi động chạy lần đầu
+        // Chạy ngay khi mở trang
         fetchLivePriceData();
 
-        // Quét ngầm liên tục sau mỗi 2 giây
+        // Thiết lập quét định kỳ 2 giây/lần cực kỳ nhẹ và ổn định
         setInterval(fetchLivePriceData, 2000);
     </script>
 </body>
