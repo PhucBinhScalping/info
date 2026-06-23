@@ -1,0 +1,213 @@
+ <!DOCTYPE html>
+
+<html lang="vi">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Biểu đồ kỹ thuật Phái sinh - Phúc Bình Scalping</title>
+
+    <style>
+
+        body, html {
+
+            margin: 0; padding: 0; width: 100%; height: 100%;
+
+            background-color: #131722; color: #ffffff; font-family: Arial, sans-serif;
+
+            display: flex; flex-direction: column; overflow: hidden;
+
+        }
+
+        /* Thanh Header chính */
+
+        .header {
+
+            height: 45px; background-color: #1c2030; display: flex;
+
+            align-items: center; padding: 0 20px; justify-content: space-between;
+
+            border-bottom: 1px solid #2b3040; box-sizing: border-box;
+
+        }
+
+        .header .back-link {
+
+            color: #ff9800; text-decoration: none; font-weight: bold; font-size: 14px;
+
+        }
+
+        
+
+        /* Thanh Menu 3 Tab Con */
+
+        .tab-menu {
+
+            height: 40px; background-color: #171b26; display: flex;
+
+            align-items: center; padding: 0 10px; gap: 5px;
+
+            border-bottom: 1px solid #232733; box-sizing: border-box;
+
+        }
+
+        .tab-item {
+
+            background: none; border: none; color: #d1d4dc; padding: 8px 16px;
+
+            font-size: 13px; font-weight: bold; cursor: pointer; border-radius: 4px;
+
+            transition: 0.2s; display: flex; align-items: center; gap: 6px;
+
+        }
+
+        .tab-item:hover {
+
+            background-color: #2a2e39; color: #ffffff;
+
+        }
+
+        /* Tab đang được chọn kích hoạt */
+
+        .tab-item.active {
+
+            background-color: #242b42; color: #2962ff; border-bottom: 2px solid #2962ff;
+
+            border-radius: 4px 4px 0 0;
+
+        }
+
+
+        /* Vùng nội dung hiển thị biểu đồ phủ kín phần còn lại */
+
+        .content-container {
+
+            flex: 1; width: 100%; height: calc(100% - 85px); position: relative;
+
+            background-color: #131722;
+
+        }
+
+        .chart-wrapper {
+
+            display: none; width: 100%; height: 100%;
+
+        }
+
+        .chart-wrapper.active {
+
+            display: block;
+
+        }
+
+        iframe {
+
+            width: 100%; height: 100%; border: none;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+    
+
+    <div class="header">
+
+        <a href="index.html" class="back-link" style="flex: 1; text-align: left;">⬅ Quay lại Trang chủ</a>
+
+        
+
+        <div style="flex: 2; text-align: center; font-size: 18px; font-weight: 500; color: #ffb700; letter-spacing: 0.5px;">
+
+             Dữ liệu được lấy trực tiếp từ Công ty Cổ phần Chứng khoán VPS
+
+        </div>
+
+        
+
+        <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #ffb700;">
+
+            SĐT: 0853.525.379 - ID VPS: BOR5
+
+        </div>
+
+    </div>
+
+
+    
+
+    <div class="tab-menu">
+
+        <button class="tab-item active" onclick="switchTab(event, 'vn30f1m_5m')">📊 VN30F1M (5 Phút)</button>
+
+        <button class="tab-item" onclick="switchTab(event, 'vn30f1m_15m')">📊 VN30F1M (15 Phút)</button>
+
+        <button class="tab-item" onclick="switchTab(event, 'vnindex')">📈 VNINDEX (Ngày)</button>
+
+    </div>
+
+
+    <div class="content-container">
+
+        
+
+        <div id="vn30f1m_5m" class="chart-wrapper active">
+
+            <iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=5&theme=light&lang=vi"></iframe>
+
+        </div>
+
+
+        <div id="vn30f1m_15m" class="chart-wrapper">
+
+            <iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=15&theme=light&lang=vi"></iframe>
+
+        </div>
+
+
+        <div id="vnindex" class="chart-wrapper">
+
+            <iframe src="https://web5.vps.com.vn/?sym=VNINDEX&interval=D&theme=light&lang=vi"></iframe>
+
+        </div>
+
+
+    </div>
+
+
+    <script>
+
+        function switchTab(event, tabId) {
+
+            // Loại bỏ class active ở các nút tab cũ
+
+            document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
+
+            // Thêm active vào nút vừa bấm
+
+            event.currentTarget.classList.add('active');
+
+
+            // Ẩn toàn bộ các khung biểu đồ
+
+            document.querySelectorAll('.chart-wrapper').forEach(chart => chart.classList.remove('active'));
+
+            // Hiển thị đúng khung biểu đồ của tab được chọn
+
+            document.getElementById(tabId).classList.add('active');
+
+        }
+
+    </script>
+
+
+</body>
+
+</html> 
