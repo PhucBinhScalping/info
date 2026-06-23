@@ -81,6 +81,7 @@
         .info-label { color: #707a8a; }
         .info-value { font-weight: 600; color: #1e222d; }
         
+        /* Màu sắc chuẩn bảng điện */
         .color-up { color: #00c853 !important; }     
         .color-down { color: #d50000 !important; }   
         .color-ref { color: #ffaa00 !important; }    
@@ -90,14 +91,13 @@
 
         iframe { width: 100%; height: 100%; border: none; }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body>
 
     <div class="header">
         <a href="index.html" class="back-link" style="flex: 1; text-align: left; color: #e65100;">⬅ Quay lại Trang chủ</a>
         <div style="flex: 2; text-align: center; font-size: 18px; font-weight: bold; color: #e65100; letter-spacing: 0.5px;">
-             Dữ liệu kết nối Live-Stream API VPS chuyên sâu
+             Dữ liệu lấy trực tiếp từ hệ thống Bảng giá VPS API
         </div>
         <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #e65100;">
             SĐT: 0853.525.379 - ID VPS: BOR5
@@ -172,13 +172,17 @@
 
     <script>
         let currentSymbol = 'VN30F1M';
-        let socket = null;
-        let referencePrice = 0;
-        let ceilingPrice = 0;
-        let floorPrice = 0;
+        let apiInterval = null;
+        let lastLoggedPrice = null;
+        let lastLoggedVol = null;
+
+        // Định nghĩa các biến mốc giá trần/sàn/tham chiếu toàn cục
+        let refPrice = 0, ceilPrice = 0, floorPrice = 0;
 
         window.onload = function() {
-            initVPSSocketConnection();
+            loadVPSDataFeed();
+            // Cập nhật real-time dữ liệu sổ lệnh và bước giá mỗi 1 giây
+            apiInterval = setInterval(loadVPSDataFeed, 1000);
         };
 
         function switchTab(event, blockId, symbol) {
@@ -187,129 +191,112 @@
             document.querySelectorAll('.tab-content-block').forEach(block => block.classList.remove('active'));
             document.getElementById(blockId).classList.add('active');
             
-            // Đổi mã chứng khoán cần theo dõi
             currentSymbol = symbol;
             document.getElementById('display_symbol').innerText = symbol;
             document.getElementById('display_desc').innerText = symbol === 'VN30F1M' ? "Hợp đồng tương lai chỉ số VN30" : "Chỉ số VN-Index Việt Nam";
             document.getElementById('matchHistoryList').innerHTML = ""; 
             
-            // Đăng ký nhận luồng dữ liệu mới từ Socket
-            if (socket && socket.connected) {
-                socket.emit('join', currentSymbol);
-            }
-        }
-
-        // KẾT NỐI VÀO CỔNG STREAMING DỮ LIỆU CỦA BẢNG GIÁ VPS
-        function initVPSSocketConnection() {
-            // Sử dụng endpoint WebSocket phân phối bảng điện phái sinh và cơ sở thực tế của VPS
-            socket = io('https://bgdatafeed.vps.com.vn', {
-                transports: ['websocket'],
-                forceNew: true
-            });
-
-            socket.on('connect', () => {
-                console.log("Đã thiết lập kênh Stream trực tiếp với máy chủ VPS thành công.");
-                socket.emit('join', currentSymbol);
-            });
-
-            // Lắng nghe dữ liệu Cơ sở dữ liệu danh mục & Tham chiếu ban đầu
-            socket.on('initData', (data) => {
-                if(data && data.symbol === currentSymbol) {
-                    processBasePrice(data);
-                }
-            });
-
-            // Lắng nghe biến động Real-time từng tích tắc (Bước giá, Khối lượng, Lịch sử khớp lệnh)
-            socket.on('stockData', (data) => {
-                if (data && data.id === currentSymbol) {
-                    updateSidebarData(data);
-                }
-            });
-
-            socket.on('disconnect', () => {
-                console.log("Mất kết nối máy chủ VPS, đang tự động kết nối lại...");
-            });
-        }
-
-        function processBasePrice(data) {
-            referencePrice = data.r || 0;
-            ceilingPrice = data.c || 0;
-            floorPrice = data.f || 0;
-            document.getElementById('val_prev').innerText = referencePrice.toFixed(2);
-        }
-
-        // Đọc cấu trúc nhị phân / JSON của gói tin gửi về từ Sàn để điền trực tiếp
-        function updateSidebarData(data) {
-            // Cập nhật thông số giá chính xác
-            const lastPrice = data.lastPrice || referencePrice;
-            const diff = data.change || (lastPrice - referencePrice);
-            const pct = data.changePercent || (referencePrice > 0 ? (diff / referencePrice) * 100 : 0);
+            lastLoggedPrice = null;
+            lastLoggedVol = null;
             
-            // Xử lý màu sắc động chuẩn thiết kế VPS
-            let colorClass = getPriceColorClass(lastPrice);
-            const prefix = diff > 0 ? "↑ +" : (diff < 0 ? "↓ " : "");
+            loadVPSDataFeed();
+        }
 
-            document.getElementById('display_price').innerText = lastPrice.toFixed(2);
-            document.getElementById('display_price').className = `vps-main-price ${colorClass}`;
-            document.getElementById('display_symbol').className = `vps-widget-header ${colorClass}`;
-            document.getElementById('display_change').innerText = `${prefix}${Math.abs(diff).toFixed(2)} (${pct.toFixed(2)}%)`;
-            document.getElementById('display_change').className = `vps-change ${colorClass}`;
-
-            // Cập nhật các thông số Cao - Thấp - Mở trong ngày
-            if(data.open) document.getElementById('val_open').innerText = data.open.toFixed(2);
-            if(data.high) document.getElementById('val_high').innerText = data.high.toFixed(2);
-            if(data.low) document.getElementById('val_low').innerText = data.low.toFixed(2);
-
-            // BẮT CHÍNH XÁC 3 BƯỚC GIÁ MUA CHỜ TỐT NHẤT (SỔ LỆNH THỰC TẾ)
-            if (data.g1) { // Gói data chứa thông tin 3 bước giá mua/bán tốt nhất từ sàn
-                const parseField = data.g1.split('|');
-                // parseField bao gồm: Giá mua 1 | KL mua 1 | Giá mua 2 | KL mua 2...
-                if(parseField.length >= 12) {
-                    // Cập nhật giá và màu sắc bên mua
-                    updateCell('bid_p1', 'bid_v1', parseFloat(parseField[0]), parseInt(parseField[1]));
-                    updateCell('bid_p2', 'bid_v2', parseFloat(parseField[2]), parseInt(parseField[3]));
-                    updateCell('bid_p3', 'bid_v3', parseFloat(parseField[4]), parseInt(parseField[5]));
-
-                    // Cập nhật giá và màu sắc bên bán
-                    updateCell('ask_p1', 'ask_v1', parseFloat(parseField[6]), parseInt(parseField[7]));
-                    updateCell('ask_p2', 'ask_v2', parseFloat(parseField[8]), parseInt(parseField[9]));
-                    updateCell('ask_p3', 'ask_v3', parseFloat(parseField[10]), parseInt(parseField[11]));
-                }
-            }
-
-            // CẬP NHẬT LỊCH SỬ KHỚP LỆNH TỨC THỜI (TIME & SALES CHUẨN SÀN)
-            if (data.lastVol && data.lastVol > 0) {
-                const list = document.getElementById('matchHistoryList');
-                const timeStr = data.time || new Date().toLocaleTimeString('vi-VN', {hour12: false});
+        // Gọi trực tiếp cổng API Restful của bảng điện VPS để lấy trọn vẹn snapshot chính xác 100%
+        async function loadVPSDataFeed() {
+            try {
+                // Endpoint API chính thức phân tách mã của VPS
+                const url = `https://banggia.vps.com.vn/api/snapshot?symbols=${currentSymbol}`;
+                const response = await fetch(url);
+                const results = await response.json();
                 
-                const row = `
-                    <div class="history-row">
-                        <span style="color:#707a8a;">${timeStr}</span>
-                        <span class="${colorClass}" style="font-weight:bold;">${lastPrice.toFixed(2)}</span>
-                        <span class="${colorClass}" style="font-weight:normal;">${data.lastVol}</span>
-                    </div>
-                `;
-                list.insertAdjacentHTML('afterbegin', row);
-                if (list.children.length > 15) list.removeChild(list.lastChild);
+                if (results && results.length > 0) {
+                    const data = results[0];
+                    
+                    // Lưu các mốc giá cơ sở để tính màu sắc
+                    refPrice = data.r || 0;
+                    ceilPrice = data.c || 0;
+                    floorPrice = data.f || 0;
+
+                    const currentPrice = data.lastPrice || refPrice;
+                    const changeValue = data.change || 0;
+                    const changePct = data.changePercent || 0;
+                    
+                    // Cập nhật giá chính và màu sắc thay đổi
+                    let colorClass = getPriceColor(currentPrice);
+                    const prefix = changeValue > 0 ? "↑ +" : (changeValue < 0 ? "↓ " : "");
+
+                    document.getElementById('display_price').innerText = currentPrice.toFixed(2);
+                    document.getElementById('display_price').className = `vps-main-price ${colorClass}`;
+                    document.getElementById('display_symbol').className = `vps-widget-header ${colorClass}`;
+                    document.getElementById('display_change').innerText = `${prefix}${Math.abs(changeValue).toFixed(2)} (${changePct.toFixed(2)}%)`;
+                    document.getElementById('display_change').className = `vps-change ${colorClass}`;
+
+                    // Điền dữ liệu 4 thông số cơ bản ở đáy Sidebar
+                    document.getElementById('val_open').innerText = data.open ? data.open.toFixed(2) : "---.--";
+                    document.getElementById('val_high').innerText = data.high ? data.high.toFixed(2) : "---.--";
+                    document.getElementById('val_low').innerText = data.low ? data.low.toFixed(2) : "---.--";
+                    document.getElementById('val_prev').innerText = refPrice.toFixed(2);
+
+                    // ĐIỀN ĐỘ SÂU THỊ TRƯỜNG (3 BƯỚC GIÁ MUA / BÁN CHUẨN)
+                    // Bên Mua (Bid)
+                    updateCellData('bid_p1', 'bid_v1', data.bp1, data.bv1);
+                    updateCellData('bid_p2', 'bid_v2', data.bp2, data.bv2);
+                    updateCellData('bid_p3', 'bid_v3', data.bp3, data.bv3);
+                    
+                    // Bên Bán (Ask)
+                    updateCellData('ask_p1', 'ask_v1', data.ap1, data.av1);
+                    updateCellData('ask_p2', 'ask_v2', data.ap2, data.av2);
+                    updateCellData('ask_p3', 'ask_v3', data.ap3, data.av3);
+
+                    // ĐẨY NHẬT KÝ KHỚP LỆNH REAL-TIME (TIME & SALES CHUẨN)
+                    if (data.lastPrice && data.lastVol && (currentPrice !== lastLoggedPrice || data.lastVol !== lastLoggedVol)) {
+                        lastLoggedPrice = currentPrice;
+                        lastLoggedVol = data.lastVol;
+
+                        const historyList = document.getElementById('matchHistoryList');
+                        const timeString = new Date().toLocaleTimeString('vi-VN', { hour12: false });
+                        
+                        const newRow = `
+                            <div class="history-row">
+                                <span style="color:#707a8a;">${timeString}</span>
+                                <span class="${colorClass}" style="font-weight:bold;">${currentPrice.toFixed(2)}</span>
+                                <span class="${colorClass}" style="font-weight:normal;">${data.lastVol.toLocaleString('vi-VN')}</span>
+                            </div>
+                        `;
+                        historyList.insertAdjacentHTML('afterbegin', newRow);
+                        
+                        // Giữ lại tối đa 15 dòng để màn hình live-stream luôn gọn gàng
+                        if (historyList.children.length > 15) {
+                            historyList.removeChild(historyList.lastChild);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Lỗi khi đồng bộ dữ liệu Snapshot từ bảng giá VPS:", error);
             }
         }
 
-        function updateCell(pId, vId, price, vol) {
-            const pEl = document.getElementById(pId);
-            const vEl = document.getElementById(vId);
-            if (price > 0) {
-                pEl.innerText = price.toFixed(2);
-                pEl.className = getPriceColorClass(price);
-                vEl.innerText = vol.toLocaleString('vi-VN');
+        function updateCellData(priceId, volId, price, vol) {
+            const pCell = document.getElementById(priceId);
+            const vCell = document.getElementById(volId);
+            if (price && price > 0) {
+                pCell.innerText = price.toFixed(2);
+                pCell.className = getPriceColor(price);
+                vCell.innerText = vol ? vol.toLocaleString('vi-VN') : "0";
+            } else {
+                pCell.innerText = "---.-";
+                pCell.className = "";
+                vCell.innerText = "---";
             }
         }
 
-        // Hàm phân định màu sắc chuẩn theo quy định HOSE/HNX/Phái sinh
-        function getPriceColorClass(price) {
-            if (price === referencePrice) return "color-ref";
-            if (price >= ceilingPrice && ceilingPrice > 0) return "color-ceil";
+        // Định dạng màu chữ chuẩn sàn chứng khoán
+        function getPriceColor(price) {
+            if (price === refPrice) return "color-ref";
+            if (price >= ceilPrice && ceilPrice > 0) return "color-ceil";
             if (price <= floorPrice && floorPrice > 0) return "color-floor";
-            return price > referencePrice ? "color-up" : "color-down";
+            return price > refPrice ? "color-up" : "color-down";
         }
     </script>
 </body>
