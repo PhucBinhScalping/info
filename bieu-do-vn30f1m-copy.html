@@ -173,7 +173,6 @@
         let currentSymbol = 'VN30F1M';
         let currentSymbolId = '41I1G7000';
         
-        // Cấu hình Headers chuẩn y hệt gói fetch bạn bắt được từ trình duyệt
         const reqHeaders = {
             "Accept": "application/json, text/javascript, */*; q=0.01",
             "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
@@ -189,13 +188,10 @@
         };
 
         function startSyncCycles() {
-            // Chạy ngay lập tức lần đầu
             syncOrderBook();
             syncTradeHistory();
-
-            // Thiết lập vòng lặp quét dữ liệu liên tục cho Scalping
-            setInterval(syncOrderBook, 1000);   // Quét bước giá mỗi 1 giây
-            setInterval(syncTradeHistory, 2000); // Quét lịch sử khớp lệnh mỗi 2 giây
+            setInterval(syncOrderBook, 1000);   
+            setInterval(syncTradeHistory, 1500); 
         }
 
         function switchTab(event, blockId, symbol) {
@@ -215,12 +211,12 @@
             syncTradeHistory();
         }
 
-        // HÀM 1: Lấy và hiển thị Giá chính + 3 Bước giá chuyên sâu (,B)
+        // Đã đổi sang "include" để truyền Cookie đăng nhập từ smartpro.vps.com.vn
         async function syncOrderBook() {
             try {
                 const timestamp = Date.now();
                 const response = await fetch(`https://spwapidatafeed.vps.com.vn/getps10pricesnapshot/${currentSymbolId},B?_=${timestamp}`, {
-                    "credentials": "omit",
+                    "credentials": "include", 
                     "headers": reqHeaders,
                     "referrer": "https://smartpro.vps.com.vn/",
                     "method": "GET",
@@ -245,40 +241,53 @@
                     
                     const prefix = changeValue > 0 ? "↑ +" : (changeValue < 0 ? "↓ " : "");
 
-                    // Render khu vực Giá lớn trên cùng
                     document.getElementById('display_price').innerText = currentPrice.toFixed(2);
                     document.getElementById('display_price').className = `vps-main-price ${colorClass}`;
                     document.getElementById('display_symbol').className = `vps-widget-header ${colorClass}`;
                     document.getElementById('display_change').innerText = `${prefix}${Math.abs(changeValue).toFixed(2)} (${changePct.toFixed(2)}%)`;
                     document.getElementById('display_change').className = `vps-change ${colorClass}`;
 
-                    // Ghi thông số OHLC dưới đáy
                     document.getElementById('val_open').innerText = data.open ? data.open.toFixed(2) : currentPrice.toFixed(2);
                     document.getElementById('val_high').innerText = data.high ? data.high.toFixed(2) : currentPrice.toFixed(2);
                     document.getElementById('val_low').innerText = data.low ? data.low.toFixed(2) : currentPrice.toFixed(2);
                     document.getElementById('val_prev').innerText = refPrice.toFixed(2);
 
-                    // Đổ dữ liệu thật vào 3 bước Giá Mua và Khối Lượng Mua (Bid)
-                    updateTableCell('bid_p1', 'bid_v1', data.bp1, data.bv1, refPrice, ceilPrice, floorPrice);
-                    updateTableCell('bid_p2', 'bid_v2', data.bp2, data.bv2, refPrice, ceilPrice, floorPrice);
-                    updateTableCell('bid_p3', 'bid_v3', data.bp3, data.bv3, refPrice, ceilPrice, floorPrice);
+                    // Trích xuất cấu trúc mảng 10 bước giá (g1) trong API thực tế của VPS
+                    const priceBoard = data.g1 || [];
+                    if (priceBoard.length >= 3) {
+                        // Sổ lệnh mua (Bid) xếp từ cao xuống thấp
+                        updateTableCell('bid_p1', 'bid_v1', priceBoard[0].bp, priceBoard[0].bv, refPrice, ceilPrice, floorPrice);
+                        updateTableCell('bid_p2', 'bid_v2', priceBoard[1].bp, priceBoard[1].bv, refPrice, ceilPrice, floorPrice);
+                        updateTableCell('bid_p3', 'bid_v3', priceBoard[2].bp, priceBoard[2].bv, refPrice, ceilPrice, floorPrice);
+                    } else {
+                        // Dự phòng trường hợp map biến phẳng trực tiếp
+                        updateTableCell('bid_p1', 'bid_v1', data.bp1, data.bv1, refPrice, ceilPrice, floorPrice);
+                        updateTableCell('bid_p2', 'bid_v2', data.bp2, data.bv2, refPrice, ceilPrice, floorPrice);
+                        updateTableCell('bid_p3', 'bid_v3', data.bp3, data.bv3, refPrice, ceilPrice, floorPrice);
+                    }
 
-                    // Đổ dữ liệu thật vào 3 bước Giá Bán và Khối Lượng Bán (Ask)
-                    updateTableCell('ask_p1', 'ask_v1', data.ap1, data.av1, refPrice, ceilPrice, floorPrice);
-                    updateTableCell('ask_p2', 'ask_v2', data.ap2, data.av2, refPrice, ceilPrice, floorPrice);
-                    updateTableCell('ask_p3', 'ask_v3', data.ap3, data.av3, refPrice, ceilPrice, floorPrice);
+                    if (priceBoard.length >= 6) {
+                        // Sổ lệnh bán (Ask) xếp tiếp theo trong mảng dữ liệu gốc
+                        updateTableCell('ask_p1', 'ask_v1', priceBoard[3].ap, priceBoard[3].av, refPrice, ceilPrice, floorPrice);
+                        updateTableCell('ask_p2', 'ask_v2', priceBoard[4].ap, priceBoard[4].av, refPrice, ceilPrice, floorPrice);
+                        updateTableCell('ask_p3', 'ask_v3', priceBoard[5].ap, priceBoard[5].av, refPrice, ceilPrice, floorPrice);
+                    } else {
+                        updateTableCell('ask_p1', 'ask_v1', data.ap1, data.av1, refPrice, ceilPrice, floorPrice);
+                        updateTableCell('ask_p2', 'ask_v2', data.ap2, data.av2, refPrice, ceilPrice, floorPrice);
+                        updateTableCell('ask_p3', 'ask_v3', data.ap3, data.av3, refPrice, ceilPrice, floorPrice);
+                    }
                 }
             } catch (error) {
-                console.error("Lỗi đồng bộ bước giá:", error);
+                console.error("Lỗi dữ liệu bước giá:", error);
             }
         }
 
-        // HÀM 2: Lấy nhật ký danh sách khớp lệnh thực tế từ sàn
+        // Đã đổi sang "include" để truyền Cookie đồng bộ lịch sử khớp lệnh thực tế
         async function syncTradeHistory() {
             try {
                 const timestamp = Date.now();
                 const response = await fetch(`https://spwapidatafeed.vps.com.vn/getliststocktrade_ps/${currentSymbolId}?numpage=20&nextidx=-1&listadd=&_=${timestamp}`, {
-                    "credentials": "omit",
+                    "credentials": "include",
                     "headers": reqHeaders,
                     "referrer": "https://smartpro.vps.com.vn/",
                     "method": "GET",
@@ -290,19 +299,17 @@
                     const historyList = document.getElementById('matchHistoryList');
                     let htmlContent = "";
 
-                    // Duyệt qua tối đa 15 lệnh vừa khớp mới nhất trả về từ API dữ liệu gốc
                     const displayTrades = trades.slice(0, 15);
                     displayTrades.forEach(trade => {
-                        // Tùy biến biến động màu dựa vào tính chất lệnh (Mua lên = xanh, Bán xuống = đỏ)
-                        // Thông thường API trả về trường 'Side' (S/B) hoặc dựa vào so sánh giá
-                        let tradeColor = "color-ref";
+                        let tradeClass = "color-ref";
+                        // Nhận diện phe chủ động: B (Buy - mua lên / xanh), S (Sell - bán xuống / đỏ)
                         if (trade.side === "B" || trade.s === "B") tradeClass = "color-up";
                         else if (trade.side === "S" || trade.s === "S") tradeClass = "color-down";
                         else tradeClass = "color-up";
 
                         const tradePrice = trade.p || trade.price || 0;
                         const tradeVol = trade.v || trade.volume || 0;
-                        const tradeTime = trade.t || trade.time || new Date().toLocaleTimeString('vi-VN', { hour12: false });
+                        const tradeTime = trade.t || trade.time || "";
 
                         htmlContent += `
                             <div class="history-row">
@@ -315,7 +322,7 @@
                     historyList.innerHTML = htmlContent;
                 }
             } catch (error) {
-                console.error("Lỗi cập nhật nhật ký khớp lệnh:", error);
+                console.error("Lỗi lịch sử khớp lệnh:", error);
             }
         }
 
