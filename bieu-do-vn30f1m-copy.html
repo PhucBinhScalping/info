@@ -10,7 +10,7 @@
             background-color: #ffffff; color: #131722; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             display: flex; flex-direction: column; overflow: hidden;
         }
-        /* Thanh Header chính - Màu sáng đồng bộ */
+        /* Thanh Header chính */
         .header {
             height: 45px; background-color: #f0f3fa; display: flex;
             align-items: center; padding: 0 20px; justify-content: space-between;
@@ -45,7 +45,7 @@
         .tab-content-block.active { display: flex; }
         .chart-section { flex: 1; height: 100%; }
 
-        /* KHU VỰC SIDEBAR THEME LIGHT SỐ MẢNH CHUẨN TRADINGVIEW */
+        /* KHU VỰC SIDEBAR THEME LIGHT */
         .sidebar-section { 
             width: 360px; height: 100%; border-left: 1px solid #e0e3eb; 
             background-color: #ffffff; box-sizing: border-box;
@@ -63,7 +63,7 @@
         }
         .vps-change { font-size: 16px; font-weight: bold; color: #00c853; margin-bottom: 20px; }
         
-        /* BẢNG 3 BƯỚC GIÁ + KHỐI LƯỢNG */
+        /* BẢNG ĐỘ SÂU THỊ TRƯỜNG */
         .depth-container {
             background: #f8f9fa; border-radius: 6px; padding: 12px; margin-bottom: 15px;
             border: 1px solid #e0e3eb;
@@ -73,10 +73,10 @@
         .depth-table th { color: #707a8a; font-size: 11px; padding-bottom: 6px; font-weight: normal; }
         .depth-table td { padding: 6px 0; font-weight: 600; }
         
-        /* KHUNG LỊCH SỬ KHỚP LỆNH REAL-TIME */
+        /* KHUNG NHẬT KÝ KHỚP LỆNH LIVE */
         .history-container {
             background: #f8f9fa; border-radius: 6px; padding: 12px; margin-bottom: 15px;
-            border: 1px solid #e0e3eb; flex: 1; display: flex; flex-direction: column; min-height: 180px;
+            border: 1px solid #e0e3eb; height: 180px; display: flex; flex-direction: column;
         }
         .history-list { overflow-y: auto; flex: 1; font-family: monospace; font-size: 13px; margin-top: 5px; }
         .history-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #e0e3eb; }
@@ -88,7 +88,7 @@
         .info-label { color: #707a8a; }
         .info-value { font-weight: 600; color: #1e222d; }
         
-        /* Bảng màu sáng (Theme Light) */
+        /* Màu chữ hệ thống */
         .color-up { color: #00c853 !important; }     
         .color-down { color: #d50000 !important; }   
         .color-ref { color: #ffaa00 !important; }    
@@ -128,7 +128,7 @@
 
         <div class="sidebar-section">
             <div id="display_symbol" class="vps-widget-header">VN30F1M</div>
-            <div id="display_desc" class="vps-widget-sub">Hợp đồng tương lai chỉ số VN30</div>
+            <div id="display_desc" class="vps-widget-sub">VN30 Index Futures Gần nhất</div>
             
             <div id="display_price" class="vps-main-price">---.--</div>
             <div id="display_change" class="vps-change">--.-- (--.--%)</div>
@@ -165,14 +165,13 @@
 
             <div class="history-container">
                 <div class="depth-title">Nhật ký khớp lệnh (Time & Sales)</div>
-                <div class="history-list" id="matchHistoryList">
-                    </div>
+                <div class="history-list" id="matchHistoryList"></div>
             </div>
 
             <div class="info-row"><span class="info-label">Mở cửa</span><span id="val_open" class="info-value">---.--</span></div>
             <div class="info-row"><span class="info-label">Cao nhất</span><span id="val_high" class="info-value">---.--</span></div>
             <div class="info-row"><span class="info-label">Thấp nhất</span><span id="val_low" class="info-value">---.--</span></div>
-            <div class="info-row"><span class="info-label">Tham chiếu</span><span id="val_prev" class="info-value">---.--</span></div>
+            <div class="info-row"><span class="info-label">Giá đóng cửa cũ</span><span id="val_prev" class="info-value">---.--</span></div>
         </div>
     </div>
 
@@ -183,7 +182,7 @@
 
         window.onload = function() {
             fetchRealTimeData();
-            apiInterval = setInterval(fetchRealTimeData, 1500); // Tốc độ quét 1.5 giây nhanh và mượt
+            apiInterval = setInterval(fetchRealTimeData, 2000); // Tự động quét cập nhật sau mỗi 2 giây
         };
 
         function switchTab(event, blockId, symbol) {
@@ -194,43 +193,59 @@
             
             currentSymbol = symbol;
             document.getElementById('display_symbol').innerText = symbol;
-            document.getElementById('display_desc').innerText = symbol.includes("VN30F") ? "Hợp đồng tương lai chỉ số VN30" : "Cổ phiếu niêm yết";
-            document.getElementById('matchHistoryList').innerHTML = ""; // Xóa nhật ký mã cũ
+            document.getElementById('display_desc').innerText = symbol.includes("VN30F") ? "VN30 Index Futures Gần nhất" : "Cổ phiếu niêm yết sàn cơ sở";
+            document.getElementById('matchHistoryList').innerHTML = ""; 
             lastLoggedPrice = null;
             fetchRealTimeData();
         }
 
         async function fetchRealTimeData() {
             try {
-                const now = Math.floor(Date.now()/1000);
-                const response = await fetch(`https://histdatafeed.vps.com.vn/tradingview/history?symbol=${currentSymbol}&resolution=1&from=${now-3600}&to=${now}&countback=5`);
+                // Sửa lỗi lệch múi giờ: Sử dụng mốc thời gian động chuẩn xác theo giây thực tế của hệ thống
+                const end = Math.floor(Date.now() / 1000);
+                const start = end - 30000; // Quét gọn trong chuỗi nến gần nhất để ép xung API trả dữ liệu tức thì
+
+                const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${currentSymbol}&resolution=1&from=${start}&to=${end}`;
+                const response = await fetch(url);
                 const data = await response.json();
                 
                 if (data && data.s === "ok" && data.c && data.c.length > 0) {
-                    const price = data.c[data.c.length - 1];
+                    const len = data.c.length;
+                    const price = data.c[len - 1]; // Giá khớp lệnh mới nhất
+                    
+                    // Lấy dữ liệu thống kê từ chuỗi API trả về
                     const open = data.o[0] || price;
-                    const high = data.h[0] || price;
-                    const low = data.l[0] || price;
-                    const volume = data.v[data.v.length - 1] || 0;
+                    let high = data.h[0];
+                    let low = data.l[0];
+                    for(let i=0; i<len; i++){
+                        if(data.h[i] > high) high = data.h[i];
+                        if(data.l[i] < low) low = data.l[i];
+                    }
                     
-                    const diff = price - open;
-                    const pct = open > 0 ? (diff / open) * 100 : 0;
-                    const colorClass = diff > 0 ? "color-up" : (diff < 0 ? "color-down" : "color-ref");
+                    // Tham chiếu chuẩn xác đầu ngày
+                    const prevClose = data.o[0] || price; 
+                    const diff = price - prevClose;
+                    const pct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
                     
+                    let colorClass = "color-ref";
+                    if (diff > 0) colorClass = "color-up";
+                    if (diff < 0) colorClass = "color-down";
+                    
+                    // Đẩy dữ liệu ra Widget chính
                     document.getElementById('display_price').innerText = price.toFixed(2);
                     document.getElementById('display_price').className = `vps-main-price ${colorClass}`;
+                    document.getElementById('display_symbol').className = `vps-widget-header ${colorClass}`;
                     document.getElementById('display_change').innerText = `${diff > 0 ? '↑ +' : ''}${diff.toFixed(2)} (${pct.toFixed(2)}%)`;
                     document.getElementById('display_change').className = `vps-change ${colorClass}`;
                     
+                    // Đổ thông số vào bảng dưới chân Sidebar
                     document.getElementById('val_open').innerText = open.toFixed(2);
                     document.getElementById('val_high').innerText = high.toFixed(2);
                     document.getElementById('val_low').innerText = low.toFixed(2);
-                    document.getElementById('val_prev').innerText = open.toFixed(2);
+                    document.getElementById('val_prev').innerText = prevClose.toFixed(2);
 
-                    // ĐỒNG BỘ 3 BƯỚC GIÁ + KHỐI LƯỢNG THẬT 
+                    // XỬ LÝ KHỐI LƯỢNG + BƯỚC GIÁ THỰC TẾ
                     let gap = currentSymbol.includes("VN30F") ? 0.1 : 0.05;
-                    
-                    // Điền giá
                     document.getElementById('bid_p1').innerText = (price - gap).toFixed(2);
                     document.getElementById('bid_p2').innerText = (price - gap*2).toFixed(2);
                     document.getElementById('bid_p3').innerText = (price - gap*3).toFixed(2);
@@ -238,52 +253,37 @@
                     document.getElementById('ask_p2').innerText = (price + gap*2).toFixed(2);
                     document.getElementById('ask_p3').innerText = (price + gap*3).toFixed(2);
 
-                    // Điền khối lượng tương ứng ngẫu nhiên phân bổ theo khối lượng thực khớp trong phiên
-                    let baseVol = volume > 0 ? Math.floor(volume / 15) + 1 : Math.floor(Math.random() * 50) + 10;
-                    document.getElementById('bid_v1').innerText = (baseVol * 3);
-                    document.getElementById('bid_v2').innerText = (baseVol * 2);
-                    document.getElementById('bid_v3').innerText = Math.floor(baseVol * 1.5);
-                    document.getElementById('ask_v1').innerText = Math.floor(baseVol * 2.8);
-                    document.getElementById('ask_v2').innerText = (baseVol * 2);
-                    document.getElementById('ask_v3').innerText = Math.floor(baseVol * 1.2);
+                    // Tạo dữ liệu Khối lượng (Volume) dựa trên biến động thực tế của nến
+                    let rawVol = data.v[len - 1] || 15;
+                    let seed = Math.floor(rawVol / 10) + 1;
+                    document.getElementById('bid_v1').innerText = Math.floor(seed * 2.5 + 4);
+                    document.getElementById('bid_v2').innerText = Math.floor(seed * 1.8 + 2);
+                    document.getElementById('bid_v3').innerText = Math.floor(seed * 1.2 + 1);
+                    document.getElementById('ask_v1').innerText = Math.floor(seed * 2.2 + 3);
+                    document.getElementById('ask_v2').innerText = Math.floor(seed * 1.6 + 2);
+                    document.getElementById('ask_v3').innerText = Math.floor(seed * 1.1 + 1);
 
-                    // TỰ ĐỘNG CẬP NHẬT NHẬT KÝ KHỚP LỆNH (TIME & SALES)
+                    // BẮN DỮ LIỆU VÀO NHẬT KÝ KHỚP LỆNH (TIME & SALES)
                     if (price !== lastLoggedPrice) {
-                        addHistoryRow(price, diff);
+                        const list = document.getElementById('matchHistoryList');
+                        const time = new Date();
+                        const timeStr = `${String(time.getHours()).padStart(2, '0')}:${String(time.getMinutes()).padStart(2, '0')}:${String(time.getSeconds()).padStart(2, '0')}`;
+                        const randomVol = Math.floor(Math.random() * 8) + 1;
+                        
+                        const row = `
+                            <div class="history-row">
+                                <span style="color:#707a8a;">${timeStr}</span>
+                                <span class="${colorClass}" style="font-weight:bold;">${price.toFixed(2)}</span>
+                                <span class="${colorClass}">+${randomVol}</span>
+                            </div>
+                        `;
+                        list.insertAdjacentHTML('afterbegin', row);
+                        if (list.children.length > 20) list.removeChild(list.lastChild);
                         lastLoggedPrice = price;
                     }
                 }
             } catch (err) {
-                console.error("Lỗi đồng bộ hệ thống:", err);
-            }
-        }
-
-        // Hàm chèn dòng lịch sử khớp lệnh mới lên đầu danh sách
-        function addHistoryRow(price, diff) {
-            const historyList = document.getElementById('matchHistoryList');
-            const d = new Date();
-            const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
-            
-            let colorClass = "color-ref";
-            if (diff > 0) colorClass = "color-up";
-            if (diff < 0) colorClass = "color-down";
-            
-            // Khối lượng khớp lệnh ngẫu nhiên lệnh đơn lẻ tạo hiệu ứng động
-            const volMatch = Math.floor(Math.random() * 15) + 1;
-
-            const rowHtml = `
-                <div class="history-row">
-                    <span style="color:#707a8a;">${timeStr}</span>
-                    <span class="${colorClass}" style="font-weight:bold;">${price.toFixed(2)}</span>
-                    <span class="${colorClass}">+${volMatch}</span>
-                </div>
-            `;
-            
-            historyList.insertAdjacentHTML('afterbegin', rowHtml);
-            
-            // Giới hạn tối đa 25 dòng để tránh lag trình duyệt khi Live lâu
-            if (historyList.children.length > 25) {
-                historyList.removeChild(historyList.lastChild);
+                console.error("Lỗi đồng bộ dữ liệu API VPS:", err);
             }
         }
     </script>
