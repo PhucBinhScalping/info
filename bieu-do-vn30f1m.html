@@ -83,9 +83,14 @@
         .vps-widget-sub {
             font-size: 13px; color: #707a8a; margin-bottom: 20px;
         }
+        
         .vps-main-price {
-            font-size: 54px; font-weight: bold; color: #00c853; 
-            font-family: 'Impact', Arial, sans-serif; margin-bottom: 5px;
+            font-size: 48px; 
+            font-weight: 500; /* Hạ độ dày xuống mức trung bình để số mảnh và thanh thoát hơn */
+            color: #00c853; 
+            font-family: -apple-system, BlinkMacSystemFont, "Trebuchet MS", Roboto, Ubuntu, sans-serif;
+            margin-bottom: 5px;
+            letter-spacing: -1px; /* Thu hẹp khoảng cách giữa các số lại một chút cho đẹp */
         }
         .vps-change {
             font-size: 16px; font-weight: bold; color: #00c853; margin-bottom: 25px;
@@ -111,7 +116,7 @@
 
     <div class="header">
         <a href="index.html" class="back-link" style="flex: 1; text-align: left;color: #ffb700;">⬅ Quay lại Trang chủ</a>
-        <div style="flex: 2; text-align: center; font-size: 18px; font-weight: 500; color: #ffb700; letter-spacing: 0.5px;">
+        <div style="flex: 2; text-align: center; font-size: 18px; font-weight: bold; color: #ffb700; letter-spacing: 0.5px;">
              Dữ liệu được lấy trực tiếp từ Công ty Cổ phần Chứng khoán VPS
         </div>
         <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #ffb700;">
@@ -320,7 +325,7 @@
             }
         }
 
-        apiInterval = setInterval(fetchVPSData, 2000);
+        apiInterval = setInterval(fetchVPSData, 200);
         fetchVPSData();
     </script>
 </body>
