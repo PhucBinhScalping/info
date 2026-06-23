@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biểu đồ kỹ thuật Phái sinh - Giao diện Sáng</title>
+    <title>Biểu đồ kỹ thuật Phái sinh - Phúc Bình Scalping</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -54,7 +54,7 @@
         /* KHU VỰC BIỂU ĐỒ BÊN TRÁI */
         .chart-section { flex: 1; height: 100%; }
 
-        /* KHU VỰC SIDEBAR BẢNG GIÁ TỰ CHẾ (Theme Light) */
+        /* KHU VỰC SIDEBAR BẢNG GIÁ TỰ CHẾ THEO LAYOUT CHUẨN (Theme Light) */
         .sidebar-section { 
             width: 360px; 
             height: 100%; 
@@ -74,7 +74,7 @@
             font-size: 13px; color: #707a8a; margin-bottom: 20px;
         }
         .vps-main-price {
-            font-size: 48px; font-weight: bold; color: #00c853; 
+            font-size: 54px; font-weight: bold; color: #00c853; 
             font-family: 'Impact', Arial, sans-serif; margin-bottom: 5px;
         }
         .vps-change {
@@ -82,9 +82,6 @@
         }
         
         /* Bảng thông số chi tiết phía dưới */
-        .info-table {
-            width: 100%; border-collapse: collapse; margin-top: 10px;
-        }
         .info-row {
             display: flex; justify-content: space-between; padding: 12px 0;
             border-bottom: 1px solid #f0f3fa; font-size: 14px;
@@ -92,9 +89,9 @@
         .info-label { color: #707a8a; }
         .info-value { font-weight: 600; color: #1e222d; }
         
-        /* Định nghĩa màu sắc kỹ thuật chứng khoán trên nền sáng (Đậm hơn nền tối để dễ nhìn) */
-        .color-up { color: #00c853 !important; }     /* Xanh lá đậm */
-        .color-down { color: #d50000 !important; }   /* Đỏ đậm */
+        /* Định nghĩa màu sắc kỹ thuật chứng khoán trên nền sáng */
+        .color-up { color: #00c853 !important; }     /* Xanh lá */
+        .color-down { color: #d50000 !important; }   /* Đỏ */
         .color-ref { color: #ffaa00 !important; }    /* Vàng tham chiếu */
 
         iframe { width: 100%; height: 100%; border: none; }
@@ -104,10 +101,10 @@
 
     <div class="header">
         <a href="index.html" class="back-link" style="flex: 1; text-align: left;">⬅ Quay lại Trang chủ</a>
-        <div style="flex: 2; text-align: center; font-size: 18px; font-weight: bold; color: #e65100; letter-spacing: 0.5px;">
+        <div style="flex: 2; text-align: center; font-size: 18px; font-weight: bold; color: #ffb700; letter-spacing: 0.5px;">
              Dữ liệu lấy từ Công ty Cổ phần Chứng khoán VPS
         </div>
-        <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #e65100;">
+        <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #ffb700;">
             SĐT: 0853.525.379 - ID VPS: BOR5
         </div>
     </div>
@@ -199,9 +196,12 @@
         async function fetchVPSData() {
             try {
                 const toTime = Math.floor(Date.now() / 1000);
-                const fromTime = toTime - 86400 * 2; 
+                
+                // Lấy lùi về 16 tiếng trước để bao trọn bộ dữ liệu từ lúc mở cửa 9h sáng đến hiện tại
+                const fromTime = toTime - 16 * 3600; 
 
-                const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${currentSymbol}&resolution=1&from=${fromTime}&to=${toTime}&countback=10`;
+                // Gọi API với countback=500 nến để hệ thống quét được toàn bộ lịch sử trong ngày
+                const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${currentSymbol}&resolution=1&from=${fromTime}&to=${toTime}&countback=500`;
                 
                 const response = await fetch(url);
                 const data = await response.json();
@@ -209,12 +209,25 @@
                 if (data && data.s === "ok" && data.c && data.c.length > 1) {
                     const len = data.c.length;
                     
+                    // 1. Giá hiện tại (Mới nhất)
                     const currentPrice = data.c[len - 1];
-                    const openPrice = data.o[len - 1];
-                    const highPrice = data.h[len - 1];
-                    const lowPrice = data.l[len - 1];
-                    const prevPrice = data.c[len - 2]; 
                     
+                    // 2. Giá Mở cửa phiên (Lấy cây nến đầu tiên khi mở phiên sáng)
+                    const sessionOpenPrice = data.o[0];
+                    
+                    // 3. Quét toàn bộ mảng từ sáng đến giờ để nhặt ra giá Cao nhất / Thấp nhất thực tế của cả phiên
+                    let sessionHighPrice = data.h[0];
+                    let sessionLowPrice = data.l[0];
+                    
+                    for (let i = 0; i < len; i++) {
+                        if (data.h[i] > sessionHighPrice) sessionHighPrice = data.h[i];
+                        if (data.l[i] < sessionLowPrice) sessionLowPrice = data.l[i];
+                    }
+                    
+                    // 4. Giá đóng cửa cây nến trước để làm tham chiếu tính tăng giảm điểm
+                    const prevPrice = data.c[0]; 
+                    
+                    // Tính biên độ biến động điểm số
                     const diff = currentPrice - prevPrice;
                     const pct = (diff / prevPrice) * 100;
                     const prefix = diff > 0 ? "↑ +" : (diff < 0 ? "↓ " : "");
@@ -223,6 +236,7 @@
                     if (diff > 0) tradeColor = "color-up";
                     if (diff < 0) tradeColor = "color-down";
                     
+                    // Đổ dữ liệu vào khu vực giá lớn
                     const pEl = document.getElementById('widget_price');
                     const cEl = document.getElementById('widget_change');
                     
@@ -233,9 +247,10 @@
                     cEl.innerText = `${prefix}${diff.toFixed(2)} (${prefix ? '' : ''}${pct.toFixed(2)}%)`;
                     cEl.className = `vps-change ${tradeColor}`;
                     
-                    document.getElementById('val_open').innerText = Number(openPrice).toFixed(2);
-                    document.getElementById('val_high').innerText = Number(highPrice).toFixed(2);
-                    document.getElementById('val_low').innerText = Number(lowPrice).toFixed(2);
+                    // Cập nhật bảng thông số chi tiết chuẩn trong ngày
+                    document.getElementById('val_open').innerText = Number(sessionOpenPrice).toFixed(2);
+                    document.getElementById('val_high').innerText = Number(sessionHighPrice).toFixed(2);
+                    document.getElementById('val_low').innerText = Number(sessionLowPrice).toFixed(2);
                     document.getElementById('val_prev').innerText = Number(prevPrice).toFixed(2);
                 }
             } catch (err) {
@@ -243,6 +258,7 @@
             }
         }
 
+        // Tự động quét cập nhật dữ liệu liên tục 2 giây/lần
         apiInterval = setInterval(fetchVPSData, 2000);
         fetchVPSData();
     </script>
