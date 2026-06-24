@@ -216,7 +216,7 @@
 
     // --- Xử lý WebSocket Bước giá ---
     function initOrderBookSocket() {
-        ws = new WebSocket('wss://datafeed-krx.dnse.com.vn/wss');
+        ws = new WebSocket('wss://tradingviewrealtime.vps.com.vn/socket.io/?EIO=4&transport=websocket&sid=cJssznmzOu8hCpF3FpPq');
         ws.onopen = () => {
             ws.send(JSON.stringify({ type: "sub", symbol: currentSymbol }));
         };
