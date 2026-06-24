@@ -12,7 +12,6 @@
             background-color: #ffffff; color: #131722; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             display: flex; flex-direction: column; overflow: hidden;
         }
-        /* Thanh Header chính - Giao diện sáng */
         .header {
             height: 45px; background-color: #f0f3fa; display: flex;
             align-items: center; padding: 0 20px; justify-content: space-between;
@@ -21,8 +20,6 @@
         .header .back-link {
             text-decoration: none; font-weight: bold; font-size: 14px;
         }
-        
-        /* Thanh Menu Tab Con - Giao diện sáng */
         .tab-menu {
             height: 40px; background-color: #ffffff; display: flex;
             align-items: center; padding: 0 10px; gap: 5px;
@@ -38,39 +35,32 @@
             background-color: #e3f2fd; color: #1565c0; border-bottom: 2px solid #1565c0;
             border-radius: 4px 4px 0 0;
         }
-
-        /* Vùng nội dung chia đôi */
+        .btn-add {
+            background-color: #e8f5e9; color: #2e7d32; border: 1px dashed #2e7d32;
+            padding: 5px 12px; font-size: 12px; font-weight: bold; cursor: pointer; border-radius: 4px;
+        }
         .content-container {
             flex: 1; width: 100%; height: calc(100% - 85px); 
             display: flex; flex-direction: row; background-color: #ffffff;
         }
-        
-        /* Phân vùng Tab */
         .tab-content-block {
             display: none; width: 100%; height: 100%; flex-direction: row;
         }
         .tab-content-block.active {
             display: flex;
         }
-
-        /* KHU VỰC BIỂU ĐỒ BÊN TRÁI */
         .chart-section { flex: 1; height: 100%; }
-
-        /* KHU VỰC HIỂN THỊ WIDGET BÊN PHẢI (THEME SÁNG) */
         .sidebar-section { 
             width: 360px; height: 100%; border-left: 1px solid #e0e3eb; 
             background-color: #ffffff; box-sizing: border-box;
             padding: 25px 20px; display: flex; flex-direction: column;
         }
-        
         .vps-widget-header {
             font-size: 32px; font-weight: bold; color: #00c853; margin-bottom: 4px;
         }
         .vps-widget-sub {
             font-size: 13px; color: #707a8a; margin-bottom: 20px;
         }
-        
-        /* Định dạng số mảnh chuẩn phong cách TradingView Light */
         .vps-main-price {
             font-size: 52px; font-weight: 500; color: #00c853; 
             font-family: -apple-system, BlinkMacSystemFont, "Trebuchet MS", Roboto, sans-serif;
@@ -79,21 +69,17 @@
         .vps-change {
             font-size: 16px; font-weight: bold; color: #00c853; margin-bottom: 30px;
         }
-        
-        /* Danh sách thông số chi tiết bóc tách từ Datafeed */
         .info-row {
             display: flex; justify-content: space-between; padding: 12px 0;
             border-bottom: 1px solid #f0f3fa; font-size: 14px;
         }
         .info-label { color: #707a8a; }
         .info-value { font-weight: 600; color: #1e222d; }
-        
-        /* Bảng màu chuẩn kỹ thuật sàn chứng khoán - Khớp cho nền sáng */
         .color-up { color: #00c853 !important; }     
         .color-down { color: #d50000 !important; }   
         .color-ref { color: #ffaa00 !important; }    
-
         iframe { width: 100%; height: 100%; border: none; }
+        /* Style cho nút đóng */
         .close-btn { 
             margin-left: 10px; 
             cursor: pointer; 
@@ -118,146 +104,119 @@
         </div>
     </div>
 
-    <div class="tab-menu">
-        <button class="tab-item active" onclick="switchTab(event, 'block_vn30f1m_5m', 'VN30F1M')">📊 VN30F1M (5 Phút)</button>
+    <div class="tab-menu" id="mainTabMenu">
+        <button class="tab-item active" id="tab_base" onclick="switchTab(event, 'block_vn30f1m_5m', 'VN30F1M')">📊 VN30F1M (5 Phút)</button>
         <button class="tab-item" onclick="switchTab(event, 'block_vn30f1m_15m', 'VN30F1M')">📊 VN30F1M (15 Phút)</button>
         <button class="tab-item" onclick="switchTab(event, 'block_vnindex', 'VNINDEX')">📈 VNINDEX (Ngày)</button>
+        <button class="btn-add" onclick="addNewChart()">+ Thêm biểu đồ</button>
     </div>
 
-    <div class="content-container">
-        
+    <div class="content-container" id="mainContent">
         <div id="block_vn30f1m_5m" class="tab-content-block active">
-            <div class="chart-section">
-                <iframe src="https://chart.vps.com.vn/tv/?symbol=VN30F1M&allowFullscreen=true&resolution=5&lang=vi&theme=light"></iframe>
-            </div>
+            <div class="chart-section"><iframe src="https://chart.vps.com.vn/tv/?symbol=VN30F1M&allowFullscreen=true&resolution=5&lang=vi&theme=light"></iframe></div>
         </div>
-
         <div id="block_vn30f1m_15m" class="tab-content-block">
-            <div class="chart-section">
-                <iframe src="https://chart.vps.com.vn/tv/?symbol=VN30F1M&allowFullscreen=true&resolution=15&lang=vi&theme=light"></iframe>
-            </div>
+            <div class="chart-section"><iframe src="https://chart.vps.com.vn/tv/?symbol=VN30F1M&allowFullscreen=true&resolution=15&lang=vi&theme=light"></iframe></div>
         </div>
-
         <div id="block_vnindex" class="tab-content-block">
-            <div class="chart-section">
-                <iframe src="https://chart.vps.com.vn/tv/?symbol=VNINDEX&allowFullscreen=true&resolution=D&lang=vi&theme=light"></iframe>
-            </div>
+            <div class="chart-section"><iframe src="https://chart.vps.com.vn/tv/?symbol=VNINDEX&allowFullscreen=true&resolution=D&lang=vi&theme=light"></iframe></div>
         </div>
 
         <div class="sidebar-section">
             <div id="display_symbol" class="vps-widget-header">VN30F1M</div>
             <div id="display_desc" class="vps-widget-sub">Hợp đồng tương lai chỉ số VN30</div>
-            
             <div id="display_price" class="vps-main-price">---.--</div>
             <div id="display_change" class="vps-change">--.-- (--.--%)</div>
-            
-            <div class="info-row">
-                <span class="info-label">Mở cửa</span>
-                <span id="val_open" class="info-value">---.--</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Cao nhất</span>
-                <span id="val_high" class="info-value">---.--</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Thấp nhất</span>
-                <span id="val_low" class="info-value">---.--</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Tham chiếu</span>
-                <span id="val_prev" class="info-value">---.--</span>
-            </div>
-            <div style="font-size: 11px; color: #707a8a; text-align: center; margin-top: 30px;">
-                ● Kết nối trực tiếp DataFeed VPS real-time
-            </div>
+            <div class="info-row"><span class="info-label">Mở cửa</span><span id="val_open" class="info-value">---.--</span></div>
+            <div class="info-row"><span class="info-label">Cao nhất</span><span id="val_high" class="info-value">---.--</span></div>
+            <div class="info-row"><span class="info-label">Thấp nhất</span><span id="val_low" class="info-value">---.--</span></div>
+            <div class="info-row"><span class="info-label">Tham chiếu</span><span id="val_prev" class="info-value">---.--</span></div>
         </div>
-
     </div>
 
 <script>
-        let currentSymbol = 'VN30F1M';
-        let apiInterval = null;
+    let currentSymbol = 'VN30F1M';
+    let apiInterval = null;
+    window.onload = function() {
+        fetchVPSData();
+        apiInterval = setInterval(fetchVPSData, 500); // Cập nhật liên tục mỗi 2 giây
+    };
 
-        window.onload = function() {
-            fetchVPSData();
-            apiInterval = setInterval(fetchVPSData, 500); // Cập nhật liên tục mỗi 2 giây
-        };
+    function switchTab(event, blockId, symbol) {
+        document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        
+        document.querySelectorAll('.tab-content-block').forEach(block => block.classList.remove('active'));
+        document.getElementById(blockId).classList.add('active');
+        
+        currentSymbol = symbol;
+        document.getElementById('display_symbol').innerText = symbol;
+        document.getElementById('display_desc').innerText = symbol === 'VN30F1M' ? "Hợp đồng tương lai chỉ số VN30" : "Chỉ số VN-Index Việt Nam";
+        
+        document.getElementById('display_price').innerText = "⏳...";
+        document.getElementById('display_change').innerText = "--.-- (--.--%)";
+        
+        fetchVPSData();
+    }
 
-        function switchTab(event, blockId, symbol) {
-            document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-            
-            document.querySelectorAll('.tab-content-block').forEach(block => block.classList.remove('active'));
-            document.getElementById(blockId).classList.add('active');
-            
-            currentSymbol = symbol;
-            document.getElementById('display_symbol').innerText = symbol;
-            document.getElementById('display_desc').innerText = symbol === 'VN30F1M' ? "Hợp đồng tương lai chỉ số VN30" : "Chỉ số VN-Index Việt Nam";
-            
-            document.getElementById('display_price').innerText = "⏳...";
-            document.getElementById('display_change').innerText = "--.-- (--.--%)";
-            
-            fetchVPSData();
-        }
+    async function fetchVPSData() {
+        try {
+            // Lấy mốc thời gian thực hiện tại
+            const toTime = Math.floor(Date.now() / 1000);
+            // Lùi hẳn về 24h trước để quét trọn vẹn dữ liệu từ lúc mở cửa phiên sáng
+            const fromTime = toTime - 86400; 
 
-        async function fetchVPSData() {
-            try {
-                // Lấy mốc thời gian thực hiện tại
-                const toTime = Math.floor(Date.now() / 1000);
-                // Lùi hẳn về 24h trước để quét trọn vẹn dữ liệu từ lúc mở cửa phiên sáng
-                const fromTime = toTime - 86400; 
-
-                const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${currentSymbol}&resolution=1&from=${fromTime}&to=${toTime}&countback=500`;
+            const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${currentSymbol}&resolution=1&from=${fromTime}&to=${toTime}&countback=500`;
+            
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data && data.s === "ok" && data.c && data.c.length > 0) {
+                const len = data.c.length;
+                const currentPrice = data.c[len - 1]; // Giá khớp real-time mới nhất
+                const sessionOpenPrice = data.o[0];    // Giá mở cửa chuẩn của phiên
                 
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                if (data && data.s === "ok" && data.c && data.c.length > 0) {
-                    const len = data.c.length;
-                    const currentPrice = data.c[len - 1]; // Giá khớp real-time mới nhất
-                    const sessionOpenPrice = data.o[0];    // Giá mở cửa chuẩn của phiên
-                    
-                    // Thuật toán quét chính xác giá Cao nhất và Thấp nhất từ đầu ngày
-                    let sessionHighPrice = data.h[0];
-                    let sessionLowPrice = data.l[0];
-                    for (let i = 0; i < len; i++) {
-                        if (data.h[i] > sessionHighPrice) sessionHighPrice = data.h[i];
-                        if (data.l[i] < sessionLowPrice) sessionLowPrice = data.l[i];
-                    }
-                    
-                    // Lấy giá đóng cửa của cây nến đầu tiên trong chuỗi dữ liệu làm mốc Tham chiếu tạm thời
-                    const referencePrice = data.o[0]; 
-                    const diff = currentPrice - referencePrice;
-                    const pct = (diff / referencePrice) * 100;
-                    const prefix = diff > 0 ? "↑ +" : (diff < 0 ? "↓ " : "");
-                    
-                    // Đổi màu chữ theo trạng thái giá
-                    let tradeColor = "color-ref";
-                    if (diff > 0) tradeColor = "color-up";   // Tăng - Xanh lá
-                    if (diff < 0) tradeColor = "color-down"; // Giảm - Đỏ
-                    
-                    const pEl = document.getElementById('display_price');
-                    const cEl = document.getElementById('display_change');
-                    
-                    // Hiển thị số mảnh lên màn hình Live
-                    pEl.innerText = Number(currentPrice).toFixed(2);
-                    pEl.className = `vps-main-price ${tradeColor}`;
-                    document.getElementById('display_symbol').className = `vps-widget-header ${tradeColor}`;
-                    
-                    cEl.innerText = `${prefix}${diff.toFixed(2)} (${pct.toFixed(2)}%)`;
-                    cEl.className = `vps-change ${tradeColor}`;
-                    
-                    // Đồng bộ 4 thông số kỹ thuật bên dưới sidebar
-                    document.getElementById('val_open').innerText = Number(sessionOpenPrice).toFixed(2);
-                    document.getElementById('val_high').innerText = Number(sessionHighPrice).toFixed(2);
-                    document.getElementById('val_low').innerText = Number(sessionLowPrice).toFixed(2);
-                    document.getElementById('val_prev').innerText = Number(referencePrice).toFixed(2);
+                // Thuật toán quét chính xác giá Cao nhất và Thấp nhất từ đầu ngày
+                let sessionHighPrice = data.h[0];
+                let sessionLowPrice = data.l[0];
+                for (let i = 0; i < len; i++) {
+                    if (data.h[i] > sessionHighPrice) sessionHighPrice = data.h[i];
+                    if (data.l[i] < sessionLowPrice) sessionLowPrice = data.l[i];
                 }
-            } catch (err) {
-                console.error("Lỗi kết nối DataFeed VPS:", err);
+                
+                // Lấy giá đóng cửa của cây nến đầu tiên trong chuỗi dữ liệu làm mốc Tham chiếu tạm thời
+                const referencePrice = data.o[0]; 
+                const diff = currentPrice - referencePrice;
+                const pct = (diff / referencePrice) * 100;
+                const prefix = diff > 0 ? "↑ +" : (diff < 0 ? "↓ " : "");
+                
+                // Đổi màu chữ theo trạng thái giá
+                let tradeColor = "color-ref";
+                if (diff > 0) tradeColor = "color-up";   // Tăng - Xanh lá
+                if (diff < 0) tradeColor = "color-down"; // Giảm - Đỏ
+                
+                const pEl = document.getElementById('display_price');
+                const cEl = document.getElementById('display_change');
+                
+                // Hiển thị số mảnh lên màn hình Live
+                pEl.innerText = Number(currentPrice).toFixed(2);
+                pEl.className = `vps-main-price ${tradeColor}`;
+                document.getElementById('display_symbol').className = `vps-widget-header ${tradeColor}`;
+                
+                cEl.innerText = `${prefix}${diff.toFixed(2)} (${pct.toFixed(2)}%)`;
+                cEl.className = `vps-change ${tradeColor}`;
+                
+                // Đồng bộ 4 thông số kỹ thuật bên dưới sidebar
+                document.getElementById('val_open').innerText = Number(sessionOpenPrice).toFixed(2);
+                document.getElementById('val_high').innerText = Number(sessionHighPrice).toFixed(2);
+                document.getElementById('val_low').innerText = Number(sessionLowPrice).toFixed(2);
+                document.getElementById('val_prev').innerText = Number(referencePrice).toFixed(2);
             }
+        } catch (err) {
+            console.error("Lỗi kết nối DataFeed VPS:", err);
         }
-    
+    }
+
     // 1. Hàm chuyển tab cơ bản
     function switchTab(event, blockId, symbol) {
         document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
@@ -301,7 +260,7 @@
         
         // Tự động chuyển đến tab mới
         newTab.click();
+    }
 </script>
-    
 </body>
 </html>
