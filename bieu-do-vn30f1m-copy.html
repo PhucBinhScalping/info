@@ -76,7 +76,7 @@
         }
         .info-label { color: #707a8a; }
         .info-value { font-weight: 600; color: #1e222d; }
-        .color-up { color: #00c853 !important; }      
+        .color-up { color: #00c853 !important; }    
         .color-down { color: #d50000 !important; }   
         .color-ref { color: #ffaa00 !important; }    
         iframe { width: 100%; height: 100%; border: none; }
@@ -132,7 +132,6 @@
             <div class="info-row"><span class="info-label">Thấp nhất</span><span id="val_low" class="info-value">---.--</span></div>
             <div class="info-row"><span class="info-label">Tham chiếu</span><span id="val_prev" class="info-value">---.--</span></div>
             
-            <!-- Bổ sung khung Bước giá -->
             <div style="margin-top: 20px; border-top: 2px solid #e0e3eb; padding-top: 10px;">
                 <div style="font-weight: bold; margin-bottom: 5px;">Bước giá (Real-time)</div>
                 <div id="order_book_container" style="font-family: monospace; font-size: 12px;">
@@ -147,6 +146,8 @@
     let currentSymbol = 'VN30F1M';
     let apiInterval = null;
     let ws = null;
+    // THAY LINK NÀY BẰNG LINK VERCEL CỦA BẠN
+    const VERCEL_PROXY = "https://phucbinhscalping-github-io.vercel.app/api/vps-data";
 
     window.onload = function() {
         fetchVPSData();
@@ -167,18 +168,12 @@
         
         document.getElementById('display_price').innerText = "⏳...";
         fetchVPSData();
-        // Gửi yêu cầu subscribe mã mới cho WebSocket
-        if(ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ type: "sub", symbol: symbol }));
-        }
     }
 
     async function fetchVPSData() {
         try {
-            const toTime = Math.floor(Date.now() / 1000);
-            const fromTime = toTime - 86400; 
-            const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${currentSymbol}&resolution=1&from=${fromTime}&to=${toTime}&countback=500`;
-            const response = await fetch(url);
+            // Gọi qua Proxy Vercel
+            const response = await fetch(`${VERCEL_PROXY}?symbol=${currentSymbol}`);
             const data = await response.json();
             
             if (data && data.s === "ok" && data.c && data.c.length > 0) {
@@ -211,45 +206,34 @@
                 document.getElementById('val_prev').innerText = Number(referencePrice).toFixed(2);
             }
         } catch (err) {
-            console.error("Lỗi kết nối DataFeed VPS:", err);
+            console.error("Lỗi kết nối:", err);
         }
     }
 
-    // --- Xử lý WebSocket Bước giá ---
     function initOrderBookSocket() {
-        // Thư viện socket.io-client đã có sẵn cơ chế quản lý SID tự động
+        // Socket.io cần cấu hình socket-io-client
         const socket = io("https://tradingviewrealtime.vps.com.vn", {
-            transports: ['websocket'], // Ưu tiên dùng WebSocket
-            path: '/socket.io',
-            reconnection: true,             // Tự động kết nối lại nếu mất
-            reconnectionAttempts: Infinity, // Cố gắng kết nối lại vô hạn
-            reconnectionDelay: 1000,        // Đợi 1s trước khi thử lại
-            timeout: 20000                  // Timeout sau 20s
+            transports: ['websocket'],
+            path: '/socket.io'
         });
-    
+
         socket.on('connect', () => {
-            console.log("Kết nối mới được thiết lập, SID đã tự động cấp mới!");
-            // Mỗi khi kết nối lại, ta phải gửi lệnh đăng ký mã lại
+            console.log("Đã kết nối Socket!");
             socket.emit('sub', { symbol: currentSymbol });
         });
-    
-        // Xử lý khi bị ngắt kết nối
-        socket.on('disconnect', (reason) => {
-            console.warn("Mất kết nối với VPS, lý do:", reason);
+
+        socket.on('message', (data) => {
+            if(data && data.asks && data.bids) {
+                updateOrderBookUI(data);
+            }
         });
-    
-        // ... (các phần lắng nghe dữ liệu khác giữ nguyên)
     }
     
     function updateOrderBookUI(data) {
-        // Kiểm tra cấu trúc dữ liệu thực tế tại đây
-        // Dữ liệu từ VPS thường nằm trong data.bids và data.asks
-        if (data && data.bids && data.asks) {
-            document.getElementById('ob_asks').innerHTML = data.asks.slice(0, 5)
-                .map(i => `Bán: ${i.price} - ${i.vol}`).join('<br>');
-            document.getElementById('ob_bids').innerHTML = data.bids.slice(0, 5)
-                .map(i => `Mua: ${i.price} - ${i.vol}`).join('<br>');
-        }
+        document.getElementById('ob_asks').innerHTML = data.asks.slice(0, 5)
+            .map(i => `Bán: ${i.price} - ${i.vol}`).join('<br>');
+        document.getElementById('ob_bids').innerHTML = data.bids.slice(0, 5)
+            .map(i => `Mua: ${i.price} - ${i.vol}`).join('<br>');
     }
 
     function addNewChart() {
@@ -277,5 +261,3 @@
 </script>
 </body>
 </html>
-
-```
