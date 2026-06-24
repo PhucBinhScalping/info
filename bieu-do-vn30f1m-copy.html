@@ -228,40 +228,37 @@
     }
 
 
+
     async function update10gia() {
-        const apiUrl = 'https://bgapidatafeed.vps.com.vn/getps10pricesnapshot/41I1G7000,B';
-        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(apiUrl);
+    // Gọi đến file api/proxy.js mà bạn đã tạo trên Vercel
+    const proxyUrl = '/api/proxy'; 
+    
+    try {
+        const res = await fetch(proxyUrl);
+        const data = await res.json();
         
-        try {
-            const res = await fetch(proxyUrl);
-            const rawData = await res.json();
-            
-            // LOG ĐỂ BẠN KIỂM TRA DỮ LIỆU THỰC TẾ
-            console.log("Dữ liệu nhận được từ VPS:", rawData);
-            
-            const tbody = document.getElementById('data-body');
-            if (!tbody) return; // Nếu chưa tìm thấy bảng thì dừng
-            
-            tbody.innerHTML = '';
-            
-            // Xử lý dữ liệu dựa trên cấu trúc thường thấy của VPS
-            // Nếu rawData là một object chứa list, hãy đổi thành rawData.list hoặc rawData.data
-            const list = Array.isArray(rawData) ? rawData : (rawData.data || []);
-            
-            list.forEach(item => {
-                // Kiểm tra tên các key trong Console log nếu vẫn ra undefined
-                const p = item.p || item.price || item.Price || 0;
-                const v = item.v || item.vol || item.Volume || 0;
-                
-                tbody.innerHTML += `<tr>
-                    <td>${p}</td>
-                    <td>${v}</td>
-                </tr>`;
+        const container = document.getElementById('order_book_container');
+        if (!container) return;
+
+        // Xử lý dữ liệu an toàn để tránh undefined
+        if (data && Array.isArray(data)) {
+            let html = '<table style="width:100%;">';
+            data.slice(0, 10).forEach(item => {
+                // Lấy giá trị với fallback an toàn
+                const price = item.p ?? '0'; 
+                const vol = item.v ?? '0';
+                html += `<tr><td>${price}</td><td>${vol}</td></tr>`;
             });
-        } catch (error) {
-            console.error("Lỗi cập nhật:", error);
+            html += '</table>';
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = "Đang chờ dữ liệu...";
         }
+    } catch (error) {
+        console.error("Lỗi:", error);
+        document.getElementById('order_book_container').innerHTML = "Lỗi load data";
     }
+}
     
     
     function updateOrderBookUI(data) {
