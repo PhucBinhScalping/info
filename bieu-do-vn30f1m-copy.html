@@ -146,7 +146,6 @@
     let currentSymbol = 'VN30F1M';
     let apiInterval = null;
     let ws = null;
-    // THAY LINK NÀY BẰNG LINK VERCEL CỦA BẠN
     const VERCEL_PROXY = "https://phucbinhscalping-github-io.vercel.app/api/vps-data";
 
     window.onload = function() {
@@ -172,7 +171,6 @@
 
     async function fetchVPSData() {
         try {
-            // Gọi qua Proxy Vercel
             const response = await fetch(`${VERCEL_PROXY}?symbol=${currentSymbol}`);
             const data = await response.json();
             
@@ -211,7 +209,6 @@
     }
 
     function initOrderBookSocket() {
-        // Socket.io cần cấu hình socket-io-client
         const socket = io("https://tradingviewrealtime.vps.com.vn", {
             transports: ['websocket'],
             path: '/socket.io'
