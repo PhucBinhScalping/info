@@ -225,6 +225,43 @@
             }
         });
     }
+
+
+    async function updateData() {
+        const apiUrl = 'https://bgapidatafeed.vps.com.vn/getps10pricesnapshot/41I1G7000,B';
+        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(apiUrl);
+        
+        try {
+            const res = await fetch(proxyUrl);
+            const rawData = await res.json();
+            
+            // LOG ĐỂ BẠN KIỂM TRA DỮ LIỆU THỰC TẾ
+            console.log("Dữ liệu nhận được từ VPS:", rawData);
+            
+            const tbody = document.getElementById('data-body');
+            if (!tbody) return; // Nếu chưa tìm thấy bảng thì dừng
+            
+            tbody.innerHTML = '';
+            
+            // Xử lý dữ liệu dựa trên cấu trúc thường thấy của VPS
+            // Nếu rawData là một object chứa list, hãy đổi thành rawData.list hoặc rawData.data
+            const list = Array.isArray(rawData) ? rawData : (rawData.data || []);
+            
+            list.forEach(item => {
+                // Kiểm tra tên các key trong Console log nếu vẫn ra undefined
+                const p = item.p || item.price || item.Price || 0;
+                const v = item.v || item.vol || item.Volume || 0;
+                
+                tbody.innerHTML += `<tr>
+                    <td>${p}</td>
+                    <td>${v}</td>
+                </tr>`;
+            });
+        } catch (error) {
+            console.error("Lỗi cập nhật:", error);
+        }
+    }
+    
     
     function updateOrderBookUI(data) {
         document.getElementById('ob_asks').innerHTML = data.asks.slice(0, 5)
