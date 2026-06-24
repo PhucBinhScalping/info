@@ -4,95 +4,262 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Biểu đồ kỹ thuật Phái sinh - Phúc Bình Scalping</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #ffffff; color: #131722; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; display: flex; flex-direction: column; overflow: hidden; }
-        
-        .header { height: 45px; background-color: #f0f3fa; display: flex; align-items: center; padding: 0 20px; justify-content: space-between; border-bottom: 1px solid #e0e3eb; box-sizing: border-box; }
-        .back-link { text-decoration: none; font-weight: bold; font-size: 14px; }
-        
-        .tab-menu { height: 40px; background-color: #ffffff; display: flex; align-items: center; padding: 0 10px; gap: 5px; border-bottom: 1px solid #e0e3eb; }
-        .tab-item { background: none; border: none; color: #474f66; padding: 8px 16px; font-size: 13px; font-weight: bold; cursor: pointer; border-radius: 4px; transition: 0.2s; }
-        .tab-item.active { background-color: #e3f2fd; color: #1565c0; border-bottom: 2px solid #1565c0; }
-
-        .content-container { flex: 1; display: flex; flex-direction: row; }
-        .tab-content-block { display: none; width: 100%; height: 100%; }
-        .tab-content-block.active { display: flex; }
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #ffffff; color: #131722; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .header {
+            height: 45px; background-color: #f0f3fa; display: flex;
+            align-items: center; padding: 0 20px; justify-content: space-between;
+            border-bottom: 1px solid #e0e3eb; box-sizing: border-box;
+        }
+        .header .back-link {
+            text-decoration: none; font-weight: bold; font-size: 14px;
+        }
+        .tab-menu {
+            height: 40px; background-color: #ffffff; display: flex;
+            align-items: center; padding: 0 10px; gap: 5px;
+            border-bottom: 1px solid #e0e3eb; box-sizing: border-box;
+        }
+        .tab-item {
+            background: none; border: none; color: #474f66; padding: 8px 16px;
+            font-size: 13px; font-weight: bold; cursor: pointer; border-radius: 4px;
+            transition: 0.2s; display: flex; align-items: center; gap: 6px;
+        }
+        .tab-item:hover { background-color: #f0f3fa; color: #131722; }
+        .tab-item.active {
+            background-color: #e3f2fd; color: #1565c0; border-bottom: 2px solid #1565c0;
+            border-radius: 4px 4px 0 0;
+        }
+        .btn-add {
+            background-color: #e8f5e9; color: #2e7d32; border: 1px dashed #2e7d32;
+            padding: 5px 12px; font-size: 12px; font-weight: bold; cursor: pointer; border-radius: 4px;
+        }
+        .content-container {
+            flex: 1; width: 100%; height: calc(100% - 85px); 
+            display: flex; flex-direction: row; background-color: #ffffff;
+        }
+        .tab-content-block {
+            display: none; width: 100%; height: 100%; flex-direction: row;
+        }
+        .tab-content-block.active {
+            display: flex;
+        }
         .chart-section { flex: 1; height: 100%; }
-
-        /* Sidebar Sidebar-section (Khung đỏ bên phải) */
-        .sidebar-section { width: 360px; height: 100%; border-left: 1px solid #e0e3eb; background-color: #ffffff; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        
-        .vps-widget-header { font-size: 32px; font-weight: bold; color: #00c853; margin-bottom: 4px; }
-        .vps-widget-sub { font-size: 13px; color: #707a8a; margin-bottom: 20px; }
-        .vps-main-price { font-size: 52px; font-weight: 500; color: #00c853; margin-bottom: 5px; letter-spacing: -1px; }
-        .vps-change { font-size: 16px; font-weight: bold; color: #00c853; margin-bottom: 20px; }
-        
-        .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f3fa; font-size: 13px; }
+        .sidebar-section { 
+            width: 360px; height: 100%; border-left: 1px solid #e0e3eb; 
+            background-color: #ffffff; box-sizing: border-box;
+            padding: 25px 20px; display: flex; flex-direction: column;
+        }
+        .vps-widget-header {
+            font-size: 32px; font-weight: bold; color: #00c853; margin-bottom: 4px;
+        }
+        .vps-widget-sub {
+            font-size: 13px; color: #707a8a; margin-bottom: 20px;
+        }
+        .vps-main-price {
+            font-size: 52px; font-weight: 500; color: #00c853; 
+            font-family: -apple-system, BlinkMacSystemFont, "Trebuchet MS", Roboto, sans-serif;
+            margin-bottom: 5px; letter-spacing: -1px;
+        }
+        .vps-change {
+            font-size: 16px; font-weight: bold; color: #00c853; margin-bottom: 30px;
+        }
+        .info-row {
+            display: flex; justify-content: space-between; padding: 12px 0;
+            border-bottom: 1px solid #f0f3fa; font-size: 14px;
+        }
         .info-label { color: #707a8a; }
         .info-value { font-weight: 600; color: #1e222d; }
-
-        /* Style bảng sổ lệnh và lịch sử */
-        .table-title { font-size: 14px; font-weight: bold; margin: 20px 0 10px 0; border-bottom: 1px solid #e0e3eb; padding-bottom: 5px; }
-        .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        .data-table th { color: #707a8a; text-align: left; padding: 5px 0; }
-        .color-up { color: #00c853; } .color-down { color: #d50000; }
-        
+        .color-up { color: #00c853 !important; }     
+        .color-down { color: #d50000 !important; }   
+        .color-ref { color: #ffaa00 !important; }    
         iframe { width: 100%; height: 100%; border: none; }
+        /* Style cho nút đóng */
+        .close-btn { 
+            margin-left: 10px; 
+            cursor: pointer; 
+            color: red; 
+            font-weight: bold; 
+            display: inline-block; /* Quan trọng */
+            padding: 2px 5px;
+            z-index: 100; /* Đưa nút lên trên */
+        }
+        .close-btn:hover { background: #ffcdd2; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <a href="index.html" class="back-link" style="color: #ffb700;">⬅ Quay lại Trang chủ</a>
-        <div style="font-weight: bold; color: #ffb700;">Dữ liệu được lấy trực tiếp từ Chứng khoán VPS</div>
-        <div style="font-weight: bold; color: #ffb700;">SĐT: 0853.525.379</div>
+        <a href="index.html" class="back-link" style="flex: 1; text-align: left; color: #ffb700;">⬅ Quay lại Trang chủ</a>
+        <div style="flex: 2; text-align: center; font-size: 18px; font-weight: bold; color: #ffb700; letter-spacing: 0.5px;">
+             Dữ liệu được lấy trực tiếp từ Công ty Cổ phần Chứng khoán VPS
+        </div>
+        <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #ffb700;">
+            SĐT: 0853.525.379 - ID VPS: BOR5
+        </div>
     </div>
 
-    <div class="tab-menu">
-        <button class="tab-item active" onclick="switchTab(event, 'block1', 'VN30F1M')">📊 VN30F1M (5 Phút)</button>
-        <button class="tab-item" onclick="switchTab(event, 'block2', 'VN30F1M')">📊 VN30F1M (15 Phút)</button>
+    <div class="tab-menu" id="mainTabMenu">
+        <button class="tab-item active" id="tab_base" onclick="switchTab(event, 'block_vn30f1m_5m', 'VN30F1M')">📊 VN30F1M (5 Phút)</button>
+        <button class="tab-item" onclick="switchTab(event, 'block_vn30f1m_15m', 'VN30F1M')">📊 VN30F1M (15 Phút)</button>
+        <button class="tab-item" onclick="switchTab(event, 'block_vnindex', 'VNINDEX')">📈 VNINDEX (Ngày)</button>
+        <button class="btn-add" onclick="addNewChart()">+ Thêm biểu đồ</button>
     </div>
 
-    <div class="content-container">
-        <div id="block1" class="tab-content-block active"><div class="chart-section"><iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=5&theme=light&lang=vi"></iframe></div></div>
-        <div id="block2" class="tab-content-block"><div class="chart-section"><iframe src="https://web5.vps.com.vn/?sym=VN30F1M&interval=15&theme=light&lang=vi"></iframe></div></div>
+    <div class="content-container" id="mainContent">
+        <div id="block_vn30f1m_5m" class="tab-content-block active">
+            <div class="chart-section"><iframe src="https://chart.vps.com.vn/tv/?symbol=VN30F1M&allowFullscreen=true&resolution=5&lang=vi&theme=light"></iframe></div>
+        </div>
+        <div id="block_vn30f1m_15m" class="tab-content-block">
+            <div class="chart-section"><iframe src="https://chart.vps.com.vn/tv/?symbol=VN30F1M&allowFullscreen=true&resolution=15&lang=vi&theme=light"></iframe></div>
+        </div>
+        <div id="block_vnindex" class="tab-content-block">
+            <div class="chart-section"><iframe src="https://chart.vps.com.vn/tv/?symbol=VNINDEX&allowFullscreen=true&resolution=D&lang=vi&theme=light"></iframe></div>
+        </div>
 
-        <!-- Sidebar bên phải -->
         <div class="sidebar-section">
             <div id="display_symbol" class="vps-widget-header">VN30F1M</div>
-            <div class="vps-widget-sub">Hợp đồng tương lai chỉ số VN30</div>
-            <div id="display_price" class="vps-main-price">1991.40</div>
-            <div id="display_change" class="vps-change color-up">↑ +6.70 (0.34%)</div>
-            
-            <div class="info-row"><span class="info-label">Mở cửa</span><span class="info-value">1984.70</span></div>
-            <div class="info-row"><span class="info-label">Cao nhất</span><span class="info-value">2012.40</span></div>
-            <div class="info-row"><span class="info-label">Thấp nhất</span><span class="info-value">1981.50</span></div>
-            <div class="info-row"><span class="info-label">Tham chiếu</span><span class="info-value">1984.70</span></div>
-
-            <div class="table-title">Sổ lệnh (Đặt mua/bán)</div>
-            <table class="data-table">
-                <thead><tr><th>Mua</th><th>Giá</th><th>Bán</th></tr></thead>
-                <tbody id="ob-body">
-                    <tr><td class="color-up">10</td><td>1991.4</td><td class="color-down">5</td></tr>
-                </tbody>
-            </table>
-
-            <div class="table-title">Lịch sử khớp lệnh</div>
-            <table class="data-table">
-                <thead><tr><th>Thời gian</th><th>Giá</th><th>KL</th></tr></thead>
-                <tbody id="th-body">
-                    <tr><td>23:49:24</td><td class="color-up">1991.4</td><td>2</td></tr>
-                </tbody>
-            </table>
+            <div id="display_desc" class="vps-widget-sub">Hợp đồng tương lai chỉ số VN30</div>
+            <div id="display_price" class="vps-main-price">---.--</div>
+            <div id="display_change" class="vps-change">--.-- (--.--%)</div>
+            <div class="info-row"><span class="info-label">Mở cửa</span><span id="val_open" class="info-value">---.--</span></div>
+            <div class="info-row"><span class="info-label">Cao nhất</span><span id="val_high" class="info-value">---.--</span></div>
+            <div class="info-row"><span class="info-label">Thấp nhất</span><span id="val_low" class="info-value">---.--</span></div>
+            <div class="info-row"><span class="info-label">Tham chiếu</span><span id="val_prev" class="info-value">---.--</span></div>
         </div>
     </div>
 
 <script>
-    function switchTab(e, id, sym) {
-        document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
-        e.currentTarget.classList.add('active');
-        document.querySelectorAll('.tab-content-block').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
+    let currentSymbol = 'VN30F1M';
+    let apiInterval = null;
+    window.onload = function() {
+        fetchVPSData();
+        apiInterval = setInterval(fetchVPSData, 500); // Cập nhật liên tục mỗi 2 giây
+    };
+
+    function switchTab(event, blockId, symbol) {
+        document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        
+        document.querySelectorAll('.tab-content-block').forEach(block => block.classList.remove('active'));
+        document.getElementById(blockId).classList.add('active');
+        
+        currentSymbol = symbol;
+        document.getElementById('display_symbol').innerText = symbol;
+        document.getElementById('display_desc').innerText = symbol === 'VN30F1M' ? "Hợp đồng tương lai chỉ số VN30" : "Chỉ số VN-Index Việt Nam";
+        
+        document.getElementById('display_price').innerText = "⏳...";
+        document.getElementById('display_change').innerText = "--.-- (--.--%)";
+        
+        fetchVPSData();
+    }
+
+    async function fetchVPSData() {
+        try {
+            // Lấy mốc thời gian thực hiện tại
+            const toTime = Math.floor(Date.now() / 1000);
+            // Lùi hẳn về 24h trước để quét trọn vẹn dữ liệu từ lúc mở cửa phiên sáng
+            const fromTime = toTime - 86400; 
+
+            const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${currentSymbol}&resolution=1&from=${fromTime}&to=${toTime}&countback=500`;
+            
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data && data.s === "ok" && data.c && data.c.length > 0) {
+                const len = data.c.length;
+                const currentPrice = data.c[len - 1]; // Giá khớp real-time mới nhất
+                const sessionOpenPrice = data.o[0];    // Giá mở cửa chuẩn của phiên
+                
+                // Thuật toán quét chính xác giá Cao nhất và Thấp nhất từ đầu ngày
+                let sessionHighPrice = data.h[0];
+                let sessionLowPrice = data.l[0];
+                for (let i = 0; i < len; i++) {
+                    if (data.h[i] > sessionHighPrice) sessionHighPrice = data.h[i];
+                    if (data.l[i] < sessionLowPrice) sessionLowPrice = data.l[i];
+                }
+                
+                // Lấy giá đóng cửa của cây nến đầu tiên trong chuỗi dữ liệu làm mốc Tham chiếu tạm thời
+                const referencePrice = data.o[0]; 
+                const diff = currentPrice - referencePrice;
+                const pct = (diff / referencePrice) * 100;
+                const prefix = diff > 0 ? "↑ +" : (diff < 0 ? "↓ " : "");
+                
+                // Đổi màu chữ theo trạng thái giá
+                let tradeColor = "color-ref";
+                if (diff > 0) tradeColor = "color-up";   // Tăng - Xanh lá
+                if (diff < 0) tradeColor = "color-down"; // Giảm - Đỏ
+                
+                const pEl = document.getElementById('display_price');
+                const cEl = document.getElementById('display_change');
+                
+                // Hiển thị số mảnh lên màn hình Live
+                pEl.innerText = Number(currentPrice).toFixed(2);
+                pEl.className = `vps-main-price ${tradeColor}`;
+                document.getElementById('display_symbol').className = `vps-widget-header ${tradeColor}`;
+                
+                cEl.innerText = `${prefix}${diff.toFixed(2)} (${pct.toFixed(2)}%)`;
+                cEl.className = `vps-change ${tradeColor}`;
+                
+                // Đồng bộ 4 thông số kỹ thuật bên dưới sidebar
+                document.getElementById('val_open').innerText = Number(sessionOpenPrice).toFixed(2);
+                document.getElementById('val_high').innerText = Number(sessionHighPrice).toFixed(2);
+                document.getElementById('val_low').innerText = Number(sessionLowPrice).toFixed(2);
+                document.getElementById('val_prev').innerText = Number(referencePrice).toFixed(2);
+            }
+        } catch (err) {
+            console.error("Lỗi kết nối DataFeed VPS:", err);
+        }
+    }
+
+    // 1. Hàm chuyển tab cơ bản
+    function switchTab(event, blockId, symbol) {
+        document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        
+        document.querySelectorAll('.tab-content-block').forEach(block => block.classList.remove('active'));
+        document.getElementById(blockId).classList.add('active');
+        currentSymbol = symbol;
+    }
+
+    // 2. Hàm thêm mới biểu đồ
+    function addNewChart() {
+        const id = "chart_" + Date.now();
+        const symbol = "VN30F1M";
+        const res = "D";
+        
+        // Tạo nút Tab
+        const newTab = document.createElement("button");
+        newTab.className = "tab-item";
+        newTab.innerHTML = `📊 ${symbol} (${res}) <span class="close-btn" id="btn_${id}">×</span>`;
+        newTab.onclick = (e) => switchTab(e, id, symbol);
+        document.getElementById("mainTabMenu").insertBefore(newTab, document.querySelector(".btn-add"));
+        
+        // Tạo khối nội dung
+        const newContent = document.createElement("div");
+        newContent.id = id;
+        newContent.className = "tab-content-block";
+        newContent.innerHTML = `<div class="chart-section"><iframe src="https://chart.vps.com.vn/tv/?symbol=${symbol}&allowFullscreen=true&resolution=${res}&lang=vi&theme=light"></iframe></div>`;
+        document.getElementById("mainContent").insertBefore(newContent, document.querySelector(".sidebar-section"));
+
+        // Gắn sự kiện xóa bằng addEventListener (tránh lỗi xung đột click)
+        document.getElementById(`btn_${id}`).addEventListener('click', function(e) {
+            e.stopPropagation(); // Ngăn chuyển tab
+            const tabEl = newTab;
+            const contentEl = newContent;
+            tabEl.remove();
+            contentEl.remove();
+            // Quay lại tab đầu tiên
+            document.querySelectorAll('.tab-item')[0].click();
+        });
+        
+        // Tự động chuyển đến tab mới
+        newTab.click();
     }
 </script>
 </body>
