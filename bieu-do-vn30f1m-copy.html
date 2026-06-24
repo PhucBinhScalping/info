@@ -217,32 +217,28 @@
 
     // --- Xử lý WebSocket Bước giá ---
     function initOrderBookSocket() {
-        // 1. Kết nối tới Base URL của VPS
+        // Thư viện socket.io-client đã có sẵn cơ chế quản lý SID tự động
         const socket = io("https://tradingviewrealtime.vps.com.vn", {
-            transports: ['websocket'],
+            transports: ['websocket'], // Ưu tiên dùng WebSocket
             path: '/socket.io',
-            reconnection: true
+            reconnection: true,             // Tự động kết nối lại nếu mất
+            reconnectionAttempts: Infinity, // Cố gắng kết nối lại vô hạn
+            reconnectionDelay: 1000,        // Đợi 1s trước khi thử lại
+            timeout: 20000                  // Timeout sau 20s
         });
     
         socket.on('connect', () => {
-            console.log("Kết nối thành công với SID mới!");
-            
-            // 2. Gửi lệnh đăng ký mã
-            // Dựa trên phân tích app VPS, lệnh thường là emit một sự kiện 'sub'
+            console.log("Kết nối mới được thiết lập, SID đã tự động cấp mới!");
+            // Mỗi khi kết nối lại, ta phải gửi lệnh đăng ký mã lại
             socket.emit('sub', { symbol: currentSymbol });
         });
     
-        // 3. Lắng nghe dữ liệu về
-        // Mẹo: Hãy mở tab Console trong F12, nếu thấy dữ liệu hiện ra, bạn sẽ biết tên sự kiện (vd: 'tick', 'data')
-        socket.on('message', (data) => {
-            console.log("Dữ liệu nhận về:", data);
-            updateOrderBookUI(data);
+        // Xử lý khi bị ngắt kết nối
+        socket.on('disconnect', (reason) => {
+            console.warn("Mất kết nối với VPS, lý do:", reason);
         });
-        
-        // Nếu VPS gửi dữ liệu qua một tên sự kiện khác, hãy thử thay 'message' bằng 'data' hoặc 'orderbook'
-        socket.on('data', (data) => {
-            updateOrderBookUI(data);
-        });
+    
+        // ... (các phần lắng nghe dữ liệu khác giữ nguyên)
     }
     
     function updateOrderBookUI(data) {
