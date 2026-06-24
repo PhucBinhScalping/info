@@ -6,7 +6,6 @@
     <title>Biểu đồ kỹ thuật Phái sinh - Phúc Bình Scalping</title>
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="apple-touch-icon" href="logo.png">
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -54,7 +53,7 @@
         .sidebar-section { 
             width: 360px; height: 100%; border-left: 1px solid #e0e3eb; 
             background-color: #ffffff; box-sizing: border-box;
-            padding: 25px 20px; display: flex; flex-direction: column;
+            padding: 25px 20px; display: flex; flex-direction: column; overflow-y: auto;
         }
         .vps-widget-header {
             font-size: 32px; font-weight: bold; color: #00c853; margin-bottom: 4px;
@@ -76,18 +75,13 @@
         }
         .info-label { color: #707a8a; }
         .info-value { font-weight: 600; color: #1e222d; }
-        .color-up { color: #00c853 !important; }    
-        .color-down { color: #d50000 !important; }   
+        .color-up { color: #00c853 !important; }      
+        .color-down { color: #d50000 !important; }    
         .color-ref { color: #ffaa00 !important; }    
         iframe { width: 100%; height: 100%; border: none; }
         .close-btn { 
-            margin-left: 10px; 
-            cursor: pointer; 
-            color: red; 
-            font-weight: bold; 
-            display: inline-block; 
-            padding: 2px 5px;
-            z-index: 100;
+            margin-left: 10px; cursor: pointer; color: red; font-weight: bold; 
+            display: inline-block; padding: 2px 5px; z-index: 100;
         }
         .close-btn:hover { background: #ffcdd2; }
     </style>
@@ -97,7 +91,7 @@
     <div class="header">
         <a href="index.html" class="back-link" style="flex: 1; text-align: left; color: #ffb700;">⬅ Quay lại Trang chủ</a>
         <div style="flex: 2; text-align: center; font-size: 18px; font-weight: bold; color: #ffb700; letter-spacing: 0.5px;">
-             Dữ liệu được lấy trực tiếp từ Công ty Cổ phần Chứng khoán VPS
+              Dữ liệu được lấy trực tiếp từ Công ty Cổ phần Chứng khoán VPS
         </div>
         <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #ffb700;">
             SĐT: 0853.525.379 - ID VPS: BOR5
@@ -132,47 +126,68 @@
             <div class="info-row"><span class="info-label">Thấp nhất</span><span id="val_low" class="info-value">---.--</span></div>
             <div class="info-row"><span class="info-label">Tham chiếu</span><span id="val_prev" class="info-value">---.--</span></div>
             
-            <div style="margin-top: 20px; border-top: 2px solid #e0e3eb; padding-top: 10px;">
-                <div style="font-weight: bold; margin-bottom: 5px;">Bước giá (Real-time)</div>
-                <div id="order_book_container" style="font-family: monospace; font-size: 12px;">
-                    <div id="ob_asks" style="color: #d50000;">Đang tải...</div>
-                    <div id="ob_bids" style="color: #00c853;"></div>
-                </div>
-            </div>
+            <h4 style="margin-top:20px; color:#131722;">10 Bước Giá</h4>
+            <table id="order-book-table" style="width:100%; border-collapse:collapse; text-align:center; font-size:12px;">
+                <thead>
+                    <tr style="background:#f0f3fa; color:#474f66;">
+                        <th style="padding:5px;">KL Mua</th><th>Giá Mua</th><th>Giá Bán</th><th>KL Bán</th>
+                    </tr>
+                </thead>
+                <tbody id="ob-body"></tbody>
+            </table>
         </div>
     </div>
 
 <script>
     let currentSymbol = 'VN30F1M';
     let apiInterval = null;
-    let ws = null;
-    const VERCEL_PROXY = "https://phucbinhscalping-github-io.vercel.app/api/vps-data";
-
     window.onload = function() {
         fetchVPSData();
-        apiInterval = setInterval(fetchVPSData, 200);
-        update10gia();
-        initOrderBookSocket();
+        apiInterval = setInterval(() => {
+            fetchVPSData();
+            updateOrderBook();
+        }, 2000);
+        updateOrderBook();
     };
+
+    async function updateOrderBook() {
+        try {
+            const [resB, resS] = await Promise.all([
+                fetch('/api/proxy?side=B').then(r => r.json()),
+                fetch('/api/proxy?side=S').then(r => r.json())
+            ]);
+            const tbody = document.getElementById('ob-body');
+            tbody.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const buy = resB[i] || { p: '-', v: '-' };
+                const sell = resS[i] || { p: '-', v: '-' };
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="color:#00c853; padding:3px 0;">${buy.v}</td>
+                        <td style="font-weight:bold">${buy.p}</td>
+                        <td style="font-weight:bold">${sell.p}</td>
+                        <td style="color:#d50000">${sell.v}</td>
+                    </tr>
+                `;
+            }
+        } catch (err) { console.error("Lỗi:", err); }
+    }
 
     function switchTab(event, blockId, symbol) {
         document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
         event.currentTarget.classList.add('active');
-        
         document.querySelectorAll('.tab-content-block').forEach(block => block.classList.remove('active'));
         document.getElementById(blockId).classList.add('active');
-        
         currentSymbol = symbol;
-        document.getElementById('display_symbol').innerText = symbol;
-        document.getElementById('display_desc').innerText = symbol === 'VN30F1M' ? "Hợp đồng tương lai chỉ số VN30" : "Chỉ số VN-Index Việt Nam";
-        
-        document.getElementById('display_price').innerText = "⏳...";
         fetchVPSData();
     }
 
     async function fetchVPSData() {
         try {
-            const response = await fetch(`${VERCEL_PROXY}?symbol=${currentSymbol}`);
+            const toTime = Math.floor(Date.now() / 1000);
+            const fromTime = toTime - 86400; 
+            const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${currentSymbol}&resolution=1&from=${fromTime}&to=${toTime}&countback=500`;
+            const response = await fetch(url);
             const data = await response.json();
             
             if (data && data.s === "ok" && data.c && data.c.length > 0) {
@@ -189,9 +204,8 @@
                 const diff = currentPrice - referencePrice;
                 const pct = (diff / referencePrice) * 100;
                 const prefix = diff > 0 ? "↑ +" : (diff < 0 ? "↓ " : "");
-                let tradeColor = "color-ref";
-                if (diff > 0) tradeColor = "color-up";
-                if (diff < 0) tradeColor = "color-down";
+                let tradeColor = diff > 0 ? "color-up" : (diff < 0 ? "color-down" : "color-ref");
+                
                 const pEl = document.getElementById('display_price');
                 const cEl = document.getElementById('display_change');
                 pEl.innerText = Number(currentPrice).toFixed(2);
@@ -204,88 +218,25 @@
                 document.getElementById('val_low').innerText = Number(sessionLowPrice).toFixed(2);
                 document.getElementById('val_prev').innerText = Number(referencePrice).toFixed(2);
             }
-        } catch (err) {
-            console.error("Lỗi kết nối:", err);
-        }
-    }
-
-    function initOrderBookSocket() {
-        const socket = io("https://tradingviewrealtime.vps.com.vn", {
-            transports: ['websocket'],
-            path: '/socket.io'
-        });
-
-        socket.on('connect', () => {
-            console.log("Đã kết nối Socket!");
-            socket.emit('sub', { symbol: currentSymbol });
-        });
-
-        socket.on('message', (data) => {
-            if(data && data.asks && data.bids) {
-                updateOrderBookUI(data);
-            }
-        });
-    }
-
-
-
-    async function update10gia() {
-    // Gọi đến file api/proxy.js mà bạn đã tạo trên Vercel
-    const proxyUrl = '/api/proxy'; 
-    
-    try {
-        const res = await fetch(proxyUrl);
-        const data = await res.json();
-        
-        const container = document.getElementById('order_book_container');
-        if (!container) return;
-
-        // Xử lý dữ liệu an toàn để tránh undefined
-        if (data && Array.isArray(data)) {
-            let html = '<table style="width:100%;">';
-            data.slice(0, 10).forEach(item => {
-                // Lấy giá trị với fallback an toàn
-                const price = item.p ?? '0'; 
-                const vol = item.v ?? '0';
-                html += `<tr><td>${price}</td><td>${vol}</td></tr>`;
-            });
-            html += '</table>';
-            container.innerHTML = html;
-        } else {
-            container.innerHTML = "Đang chờ dữ liệu...";
-        }
-    } catch (error) {
-        console.error("Lỗi:", error);
-        document.getElementById('order_book_container').innerHTML = "Lỗi load data";
-    }
-}
-    
-    
-    function updateOrderBookUI(data) {
-        document.getElementById('ob_asks').innerHTML = data.asks.slice(0, 5)
-            .map(i => `Bán: ${i.price} - ${i.vol}`).join('<br>');
-        document.getElementById('ob_bids').innerHTML = data.bids.slice(0, 5)
-            .map(i => `Mua: ${i.price} - ${i.vol}`).join('<br>');
+        } catch (err) { console.error("Lỗi:", err); }
     }
 
     function addNewChart() {
         const id = "chart_" + Date.now();
         const symbol = "VN30F1M";
-        const res = "D";
         const newTab = document.createElement("button");
         newTab.className = "tab-item";
-        newTab.innerHTML = `📊 ${symbol} (${res}) <span class="close-btn" id="btn_${id}">×</span>`;
+        newTab.innerHTML = `📊 ${symbol} (D) <span class="close-btn" id="btn_${id}">×</span>`;
         newTab.onclick = (e) => switchTab(e, id, symbol);
         document.getElementById("mainTabMenu").insertBefore(newTab, document.querySelector(".btn-add"));
         const newContent = document.createElement("div");
         newContent.id = id;
         newContent.className = "tab-content-block";
-        newContent.innerHTML = `<div class="chart-section"><iframe src="https://chart.vps.com.vn/tv/?symbol=${symbol}&allowFullscreen=true&resolution=${res}&lang=vi&theme=light"></iframe></div>`;
+        newContent.innerHTML = `<div class="chart-section"><iframe src="https://chart.vps.com.vn/tv/?symbol=${symbol}&resolution=D&theme=light"></iframe></div>`;
         document.getElementById("mainContent").insertBefore(newContent, document.querySelector(".sidebar-section"));
         document.getElementById(`btn_${id}`).addEventListener('click', function(e) {
             e.stopPropagation();
-            newTab.remove();
-            newContent.remove();
+            newTab.remove(); newContent.remove();
             document.querySelectorAll('.tab-item')[0].click();
         });
         newTab.click();
