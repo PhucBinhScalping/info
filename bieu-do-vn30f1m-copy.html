@@ -6,6 +6,7 @@
     <title>Biểu đồ kỹ thuật Phái sinh - Phúc Bình Scalping</title>
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="apple-touch-icon" href="logo.png">
+    <script src="api/config.js"></script>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -161,6 +162,31 @@
         updateOrderBook();
     };
 
+
+
+    async function getStockData(symbol) {
+        let url = '';
+        
+        // 1. Kiểm tra phái sinh
+        if (API_CONFIG.PHAI_SINH.symbols.includes(symbol)) {
+            // Lưu ý: Phái sinh cần thêm ,B hoặc ,S tùy mục đích
+            url = API_CONFIG.PHAI_SINH.baseUrl + symbol + ',B'; 
+        } 
+        // 2. Kiểm tra cổ phiếu (Dùng chung baseUrl vì bạn dùng chung API 'getliststockdata')
+        else {
+            url = API_CONFIG.HOSE.baseUrl + symbol;
+        }
+        
+        try {
+            const response = await fetch(url);
+            return await response.json();
+        } catch (err) {
+            console.error("Lỗi fetch dữ liệu cho mã " + symbol, err);
+            return null;
+        }
+    }
+
+
     // Hàm giải mã chuỗi ndata đặc thù của VPS
     function parseNdata(ndataString) {
         if (!ndataString) return [];
@@ -185,15 +211,21 @@
     }
 
     async function updateOrderBook() {
+        // Lấy mã code an toàn
+        const code = await getSymbolCode(currentSymbol);
+        
+        // Nếu mã bị lỗi hoặc trống, không làm gì cả
+        if (!code) {
+            console.error("Không tìm thấy mã cho:", currentSymbol);
+            return;
+        }
+
         try {
-            // Lưu ý: Nếu bạn gặp lỗi CORS khi chạy trực tiếp, 
-            // bạn bắt buộc phải gọi qua file /api/proxy.js của bạn
             const [resB, resS] = await Promise.all([
-                fetch('https://bgapidatafeed.vps.com.vn/getps10pricesnapshot/41I1G7000,B').then(r => r.json()),
-                fetch('https://bgapidatafeed.vps.com.vn/getps10pricesnapshot/41I1G7000,S').then(r => r.json())
+                fetch(`https://bgapidatafeed.vps.com.vn/getps10pricesnapshot/${code},B`).then(r => r.json()),
+                fetch(`https://bgapidatafeed.vps.com.vn/getps10pricesnapshot/${code},S`).then(r => r.json())
             ]);
 
-            // Xử lý dữ liệu thô từ chuỗi ndata
             const buyData = parseVPSNdata(resB.ndata);
             const sellData = parseVPSNdata(resS.ndata);
 
@@ -214,18 +246,22 @@
                 `;
             }
         } catch (err) { 
-            console.error("Lỗi:", err); 
+            console.error("Lỗi khi fetch mã " + code + ":", err); 
         }
     }
-
     // Chạy hàm này mỗi 2 giây
     setInterval(updateOrderBook, 200);
     updateOrderBook(); // Gọi lần đầu ngay khi tải xong trang
 
 
     async function fetchTradeHistory() {
+        // 1. Phải lấy mã code trước
+        const code = await getSymbolCode(currentSymbol);
+        
         try {
-            const url = 'https://bgapidatafeed.vps.com.vn/getliststocktrade_ps/41I1G7000?numpage=20&nextidx=-1';
+            // 2. Dùng dấu backtick (`) thay vì nháy đơn (') để ${code} hoạt động
+            const url = `https://bgapidatafeed.vps.com.vn/getliststocktrade_ps/${code}?numpage=20&nextidx=-1`;
+            
             const response = await fetch(url);
             const result = await response.json();
             const tbody = document.getElementById('trade-history-body');
@@ -233,7 +269,6 @@
             if (result && result.data) {
                 tbody.innerHTML = '';
                 result.data.slice(0, 20).forEach(item => {
-                    // Xác định Mua hay Bán
                     const sideText = item.side === 'S' ? 'B' : 'M';
                     const sideColor = item.side === 'S' ? '#d50000' : '#00c853';
                     
@@ -247,7 +282,9 @@
                     `;
                 });
             }
-        } catch (err) { console.error("Lỗi lấy lịch sử:", err); }
+        } catch (err) { 
+            console.error("Lỗi lấy lịch sử cho mã " + code + ":", err); 
+        }
     }
 
     // Cập nhật trong setInterval hiện tại của bạn:
@@ -259,11 +296,11 @@
 
 
     function switchTab(event, blockId, symbol) {
+        currentSymbol = symbol;
         document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
         event.currentTarget.classList.add('active');
         document.querySelectorAll('.tab-content-block').forEach(block => block.classList.remove('active'));
         document.getElementById(blockId).classList.add('active');
-        currentSymbol = symbol;
         fetchVPSData();
     }
 
