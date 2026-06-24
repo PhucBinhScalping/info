@@ -6,6 +6,7 @@
     <title>Biểu đồ kỹ thuật Phái sinh - Phúc Bình Scalping</title>
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="apple-touch-icon" href="logo.png">
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -216,18 +217,39 @@
 
     // --- Xử lý WebSocket Bước giá ---
     function initOrderBookSocket() {
-        ws = new WebSocket('wss://tradingviewrealtime.vps.com.vn/socket.io/?EIO=4&transport=websocket&sid=cJssznmzOu8hCpF3FpPq');
-        ws.onopen = () => {
-            ws.send(JSON.stringify({ type: "sub", symbol: currentSymbol }));
-        };
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.asks && data.bids) {
-                document.getElementById('ob_asks').innerHTML = data.asks.slice(0, 5).map(i => `Bán: ${i.price} - ${i.vol}`).join('<br>');
-                document.getElementById('ob_bids').innerHTML = data.bids.slice(0, 5).map(i => `Mua: ${i.price} - ${i.vol}`).join('<br>');
-            }
-        };
-        ws.onclose = () => setTimeout(initOrderBookSocket, 5000);
+        // Kết nối tới đúng endpoint của VPS
+        const socket = io("https://tradingviewrealtime.vps.com.vn", {
+            transports: ['websocket'],
+            path: '/socket.io'
+        });
+    
+        socket.on('connect', () => {
+            console.log("Đã kết nối Socket.io VPS");
+            // Gửi lệnh đăng ký mã - Bạn cần kiểm tra cấu trúc này trong tab Network -> Messages
+            // Thường là 'sub' hoặc 'join' kèm mã symbol
+            socket.emit('sub', { symbol: currentSymbol });
+        });
+    
+        socket.on('message', (data) => {
+            // VPS thường trả về dữ liệu ở đây hoặc qua một event cụ thể
+            console.log("Dữ liệu nhận được:", data);
+            updateOrderBookUI(data);
+        });
+    
+        // Nếu dữ liệu trả về qua một event tên là 'data' hoặc 'marketData'
+        socket.on('marketData', (data) => {
+            updateOrderBookUI(data);
+        });
+    }
+    
+    function updateOrderBookUI(data) {
+        // Giả sử data trả về có dạng: { asks: [...], bids: [...] }
+        if (data && data.asks && data.bids) {
+            document.getElementById('ob_asks').innerHTML = data.asks.slice(0, 5)
+                .map(i => `Bán: ${i.price} - ${i.vol}`).join('<br>');
+            document.getElementById('ob_bids').innerHTML = data.bids.slice(0, 5)
+                .map(i => `Mua: ${i.price} - ${i.vol}`).join('<br>');
+        }
     }
 
     function addNewChart() {
