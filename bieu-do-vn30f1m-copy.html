@@ -217,33 +217,37 @@
 
     // --- Xử lý WebSocket Bước giá ---
     function initOrderBookSocket() {
-        // Kết nối tới đúng endpoint của VPS
+        // 1. Khởi tạo kết nối Socket.io
         const socket = io("https://tradingviewrealtime.vps.com.vn", {
             transports: ['websocket'],
             path: '/socket.io'
         });
     
         socket.on('connect', () => {
-            console.log("Đã kết nối Socket.io VPS");
-            // Gửi lệnh đăng ký mã - Bạn cần kiểm tra cấu trúc này trong tab Network -> Messages
-            // Thường là 'sub' hoặc 'join' kèm mã symbol
-            socket.emit('sub', { symbol: currentSymbol });
+            console.log("Đã kết nối thành công tới server VPS!");
+            // 2. Đăng ký kênh (Subscribe) mã chứng khoán
+            // Bạn cần đổi 'VN30F1M' thành biến currentSymbol
+            socket.emit('subscribe', { symbol: currentSymbol }); 
         });
     
+        // 3. Lắng nghe sự kiện dữ liệu (Tên sự kiện tùy thuộc vào cấu trúc của VPS)
+        // Bạn hãy theo dõi tab "Messages" trong F12, nếu thấy tên sự kiện là 'data', 'tick', hay 'orderbook' 
+        // thì thay vào chỗ 'message' bên dưới.
         socket.on('message', (data) => {
-            // VPS thường trả về dữ liệu ở đây hoặc qua một event cụ thể
-            console.log("Dữ liệu nhận được:", data);
+            // Đây là nơi xử lý dữ liệu trả về
             updateOrderBookUI(data);
         });
     
-        // Nếu dữ liệu trả về qua một event tên là 'data' hoặc 'marketData'
-        socket.on('marketData', (data) => {
-            updateOrderBookUI(data);
+        socket.on('disconnect', () => {
+            console.log("Mất kết nối, đang thử lại...");
         });
     }
     
     function updateOrderBookUI(data) {
-        // Giả sử data trả về có dạng: { asks: [...], bids: [...] }
+        // Debug để biết cấu trúc dữ liệu VPS trả về là gì
+        console.log("Dữ liệu nhận được:", data); 
+    
+        // Giả sử sau khi debug, bạn thấy data có dạng { asks: [...], bids: [...] }
         if (data && data.asks && data.bids) {
             document.getElementById('ob_asks').innerHTML = data.asks.slice(0, 5)
                 .map(i => `Bán: ${i.price} - ${i.vol}`).join('<br>');
