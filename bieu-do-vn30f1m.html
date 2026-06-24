@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Biểu đồ kỹ thuật Phái sinh - Phúc Bình Scalping</title>
     <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -16,56 +17,82 @@
             align-items: center; padding: 0 20px; justify-content: space-between;
             border-bottom: 1px solid #e0e3eb; box-sizing: border-box;
         }
+        .header .back-link {
+            text-decoration: none; font-weight: bold; font-size: 14px;
+        }
         .tab-menu {
             height: 40px; background-color: #ffffff; display: flex;
             align-items: center; padding: 0 10px; gap: 5px;
-            border-bottom: 1px solid #e0e3eb; box-sizing: border-box; overflow-x: auto;
+            border-bottom: 1px solid #e0e3eb; box-sizing: border-box;
         }
         .tab-item {
             background: none; border: none; color: #474f66; padding: 8px 16px;
             font-size: 13px; font-weight: bold; cursor: pointer; border-radius: 4px;
-            transition: 0.2s; display: flex; align-items: center; gap: 6px; white-space: nowrap;
+            transition: 0.2s; display: flex; align-items: center; gap: 6px;
         }
         .tab-item:hover { background-color: #f0f3fa; color: #131722; }
         .tab-item.active {
             background-color: #e3f2fd; color: #1565c0; border-bottom: 2px solid #1565c0;
             border-radius: 4px 4px 0 0;
         }
-        .btn-add {
-            background-color: #e8f5e9; color: #2e7d32; border: 1px dashed #2e7d32;
-            padding: 5px 12px; font-size: 12px; font-weight: bold; cursor: pointer; border-radius: 4px;
-        }
         .content-container {
             flex: 1; width: 100%; height: calc(100% - 85px); 
             display: flex; flex-direction: row; background-color: #ffffff;
         }
-        .tab-content-block { display: none; width: 100%; height: 100%; flex-direction: row; }
-        .tab-content-block.active { display: flex; }
+        .tab-content-block {
+            display: none; width: 100%; height: 100%; flex-direction: row;
+        }
+        .tab-content-block.active {
+            display: flex;
+        }
         .chart-section { flex: 1; height: 100%; }
         .sidebar-section { 
             width: 360px; height: 100%; border-left: 1px solid #e0e3eb; 
             background-color: #ffffff; box-sizing: border-box;
             padding: 25px 20px; display: flex; flex-direction: column;
         }
-        .vps-widget-header { font-size: 32px; font-weight: bold; color: #00c853; margin-bottom: 4px; }
-        .vps-widget-sub { font-size: 13px; color: #707a8a; margin-bottom: 20px; }
-        .vps-main-price { font-size: 52px; font-weight: 500; color: #00c853; margin-bottom: 5px; letter-spacing: -1px; }
-        .vps-change { font-size: 16px; font-weight: bold; color: #00c853; margin-bottom: 30px; }
-        .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f3fa; font-size: 14px; }
+        .vps-widget-header {
+            font-size: 32px; font-weight: bold; color: #00c853; margin-bottom: 4px;
+        }
+        .vps-widget-sub {
+            font-size: 13px; color: #707a8a; margin-bottom: 20px;
+        }
+        .vps-main-price {
+            font-size: 52px; font-weight: 500; color: #00c853; 
+            font-family: -apple-system, BlinkMacSystemFont, "Trebuchet MS", Roboto, sans-serif;
+            margin-bottom: 5px; letter-spacing: -1px;
+        }
+        .vps-change {
+            font-size: 16px; font-weight: bold; color: #00c853; margin-bottom: 30px;
+        }
+        .info-row {
+            display: flex; justify-content: space-between; padding: 12px 0;
+            border-bottom: 1px solid #f0f3fa; font-size: 14px;
+        }
         .info-label { color: #707a8a; }
         .info-value { font-weight: 600; color: #1e222d; }
+        .color-up { color: #00c853 !important; }     
+        .color-down { color: #d50000 !important; }   
+        .color-ref { color: #ffaa00 !important; }    
         iframe { width: 100%; height: 100%; border: none; }
+        /* Thêm style nút đóng ở đây */
+        .close-x { margin-left: 10px; cursor: pointer; color: red; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div style="color: #ffb700; font-weight: bold;">PHÚC BÌNH SCALPING</div>
-        <div style="font-weight: bold; color: #ffb700;">SĐT: 0853.525.379</div>
+        <a href="index.html" class="back-link" style="flex: 1; text-align: left; color: #ffb700;">⬅ Quay lại Trang chủ</a>
+        <div style="flex: 2; text-align: center; font-size: 18px; font-weight: bold; color: #ffb700; letter-spacing: 0.5px;">
+             Dữ liệu được lấy trực tiếp từ Công ty Cổ phần Chứng khoán VPS
+        </div>
+        <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #ffb700;">
+            SĐT: 0853.525.379 - ID VPS: BOR5
+        </div>
     </div>
 
     <div class="tab-menu" id="mainTabMenu">
-        <button class="tab-item active" onclick="switchTab(event, 'block_vn30f1m_5m', 'VN30F1M')">📊 VN30F1M (5 Phút)</button>
+        <button class="tab-item active" id="tab_base" onclick="switchTab(event, 'block_vn30f1m_5m', 'VN30F1M')">📊 VN30F1M (5 Phút)</button>
         <button class="tab-item" onclick="switchTab(event, 'block_vn30f1m_15m', 'VN30F1M')">📊 VN30F1M (15 Phút)</button>
         <button class="tab-item" onclick="switchTab(event, 'block_vnindex', 'VNINDEX')">📈 VNINDEX (Ngày)</button>
         <button class="btn-add" onclick="addNewChart()">+ Thêm biểu đồ</button>
@@ -95,9 +122,9 @@
     let currentSymbol = 'VN30F1M';
 
     function switchTab(event, blockId, symbol) {
+        if (event.target.classList.contains('close-x')) return;
         document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
         if(event.currentTarget) event.currentTarget.classList.add('active');
-        
         document.querySelectorAll('.tab-content-block').forEach(block => block.classList.remove('active'));
         document.getElementById(blockId).classList.add('active');
         currentSymbol = symbol;
@@ -105,20 +132,26 @@
 
     function addNewChart() {
         const symbol = "VN30F1M";
-        const res = "5";
+        const res = "D";
         const id = "chart_" + Date.now();
-        
         const newTab = document.createElement("button");
         newTab.className = "tab-item";
-        newTab.innerHTML = `📊 ${symbol} (${res}p)`;
+        newTab.innerHTML = `📊 ${symbol} (${res}p) <span class="close-x" onclick="removeChart('${id}')">×</span>`;
         newTab.onclick = (e) => switchTab(e, id, symbol);
         document.getElementById("mainTabMenu").insertBefore(newTab, document.querySelector(".btn-add"));
-        
         const newContent = document.createElement("div");
         newContent.id = id;
         newContent.className = "tab-content-block";
         newContent.innerHTML = `<div class="chart-section"><iframe src="https://chart.vps.com.vn/tv/?symbol=${symbol}&resolution=${res}&lang=vi&theme=light"></iframe></div>`;
         document.getElementById("mainContent").insertBefore(newContent, document.querySelector(".sidebar-section"));
+    }
+
+    function removeChart(id) {
+        const tab = document.querySelector(`button[onclick*="${id}"]`);
+        const content = document.getElementById(id);
+        if (tab) tab.remove();
+        if (content) content.remove();
+        document.getElementById("tab_base").click();
     }
 </script>
 </body>
