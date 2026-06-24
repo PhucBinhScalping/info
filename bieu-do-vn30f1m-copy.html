@@ -186,6 +186,15 @@
         }
     }
 
+    async function getSymbolCode(symbol) {
+        // Nếu symbol đã là mã phái sinh (ví dụ '41I1G7000'), trả về nó luôn
+        if (API_CONFIG.PHAI_SINH.symbols.includes(symbol)) return symbol;
+        
+        // Nếu symbol là mã cổ phiếu (ví dụ 'HPG'), kiểm tra xem nó có trong danh sách không
+        if (API_CONFIG.HOSE.symbols.includes(symbol)) return symbol;
+        
+        return symbol; // Mặc định trả về symbol nếu không tìm thấy
+    }
 
     // Hàm giải mã chuỗi ndata đặc thù của VPS
     function parseNdata(ndataString) {
