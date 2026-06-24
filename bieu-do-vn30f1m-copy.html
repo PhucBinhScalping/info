@@ -53,16 +53,16 @@
         .sidebar-section { 
             width: 360px; height: 100%; border-left: 1px solid #e0e3eb; 
             background-color: #ffffff; box-sizing: border-box;
-            padding: 25px 20px; display: flex; flex-direction: column; overflow-y: auto;
+            padding: 15px 15px; display: flex; flex-direction: column; overflow-y: auto;
         }
         .vps-widget-header {
-            font-size: 32px; font-weight: bold; color: #00c853; margin-bottom: 4px;
+            font-size: 22px; font-weight: bold; color: #00c853; margin-bottom: 3px;
         }
         .vps-widget-sub {
             font-size: 13px; color: #707a8a; margin-bottom: 20px;
         }
         .vps-main-price {
-            font-size: 52px; font-weight: 500; color: #00c853; 
+            font-size: 36px; font-weight: 500; color: #00c853; 
             font-family: -apple-system, BlinkMacSystemFont, "Trebuchet MS", Roboto, sans-serif;
             margin-bottom: 5px; letter-spacing: -1px;
         }
@@ -71,7 +71,7 @@
         }
         .info-row {
             display: flex; justify-content: space-between; padding: 12px 0;
-            border-bottom: 1px solid #f0f3fa; font-size: 14px;
+            border-bottom: 1px solid #f0f3fa; font-size: 12px;
         }
         .info-label { color: #707a8a; }
         .info-value { font-weight: 600; color: #1e222d; }
@@ -126,7 +126,7 @@
             <div class="info-row"><span class="info-label">Thấp nhất</span><span id="val_low" class="info-value">---.--</span></div>
             <div class="info-row"><span class="info-label">Tham chiếu</span><span id="val_prev" class="info-value">---.--</span></div>
             
-            <h4 style="margin-top:20px; color:#131722;">10 Bước Giá</h4>
+            <h4 style="margin-top:20px; color:#131722;">Bước Giá</h4>
             <table id="order-book-table" style="width:100%; border-collapse:collapse; text-align:center; font-size:12px;">
                 <thead>
                     <tr style="background:#f0f3fa; color:#474f66;">
@@ -135,6 +135,17 @@
                 </thead>
                 <tbody id="ob-body"></tbody>
             </table>
+            <h4 style="margin-top:20px; color:#131722;">Lịch sử khớp lệnh</h4>
+            <div style="height: 200px; overflow-y: auto; font-size: 11px;">
+                <table style="width:100%; border-collapse:collapse; text-align:center;">
+                    <thead>
+                        <tr style="background:#f0f3fa; color:#474f66;">
+                            <th>Thời gian</th><th>Giá</th><th>KL</th><th>M/B</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trade-history-body"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -146,21 +157,53 @@
         apiInterval = setInterval(() => {
             fetchVPSData();
             updateOrderBook();
-        }, 2000);
+        }, 200);
         updateOrderBook();
     };
 
+    // Hàm giải mã chuỗi ndata đặc thù của VPS
+    function parseNdata(ndataString) {
+        if (!ndataString) return [];
+        return ndataString.split(String.fromCharCode(1)).map(item => {
+            const parts = item.split(':');
+            return { p: parts[0], v: parts[1] };
+        });
+    }
+
+// Hàm này giúp tách chuỗi "2008.9:1SOH2008.8:10..." thành mảng sạch
+    function parseVPSNdata(ndataString) {
+        if (!ndataString) return [];
+        
+        // Thay vì String.fromCharCode(1), hãy dùng chuỗi "SOH" trực tiếp
+        return ndataString.split("SOH").map(item => {
+            const parts = item.split(':');
+            return { 
+                p: parts[0] || '-', 
+                v: parts[1] || '-' 
+            };
+        });
+    }
+
     async function updateOrderBook() {
         try {
+            // Lưu ý: Nếu bạn gặp lỗi CORS khi chạy trực tiếp, 
+            // bạn bắt buộc phải gọi qua file /api/proxy.js của bạn
             const [resB, resS] = await Promise.all([
-                fetch('/api/proxy?side=B').then(r => r.json()),
-                fetch('/api/proxy?side=S').then(r => r.json())
+                fetch('https://bgapidatafeed.vps.com.vn/getps10pricesnapshot/41I1G7000,B').then(r => r.json()),
+                fetch('https://bgapidatafeed.vps.com.vn/getps10pricesnapshot/41I1G7000,S').then(r => r.json())
             ]);
+
+            // Xử lý dữ liệu thô từ chuỗi ndata
+            const buyData = parseVPSNdata(resB.ndata);
+            const sellData = parseVPSNdata(resS.ndata);
+
             const tbody = document.getElementById('ob-body');
             tbody.innerHTML = '';
-            for (let i = 0; i < 10; i++) {
-                const buy = resB[i] || { p: '-', v: '-' };
-                const sell = resS[i] || { p: '-', v: '-' };
+            
+            for (let i = 0; i < 5; i++) {
+                const buy = buyData[i] || { p: '-', v: '-' };
+                const sell = sellData[i] || { p: '-', v: '-' };
+                
                 tbody.innerHTML += `
                     <tr>
                         <td style="color:#00c853; padding:3px 0;">${buy.v}</td>
@@ -170,8 +213,50 @@
                     </tr>
                 `;
             }
-        } catch (err) { console.error("Lỗi:", err); }
+        } catch (err) { 
+            console.error("Lỗi:", err); 
+        }
     }
+
+    // Chạy hàm này mỗi 2 giây
+    setInterval(updateOrderBook, 200);
+    updateOrderBook(); // Gọi lần đầu ngay khi tải xong trang
+
+
+    async function fetchTradeHistory() {
+        try {
+            const url = 'https://bgapidatafeed.vps.com.vn/getliststocktrade_ps/41I1G7000?numpage=20&nextidx=-1';
+            const response = await fetch(url);
+            const result = await response.json();
+            const tbody = document.getElementById('trade-history-body');
+            
+            if (result && result.data) {
+                tbody.innerHTML = '';
+                result.data.slice(0, 20).forEach(item => {
+                    // Xác định Mua hay Bán
+                    const sideText = item.side === 'S' ? 'B' : 'M';
+                    const sideColor = item.side === 'S' ? '#d50000' : '#00c853';
+                    
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${item.time}</td>
+                            <td style="font-weight:bold">${item.lastPrice}</td>
+                            <td>${item.lastVol}</td>
+                            <td style="font-weight:bold; color:${sideColor}">${sideText}</td>
+                        </tr>
+                    `;
+                });
+            }
+        } catch (err) { console.error("Lỗi lấy lịch sử:", err); }
+    }
+
+    // Cập nhật trong setInterval hiện tại của bạn:
+    apiInterval = setInterval(() => {
+        fetchVPSData();
+        updateOrderBook();
+        fetchTradeHistory(); // Thêm dòng này vào
+    }, 200);
+
 
     function switchTab(event, blockId, symbol) {
         document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
