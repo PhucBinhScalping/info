@@ -258,37 +258,49 @@
             }
         }
     
-
-    // SỬA HÀM NÀY: Thêm kiểm tra event.target
+    // 1. Hàm chuyển tab cơ bản
     function switchTab(event, blockId, symbol) {
-        // Nếu click vào nút đóng (class 'close-btn'), không làm gì cả (dừng lại)
-        if (event.target.classList.contains('close-btn')) return;
-
         document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
         event.currentTarget.classList.add('active');
         
         document.querySelectorAll('.tab-content-block').forEach(block => block.classList.remove('active'));
         document.getElementById(blockId).classList.add('active');
-        
         currentSymbol = symbol;
-        // ... (phần code cập nhật dữ liệu của bạn giữ nguyên)
-        fetchVPSData();
     }
 
-    // SỬA HÀM NÀY: Cách đóng an toàn
-    function removeChart(id) {
-        const tab = document.querySelector(`button[onclick*="${id}"]`);
-        const content = document.getElementById(id);
+    // 2. Hàm thêm mới biểu đồ
+    function addNewChart() {
+        const id = "chart_" + Date.now();
+        const symbol = "VN30F1M";
+        const res = "D";
         
-        if (tab) tab.remove();
-        if (content) content.remove();
+        // Tạo nút Tab
+        const newTab = document.createElement("button");
+        newTab.className = "tab-item";
+        newTab.innerHTML = `📊 ${symbol} (${res}) <span class="close-btn" id="btn_${id}">×</span>`;
+        newTab.onclick = (e) => switchTab(e, id, symbol);
+        document.getElementById("mainTabMenu").insertBefore(newTab, document.querySelector(".btn-add"));
         
-        // Sau khi xóa, ép buộc chọn lại tab đầu tiên để không bị trống
-        const firstTab = document.querySelector('.tab-item');
-        if (firstTab) {
-            firstTab.click(); 
-        }
-    }
+        // Tạo khối nội dung
+        const newContent = document.createElement("div");
+        newContent.id = id;
+        newContent.className = "tab-content-block";
+        newContent.innerHTML = `<div class="chart-section"><iframe src="https://chart.vps.com.vn/tv/?symbol=${symbol}&allowFullscreen=true&resolution=${res}&lang=vi&theme=light"></iframe></div>`;
+        document.getElementById("mainContent").insertBefore(newContent, document.querySelector(".sidebar-section"));
+
+        // Gắn sự kiện xóa bằng addEventListener (tránh lỗi xung đột click)
+        document.getElementById(`btn_${id}`).addEventListener('click', function(e) {
+            e.stopPropagation(); // Ngăn chuyển tab
+            const tabEl = newTab;
+            const contentEl = newContent;
+            tabEl.remove();
+            contentEl.remove();
+            // Quay lại tab đầu tiên
+            document.querySelectorAll('.tab-item')[0].click();
+        });
+        
+        // Tự động chuyển đến tab mới
+        newTab.click();
 </script>
     
 </body>
