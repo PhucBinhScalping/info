@@ -150,7 +150,8 @@
 
     window.onload = function() {
         fetchVPSData();
-        apiInterval = setInterval(fetchVPSData, 2000); 
+        apiInterval = setInterval(fetchVPSData, 200);
+        update10gia();
         initOrderBookSocket();
     };
 
