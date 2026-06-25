@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Phúc Bình Scalping - Full Edition</title>
+    <title>Phúc Bình Scalping</title>
     <style>
         /* Thiết lập nền tảng */
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: sans-serif; overflow: hidden; background: #fff; }
@@ -120,7 +120,7 @@
         updateOrderBook();
     };
     const symbolMap = { "VN30F1M": "41I1G7000", "VN30F2M": "41I1G8000" };
-
+    
     async function getRefPrice() {
         try {
             const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${currentSymbol}&resolution=D&from=${Math.floor(Date.now()/1000)-86400}&to=${Math.floor(Date.now()/1000)}`;
@@ -129,64 +129,193 @@
         } catch(e) { return 0; }
     }
 
+
+    // Biến toàn cục để lưu giá tham chiếu
+    let globalRefPrice = null;
+
+    async function getPreviousClosePrice(symbol) {
+        try {
+            const toTime = Math.floor(Date.now() / 1000);
+            const fromTime = toTime - 86400 * 2; // Lấy rộng hơn ra 48h để chắc chắn bao gồm cả ngày hôm trước
+            const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${symbol}&resolution=1&from=${fromTime}&to=${toTime}&countback=1000`;
+            
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data && data.s === "ok" && data.t && data.c) {
+                // 1. Chuyển đổi mảng thời gian sang dạng ngày (YYYY-MM-DD)
+                // Chúng ta cần tìm ngày gần nhất mà có dữ liệu (có thể là hôm qua)
+                const timestamps = data.t;
+                const closes = data.c;
+
+                // Tìm timestamp lớn nhất (thời gian mới nhất trong dữ liệu)
+                const latestTime = timestamps[timestamps.length - 1];
+                const latestDate = new Date(latestTime * 1000).toDateString();
+
+                // 2. Tìm giá đóng cửa của ngày cũ nhất (ngày trước ngày mới nhất)
+                // Duyệt ngược từ cuối, bỏ qua tất cả nến của ngày mới nhất, 
+                // nến đầu tiên gặp của ngày cũ hơn chính là ATC hôm trước
+                let prevDate = null;
+                for (let i = timestamps.length - 1; i >= 0; i--) {
+                    const currentDate = new Date(timestamps[i] * 1000).toDateString();
+                    
+                    if (currentDate !== latestDate) {
+                        // Đây là ngày hôm trước
+                        if (!prevDate) prevDate = currentDate; // Ghi nhận ngày đầu tiên tìm thấy
+                        
+                        if (currentDate === prevDate) {
+                            // Nến mới nhất của ngày hôm trước chính là giá đóng cửa (ATC)
+                            return parseFloat(closes[i]);
+                        }
+                    }
+                }
+            }
+            return null;
+        } catch (e) {
+            console.error("Lỗi lấy giá từ history:", e);
+            return null;
+        }
+    }
+
+    // Hàm cập nhật dữ liệu chính
     async function fetchVPSData() {
         try {
+            // 1. Nếu chưa có giá tham chiếu hoặc đang đổi mã, thì lấy lại
+            if (globalRefPrice === null) {
+                globalRefPrice = await getPreviousClosePrice(currentSymbol);
+            }
+
             const toTime = Math.floor(Date.now() / 1000);
             const fromTime = toTime - 86400; 
             const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${currentSymbol}&resolution=1&from=${fromTime}&to=${toTime}&countback=500`;
             const response = await fetch(url);
             const data = await response.json();
-            
+                
             if (data && data.s === "ok" && data.c && data.c.length > 0) {
                 const len = data.c.length;
                 const currentPrice = data.c[len - 1];
                 const sessionOpenPrice = data.o[0];
+                
                 let sessionHighPrice = data.h[0];
                 let sessionLowPrice = data.l[0];
                 for (let i = 0; i < len; i++) {
                     if (data.h[i] > sessionHighPrice) sessionHighPrice = data.h[i];
                     if (data.l[i] < sessionLowPrice) sessionLowPrice = data.l[i];
                 }
-                const referencePrice = data.o[0]; 
-                const diff = currentPrice - referencePrice;
-                const pct = (diff / referencePrice) * 100;
+
+                // Sử dụng giá tham chiếu lấy được, dự phòng bằng giá mở cửa nếu lỗi
+                const ref = (globalRefPrice !== null) ? globalRefPrice : sessionOpenPrice;
+                
+                const diff = currentPrice - ref;
+                const pct = (diff / ref) * 100;
                 const prefix = diff > 0 ? "↑ +" : (diff < 0 ? "↓ " : "");
                 let tradeColor = diff > 0 ? "color-up" : (diff < 0 ? "color-down" : "color-ref");
-                
+                    
+                // Cập nhật DOM
                 const pEl = document.getElementById('display_price');
                 const cEl = document.getElementById('display_change');
+                
                 pEl.innerText = Number(currentPrice).toFixed(2);
                 pEl.className = `vps-main-price ${tradeColor}`;
                 document.getElementById('display_symbol').className = `vps-widget-header ${tradeColor}`;
+                
                 cEl.innerText = `${prefix}${diff.toFixed(2)} (${pct.toFixed(2)}%)`;
                 cEl.className = `vps-change ${tradeColor}`;
+                
                 document.getElementById('val_open').innerText = Number(sessionOpenPrice).toFixed(2);
                 document.getElementById('val_high').innerText = Number(sessionHighPrice).toFixed(2);
                 document.getElementById('val_low').innerText = Number(sessionLowPrice).toFixed(2);
-                document.getElementById('val_prev').innerText = Number(referencePrice).toFixed(2);
+                document.getElementById('val_prev').innerText = Number(ref).toFixed(2);
             }
         } catch (err) { console.error("Lỗi:", err); }
     }
 
+
+    // Danh sách các chỉ số
+    const indexList = ["VN30", "VN100", "VN50", "VNINDEX", "HNX", "HNX30", "UPCOM"];
+
+    // Hàm phân loại mã
+    function getSymbolType(symbol) {
+        const s = symbol.toUpperCase();
+        if (indexList.includes(s)) return "INDEX";
+        if (s.length > 3) return "DERIVATIVE";
+        return "STOCK";
+    }
+
     async function updateOrderBook() {
+        const type = getSymbolType(currentSymbol);
+        
+        // Nếu là chỉ số thì dừng
+        if (type === "INDEX") {
+            document.getElementById('ob-body').innerHTML = "<tr><td colspan='4' style='text-align:center;'>Không hỗ trợ chỉ số</td></tr>";
+            return;
+        }
+
         try {
-            const code = symbolMap[currentSymbol] || "41I1G7000";
-            const [rB, rS] = await Promise.all([fetch(`https://bgapidatafeed.vps.com.vn/getps10pricesnapshot/${code},B`).then(r=>r.json()), fetch(`https://bgapidatafeed.vps.com.vn/getps10pricesnapshot/${code},S`).then(r=>r.json())]);
-            const parse = (str) => str ? str.split("SOH").map(i => ({p: i.split(':')[0], v: i.split(':')[1]})) : [];
-            const b = parse(rB.ndata), s = parse(rS.ndata);
+            let b = [], s = [];
+            if (type === "DERIVATIVE") {
+                // Logic phái sinh
+                const code = symbolMap[currentSymbol] || "41I1G7000";
+                const [rB, rS] = await Promise.all([
+                    fetch(`https://bgapidatafeed.vps.com.vn/getps10pricesnapshot/${code},B`).then(r => r.json()),
+                    fetch(`https://bgapidatafeed.vps.com.vn/getps10pricesnapshot/${code},S`).then(r => r.json())
+                ]);
+                const parse = (str) => str ? str.split("SOH").map(i => ({ p: i.split(':')[0], v: i.split(':')[1] })) : [];
+                b = parse(rB.ndata);
+                s = parse(rS.ndata);
+            } else {
+                // Logic cổ phiếu cơ sở
+                const res = await fetch(`https://bgapidatafeed.vps.com.vn/getliststockdata/${currentSymbol}`).then(r => r.json());
+                const data = res[0];
+                const parseCS = (val) => {
+                    if (!val) return { p: '-', v: '-' };
+                    const parts = val.split('|');
+                    return { p: parts[0], v: parts[1] };
+                };
+                b = [parseCS(data.g1), parseCS(data.g2), parseCS(data.g3), parseCS(data.g4), parseCS(data.g5)];
+                s = [parseCS(data.g5), parseCS(data.g4), parseCS(data.g3), parseCS(data.g2), parseCS(data.g1)];
+            }
+
             let html = "";
-            for(let i=0; i<5; i++) html += `<tr><td style="color:#00c853">${b[i]?.v||'-'}</td><td>${b[i]?.p||'-'}</td><td>${s[i]?.p||'-'}</td><td style="color:#d50000">${s[i]?.v||'-'}</td></tr>`;
+            for (let i = 0; i < 5; i++) {
+                html += `<tr><td style="color:#00c853">${b[i]?.v || '-'}</td><td>${b[i]?.p || '-'}</td><td>${s[i]?.p || '-'}</td><td style="color:#d50000">${s[i]?.v || '-'}</td></tr>`;
+            }
             document.getElementById('ob-body').innerHTML = html;
-        } catch(e) {}
+        } catch (e) { console.error("Error updating OrderBook:", e); }
     }
 
     async function fetchTradeHistory() {
+        const type = getSymbolType(currentSymbol);
+
+        // Nếu là chỉ số thì dừng
+        if (type === "INDEX") {
+            document.getElementById('trade-history-body').innerHTML = "<tr><td colspan='4' style='text-align:center;'>Không hỗ trợ lịch sử</td></tr>";
+            return;
+        }
+
         try {
-            const code = symbolMap[currentSymbol] || "41I1G7000";
-            const res = await fetch(`https://bgapidatafeed.vps.com.vn/getliststocktrade_ps/${code}?numpage=10`).then(r=>r.json());
-            document.getElementById('trade-history-body').innerHTML = (res.data||[]).map(i => `<tr><td>${i.time}</td><td>${i.lastPrice}</td><td>${i.lastVol}</td><td style="color:${i.side==='S'?'red':'green'}">${i.side==='S'?'B':'M'}</td></tr>`).join('');
-        } catch(e) {}
+            // Chọn URL dựa trên loại (DERIVATIVE hoặc STOCK)
+            const url = (type === "DERIVATIVE") 
+                ? `https://bgapidatafeed.vps.com.vn/getliststocktrade_ps/${symbolMap[currentSymbol] || "41I1G7000"}?numpage=10`
+                : `https://bgapidatafeed.vps.com.vn/getliststocktrade_cs/${currentSymbol}?numpage=100&nextidx=-1`;
+                
+            const res = await fetch(url).then(r => r.json());
+            
+            document.getElementById('trade-history-body').innerHTML = (res.data || []).map(i => 
+                `<tr>
+                    <td>${i.time}</td>
+                    <td>${i.lastPrice}</td>
+                    <td>${i.lastVol}</td>
+                    <td style="color:${i.side==='S'?'red':'green'}">${i.side==='S'?'B':'M'}</td>
+                </tr>`
+            ).join('');
+        } catch(e) { console.error("Error fetching trade history:", e); }
     }
+
+
+
+
+
 
     function switchTab(e, blockId, symbol) {
         // 1. Cập nhật nút tab
