@@ -15,6 +15,10 @@
         .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; }
         table { width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; margin-top: 10px; }
         th { background: #f0f3fa; color: #474f66; padding: 5px; }
+        .color-up { color: #00c853 !important; }   /* Xanh lá */
+        .color-down { color: #d50000 !important; } /* Đỏ */
+        .color-ref { color: #ffab00 !important; }  /* Vàng */
+        .vps-change { font-size: 14px; font-weight: bold; margin-bottom: 5px; }
         /* Giới hạn chiều cao và cho phép cuộn nội dung bảng Khớp Lệnh */
         /* Container chứa bảng Khớp Lệnh */
         #trade-history-container {
@@ -43,6 +47,16 @@
     </style>
 </head>
 <body>
+<div class="header">
+    <a href="index.html" class="back-link" style="flex: 1; text-align: left; color: #ffb700;">⬅ Quay lại Trang chủ</a>
+    <div style="flex: 2; text-align: center; font-size: 18px; font-weight: bold; color: #ffb700; letter-spacing: 0.5px;">
+          Dữ liệu được lấy trực tiếp từ Công ty Cổ phần Chứng khoán VPS
+    </div>
+    <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #ffb700;">
+        SĐT: 0853.525.379 - ID VPS: BOR5
+    </div>
+</div>
+
 
 <div class="header">
     <strong>Nhập mã:</strong>
@@ -88,45 +102,46 @@
     let currentSymbol = "VN30F1M";
     let currentApiCode = "41I1G7000";
 
-
     async function fetchVPSData() {
         try {
             const toTime = Math.floor(Date.now() / 1000);
-            const fromTime = toTime - 86400; 
-            const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${currentSymbol}&resolution=1&from=${toTime-86400}&to=${toTime}&countback=100`;
-            const response = await fetch(url);
-            const data = await response.json();
-            
-            if (data && data.s === "ok" && data.c && data.c.length > 0) {
-                const len = data.c.length;
-                const currentPrice = data.c[len - 1];
-                const sessionOpenPrice = data.o[0];
-                let sessionHighPrice = data.h[0];
-                let sessionLowPrice = data.l[0];
-                for (let i = 0; i < len; i++) {
-                    if (data.h[i] > sessionHighPrice) sessionHighPrice = data.h[i];
-                    if (data.l[i] < sessionLowPrice) sessionLowPrice = data.l[i];
-                }
-                const referencePrice = data.o[0]; 
-                const diff = currentPrice - referencePrice;
-                const pct = (diff / referencePrice) * 100;
-                const prefix = diff > 0 ? "↑ +" : (diff < 0 ? "↓ " : "");
-                let tradeColor = diff > 0 ? "color-up" : (diff < 0 ? "color-down" : "color-ref");
+            const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${currentSymbol}&resolution=1&from=${toTime - 86400}&to=${toTime}&countback=100`;
+            const res = await fetch(url).then(r => r.json());
+
+            if (res && res.s === "ok" && res.c && res.c.length > 0) {
+                const currentPrice = res.c[res.c.length - 1];
+                const openPrice = res.o[0];
+                const highPrice = Math.max(...res.h);
+                const lowPrice = Math.min(...res.l);
                 
-                const pEl = document.getElementById('display_price');
-                const cEl = document.getElementById('display_change');
-                pEl.innerText = Number(currentPrice).toFixed(2);
-                pEl.className = `vps-main-price ${tradeColor}`;
-                document.getElementById('display_symbol').className = `vps-widget-header ${tradeColor}`;
-                cEl.innerText = `${prefix}${diff.toFixed(2)} (${pct.toFixed(2)}%)`;
-                cEl.className = `vps-change ${tradeColor}`;
-                document.getElementById('val_open').innerText = Number(sessionOpenPrice).toFixed(2);
-                document.getElementById('val_high').innerText = Number(sessionHighPrice).toFixed(2);
-                document.getElementById('val_low').innerText = Number(sessionLowPrice).toFixed(2);
-                document.getElementById('val_prev').innerText = Number(referencePrice).toFixed(2);
+                // Tính toán biến động
+                const diff = currentPrice - openPrice;
+                const pct = (diff / openPrice) * 100;
+                
+                // Xác định màu sắc
+                const tradeColor = diff > 0 ? "color-up" : (diff < 0 ? "color-down" : "color-ref");
+                const prefix = diff > 0 ? "↑ +" : (diff < 0 ? "↓ " : "");
+
+                // Cập nhật DOM
+                const priceEl = document.getElementById('disp_price');
+                priceEl.innerText = currentPrice.toFixed(2);
+                priceEl.className = `vps-main-price ${tradeColor}`; // Thêm class màu
+
+                // Bạn có thể tạo thêm 1 thẻ span có id="disp_change" để hiển thị phần trăm nếu muốn
+                // document.getElementById('disp_change').innerText = `${prefix}${diff.toFixed(2)} (${pct.toFixed(2)}%)`;
+
+                document.getElementById('val_open').innerText = openPrice.toFixed(2);
+                document.getElementById('val_high').innerText = highPrice.toFixed(2);
+                document.getElementById('val_low').innerText = lowPrice.toFixed(2);
             }
-        } catch (err) { console.error("Lỗi:", err); }
+        } catch (e) {
+            console.error("Lỗi fetch VPS:", e);
+        }
     }
+
+
+
+
 
     // Hàm cập nhật duy nhất - không bị trùng lặp
     function updateAll() {
