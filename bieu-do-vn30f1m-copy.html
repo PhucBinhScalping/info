@@ -110,31 +110,41 @@
 
     async function fetchVPSData() {
         try {
-            const toTime = Math.floor(Date.now() / 1000);
-            const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${currentSymbol}&resolution=1&from=${toTime - 86400}&to=${toTime}&countback=100`;
+            const now = new Date();
+            const toTime = Math.floor(now.getTime() / 1000);
+            
+            // 1. Đặt thời gian 'from' về đúng 00:00:00 ngày hôm nay (theo giờ địa phương)
+            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+            const fromTime = Math.floor(startOfToday.getTime() / 1000);
+
+            // Gọi API truyền từ đầu ngày hôm nay đến hiện tại
+            const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${currentSymbol}&resolution=1&from=${fromTime}&to=${toTime}`;
             const res = await fetch(url).then(r => r.json());
 
             if (res && res.s === "ok" && res.c && res.c.length > 0) {
                 const currentPrice = res.c[res.c.length - 1];
-                const openPrice = res.o[0];
+                
+                // Giá mở cửa của cây nến phút đầu tiên trong ngày (lúc 09:00)
+                const openPrice = res.o[0]; 
                 const highPrice = Math.max(...res.h);
                 const lowPrice = Math.min(...res.l);
-                
-                // Tính toán biến động
-                const diff = currentPrice - openPrice;
-                const pct = (diff / openPrice) * 100;
-                
+
+                // 2. LẤY GIÁ THAM CHIẾU (Thường API VPS sẽ trả về trong data hoặc bạn phải lấy từ API khác)
+                // Nếu API tradingview không trả về giá tham chiếu, bạn tạm tính biến động theo giá Mở Cửa 
+                // HOẶC nếu API có thuộc tính riêng cho giá tham chiếu (ví dụ: res.refPrice), hãy thay thế vào đây:
+                const refPrice = openPrice; // Tạm thời dùng openPrice nếu API không có trường Tham chiếu riêng.
+
+                // Tính toán biến động theo đúng quy tắc thị trường
+                const diff = currentPrice - refPrice;
+                const pct = (diff / refPrice) * 100;
+
                 // Xác định màu sắc
                 const tradeColor = diff > 0 ? "color-up" : (diff < 0 ? "color-down" : "color-ref");
-                const prefix = diff > 0 ? "↑ +" : (diff < 0 ? "↓ " : "");
 
                 // Cập nhật DOM
                 const priceEl = document.getElementById('disp_price');
                 priceEl.innerText = currentPrice.toFixed(2);
-                priceEl.className = `vps-main-price ${tradeColor}`; // Thêm class màu
-
-                // Bạn có thể tạo thêm 1 thẻ span có id="disp_change" để hiển thị phần trăm nếu muốn
-                // document.getElementById('disp_change').innerText = `${prefix}${diff.toFixed(2)} (${pct.toFixed(2)}%)`;
+                priceEl.className = `vps-main-price ${tradeColor}`;
 
                 document.getElementById('val_open').innerText = openPrice.toFixed(2);
                 document.getElementById('val_high').innerText = highPrice.toFixed(2);
