@@ -59,10 +59,16 @@
 
 
 <div class="header">
-    <strong>Nhập mã:</strong>
-    <input type="text" id="symbolInput" placeholder="VD: VN30F1M" onkeypress="if(event.key==='Enter') updateAll()">
-    <button onclick="updateAll()">Cập nhật</button>
+    <div class="input-group" style="margin-bottom: 5px;">
+        <strong>Nhập mã:</strong>
+        <input type="text" id="symbolInput" placeholder="VD: VN30F1M" autocomplete="off" onkeypress="if(event.key==='Enter') updateAll()">
+        <button onclick="updateAll()">Cập nhật</button>
+    </div>
+    <small style="color: #666; display: block; font-style: italic;">
+        * Dữ liệu được xử lý chuyên biệt. Vui lòng bấm cập nhật để đồng bộ bước giá và lịch sử khớp.
+    </small>
 </div>
+
 
 <div class="content-container">
     <div class="chart-section">
@@ -192,24 +198,45 @@
 
     async function updateOrderBook() {
         const tbody = document.getElementById('ob-body');
+        if (!tbody) return; // Bảo vệ nếu element chưa được render
+        
         let newRows = "";
         let rawData = "";
 
         try {
             if (currentSymbol.length <= 4) {
                 const res = await fetch(`https://bgapidatafeed.vps.com.vn/getliststockdata/${currentSymbol}`).then(r => r.json());
-                const d = res?.data;
+
+                // 1. Lấy phần tử đầu tiên từ mảng API trả về
+                const d = res?.[0]; 
                 if (!d) return;
 
-                // Tạo chuỗi thô để so sánh
-                rawData = d.g1 + d.g2 + d.g3 + d.g4 + d.g5 + d.g6;
-                if (rawData === lastOrderBookData) return; // Nếu dữ liệu không đổi, dừng lại
+                // 2. Tạo chuỗi thô để so sánh (Sửa: Bỏ từ khóa 'const' trùng lặp)
+                rawData = (d.g1 || '') + (d.g2 || '') + (d.g3 || '') + (d.g4 || '') + (d.g5 || '') + (d.g6 || '');
 
-                const parseG = (val) => (!val || val === "0.0|0|i" || val === "0|0|i") ? { p: '-', v: '-' } : { p: val.split('|')[0], v: val.split('|')[1] };
+                // Nếu dữ liệu giống hệt lần trước, dừng lại không render lại giao diện
+                if (rawData === lastOrderBookData) return; 
+
+                // 3. Hàm parse dữ liệu từ chuỗi "Giá|KhốiLượng|TrạngThái"
+                const parseG = (val) => {
+                    if (!val || val.startsWith("0.0|0") || val.startsWith("0|0")) {
+                        return { p: '-', v: '-' };
+                    }
+                    const parts = val.split('|');
+                    return { p: parts[0], v: parts[1] };
+                };
+
+                // Sửa: Bỏ dòng 'let newRows = "";' trùng lặp ở đây
                 for (let i = 1; i <= 3; i++) {
-                    const b = parseG(d['g' + i]);
-                    const s = parseG(d['g' + (i + 3)]);
-                    newRows += `<tr><td style="color:#00c853">${b.v}</td><td>${b.p}</td><td>${s.p}</td><td style="color:#d50000">${s.v}</td></tr>`;
+                    const b = parseG(d['g' + i]);       // g1, g2, g3 (Bên mua)
+                    const s = parseG(d['g' + (i + 3)]); // g4, g5, g6 (Bên bán)
+                    
+                    newRows += `<tr>
+                        <td style="color:#00c853">${b.v}</td>
+                        <td>${b.p}</td>
+                        <td>${s.p}</td>
+                        <td style="color:#d50000">${s.v}</td>
+                    </tr>`;
                 }
             } else {
                 const [resB, resS] = await Promise.all([
@@ -217,24 +244,31 @@
                     fetch(`https://bgapidatafeed.vps.com.vn/getps10pricesnapshot/${currentApiCode},S`).then(r => r.json())
                 ]);
                 
-                rawData = resB.ndata + resS.ndata;
+                rawData = (resB?.ndata || '') + (resS?.ndata || '');
                 if (rawData === lastOrderBookData) return;
 
                 const parse = (str) => str ? str.split("SOH").map(i => ({p: i.split(':')[0], v: i.split(':')[1]})) : [];
-                const buy = parse(resB.ndata), sell = parse(resS.ndata);
+                const buy = parse(resB?.ndata), sell = parse(resS?.ndata);
                 for(let i = 0; i < 5; i++) {
-                    newRows += `<tr><td style="color:#00c853">${buy[i]?.v||'-'}</td><td>${buy[i]?.p||'-'}</td><td>${sell[i]?.p||'-'}</td><td style="color:#d50000">${sell[i]?.v||'-'}</td></tr>`;
+                    newRows += `<tr>
+                        <td style="color:#00c853">${buy[i]?.v || '-'}</td>
+                        <td>${buy[i]?.p || '-'}</td>
+                        <td>${sell[i]?.p || '-'}</td>
+                        <td style="color:#d50000">${sell[i]?.v || '-'}</td>
+                    </tr>`;
                 }
             }
 
-            // Chỉ gán khi dữ liệu khác nhau
+            // Chỉ gán và cập nhật DOM khi dữ liệu có sự thay đổi thực sự
             lastOrderBookData = rawData;
             tbody.innerHTML = newRows;
 
         } catch (e) {
-            console.error("Lỗi:", e);
+            console.error("Lỗi cập nhật OrderBook:", e);
         }
     }
+
+
 
     async function fetchTradeHistory() {
         const tbody = document.getElementById('trade-history-body');
