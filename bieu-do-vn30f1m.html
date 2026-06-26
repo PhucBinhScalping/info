@@ -82,7 +82,10 @@
             width: 100%;
             height: 100%;
         }
-
+        .tab-title {
+            /* Cho phép click xuyên qua thẻ span này */
+            pointer-events: none;
+        }
         /* Các block tab */
         .tab-content-block {
             position: absolute; /* Giữ vị trí trong container */
@@ -120,11 +123,28 @@
             background: #e9ecef;   /* Thêm hiệu ứng hover để người dùng biết đó là nút */
         }
 
-        .tab-item.active {
-            background: #fff;
-            border-bottom: 2px solid #00c853;
-            color: #00c853;
+
+        .tab-item {
+            border: 1px solid #ccc; /* Màu viền xám nhạt */
+            border-radius: 4px 4px 0 0; /* Bo góc trên để trông giống tab thật */
+            padding: 8px 12px;
+            margin-right: 5px;
+            cursor: pointer;
+            background-color: #f9f9f9;
+            display: inline-flex; /* Giữ icon và chữ thẳng hàng */
+            align-items: center;
         }
+
+        /* Style khi thẻ tab đang được chọn (active) */
+        .tab-item.active {
+            border: 1px solid #ffb700; /* Viền màu */
+            background-color: #fff; /* Nền trắng khi chọn */
+            border-bottom: 1px solid #fff; /* Quan trọng: tạo cảm giác liền mạch với nội dung bên dưới */
+            margin-bottom: -1px; /* Đè lên vạch ngăn cách của khối nội dung bên dưới */
+            z-index: 2; /* Đảm bảo viền nằm trên các phần tử khác */
+        }
+
+
 
 
     </style>
@@ -655,33 +675,33 @@
     let isSwitching = false;
 
     function switchTab(e, blockId, symbol) {
+        // Tìm thẻ cha gần nhất có class 'tab-item' dù click vào bất cứ đâu bên trong nó
+        const tabItem = e.target.closest('.tab-item');
+        
+        // Nếu click vào nút đóng (close-btn), thoát hàm
         if (e.target.classList.contains('close-btn')) return;
+        
+        // Nếu không tìm thấy tab-item (click ra ngoài), thoát hàm
+        if (!tabItem) return;
 
-        // 1. Đổi UI ngay lập tức
+        // Thay thế e.currentTarget bằng tabItem
         document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
-        e.currentTarget.classList.add('active');
+        tabItem.classList.add('active'); 
         
         document.querySelectorAll('.tab-content-block').forEach(b => b.classList.remove('active'));
         document.getElementById(blockId).classList.add('active');
 
-        // 2. Cập nhật biến trạng thái
+        // Các phần còn lại giữ nguyên...
         currentSymbol = symbol;
-        
-        // Sử dụng cache thay vì gán null trực tiếp
-        // globalRefPrice = refPriceCache[symbol] ?? null; 
         globalRefPrice = null; 
-        
         document.getElementById('display_symbol').innerText = symbol;
 
-        // 3. KÍCH HOẠT TẢI DỮ LIỆU ĐỢI BROWSER RENDER XONG
-        // Dùng requestAnimationFrame để đảm bảo UI đã đổi xong mới fetch
         requestAnimationFrame(() => {
             setTimeout(() => {
                 loadTabDataImmediately();
             }, 0);
         });
         
-        // Lưu trạng thái
         debouncedSave();
     }
 
