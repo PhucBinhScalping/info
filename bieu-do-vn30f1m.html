@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Phúc Bình Scalping - Biểu đồ</title>
+    <title>Phúc Bình Scalping</title>
     <style>
         /* Thiết lập nền tảng */
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: sans-serif; overflow: hidden; background: #fff; }
@@ -46,10 +46,11 @@
         .btn-add { cursor: pointer; padding: 10px 15px; background: #e0e0e0; border: none; font-weight: bold; margin-left: 10px; }
         .close-btn { margin-left: 8px; padding: 0 5px; border-radius: 50%; background: #ffcccc; cursor: pointer; }
         .content-container {
-            display: flex; /* BẮT BUỘC ĐỂ SIDEBAR NẰM PHẢI */
-            flex-direction: row; /* Đảm bảo xếp hàng ngang */
+            display: flex;        /* Đã có */
+            flex-direction: row;  /* Sidebar và Chart nằm ngang */
             width: 100%;
-            height: calc(100% - 100px);
+            height: calc(100vh - 150px); /* Dùng vh để đảm bảo chiều cao màn hình */
+            overflow: hidden;
         }
 
         .tab-content-block {
@@ -64,12 +65,15 @@
 
         .sidebar-section {
             width: 320px;
-            flex-shrink: 0; /* Không cho sidebar bị co lại */
+            flex-shrink: 0;
+            overflow-y: auto;     /* Cho phép cuộn nếu bảng giá dài */
+            padding: 10px;
+            border-left: 1px solid #ddd;
         }
         .chart-section {
-            flex: 1;
-            width: 100%;
+            flex: 1;              /* Biểu đồ chiếm không gian còn lại */
             height: 100%;
+            display: block;       /* Đảm bảo hiển thị */
         }
 
         /* Container chứa các tab */
@@ -130,14 +134,11 @@
 <div class="header">
     <a href="index.html" class="back-link" style="flex: 1; text-align: left; color: #ffb700;">⬅ Quay lại Trang chủ</a>
     <div style="flex: 2; text-align: center; font-size: 18px; font-weight: bold; color: #ffb700; letter-spacing: 0.5px;">
-
           Dữ liệu được lấy trực tiếp từ Công ty Cổ phần Chứng khoán VPS
     </div>
     <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #ffb700;">
-
         SĐT: 0853.525.379 - ID VPS: BOR5
     </div>
-
 </div>
 
 <div class="header">
@@ -159,7 +160,7 @@
 
 
 <div class="content-container">
- 
+
     <div class="sidebar-section">
         <div id="display_symbol" class="vps-widget-header">VN30F1M</div>
         <div id="display_price" class="vps-main-price">---.--</div>
