@@ -45,6 +45,59 @@
         #trade-history-container { height: 200px; overflow-y: auto; border: 1px solid #ddd; background: #fff; border-radius: 4px; }
         .btn-add { cursor: pointer; padding: 10px 15px; background: #e0e0e0; border: none; font-weight: bold; margin-left: 10px; }
         .close-btn { margin-left: 8px; padding: 0 5px; border-radius: 50%; background: #ffcccc; cursor: pointer; }
+        .content-container {
+            display: flex; /* BẮT BUỘC ĐỂ SIDEBAR NẰM PHẢI */
+            flex-direction: row; /* Đảm bảo xếp hàng ngang */
+            width: 100%;
+            height: calc(100% - 100px);
+        }
+
+        .tab-content-block {
+            flex: 1; /* BẮT BUỘC ĐỂ BIỂU ĐỒ CHIẾM HẾT KHOẢNG TRỐNG */
+            height: 100%;
+            display: none; /* Ẩn mặc định */
+        }
+
+        .tab-content-block.active {
+            display: flex; /* Hiện khi active */
+        }
+
+        .sidebar-section {
+            width: 320px;
+            flex-shrink: 0; /* Không cho sidebar bị co lại */
+        }
+        .chart-section {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Container chứa các tab */
+        .tab-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Các block tab */
+        .tab-content-block {
+            position: absolute; /* Giữ vị trí trong container */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0;
+            pointer-events: none; /* Không cho tương tác khi đang ẩn */
+            transition: opacity 0.2s ease;
+        }
+
+        .tab-content-block.active {
+            z-index: 1;
+            opacity: 1;
+            pointer-events: auto;
+        }
+
     </style>
 </head>
 <body>
@@ -74,25 +127,14 @@
 </div>
 
 
+
 <div class="tab-menu" id="mainTabMenu">
-    <button class="tab-item active" onclick="switchTab(event, 'block_vn30f1m_5m', 'VN30F1M')">M5</button>
-    <button class="tab-item" onclick="switchTab(event, 'block_vn30f1m_15m', 'VN30F1M')">M15</button>
-    <button class="tab-item" onclick="switchTab(event, 'block_vnindex', 'VN30F1M')">Ngày</button>
     <button class="btn-add" onclick="addNewChart()">+ Thêm biểu đồ</button>
 </div>
 
 
 <div class="content-container">
-    <div id="block_vn30f1m_5m" class="tab-content-block active">
-        <div class="chart-section"><iframe src="https://chart.vps.com.vn/tv/?symbol=VN30F1M&allowFullscreen=true&resolution=5&lang=vi&theme=light"></iframe></div>
-    </div>
-    <div id="block_vn30f1m_15m" class="tab-content-block">
-        <div class="chart-section"><iframe src="https://chart.vps.com.vn/tv/?symbol=VN30F1M&allowFullscreen=true&resolution=15&lang=vi&theme=light"></iframe></div>
-    </div>
-    <div id="block_vnindex" class="tab-content-block">
-        <div class="chart-section"><iframe src="https://chart.vps.com.vn/tv/?symbol=VN30F1M&allowFullscreen=true&resolution=D&lang=vi&theme=light"></iframe></div>
-    </div>
-    
+ 
     <div class="sidebar-section">
         <div id="display_symbol" class="vps-widget-header">VN30F1M</div>
         <div id="display_price" class="vps-main-price">---.--</div>
@@ -110,126 +152,143 @@
 
 <script>
     let currentSymbol = "VN30F1M";
-    let apiInterval = null;
-    window.onload = function() {
-        fetchVPSData();
-        apiInterval = setInterval(() => {
-            fetchVPSData();
-            updateOrderBook();
-        }, 200);
-        updateOrderBook();
-    };
+    let apiInterval = null; // Khai báo ở đây
+
+
     const symbolMap = { "VN30F1M": "41I1G7000", "VN30F2M": "41I1G8000" };
-    
-    async function getRefPrice() {
-        try {
-            const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${currentSymbol}&resolution=D&from=${Math.floor(Date.now()/1000)-86400}&to=${Math.floor(Date.now()/1000)}`;
-            const res = await fetch(url).then(r => r.json());
-            return res.c ? res.c[res.c.length - 1] : 0;
-        } catch(e) { return 0; }
+
+    let saveTimeout;
+    function debouncedSave() {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => {
+            saveAppState();
+            console.log("Đã lưu trạng thái ứng dụng.");
+        }, 1000); // Đợi 1 giây để đảm bảo người dùng đã dừng tương tác
     }
 
+
+
+    // Chỉ cập nhật mã đang hiển thị trên màn hình
+    function startRealtime() {
+        if (apiInterval) clearInterval(apiInterval);
+        apiInterval = setInterval(() => {
+            // Chỉ fetch dữ liệu cho tab đang active
+            const activeBlock = document.querySelector('.tab-content-block.active');
+            if (activeBlock) {
+                fetchVPSData();
+                updateOrderBook();
+                fetchTradeHistory();
+            }
+        }, 3000);
+    }
 
     // Biến toàn cục để lưu giá tham chiếu
     let globalRefPrice = null;
+    // Khai báo biến cache ở ngoài cùng (cùng cấp với các biến global khác)
+    const refPriceCache = {};
 
-    async function getPreviousClosePrice(symbol) {
+    async function getPreviousClosePrice(symbol, signal) {
+        const cleanSymbol = symbol ? symbol.trim().toUpperCase() : "VN30F1M";
+        
+        // 1. Kiểm tra Cache trước
+        if (refPriceCache[cleanSymbol]) {
+            console.log("Lấy giá tham chiếu từ Cache:", cleanSymbol);
+            return refPriceCache[cleanSymbol];
+        }
+        
+        // 2. Tính thời gian
+        const now = new Date();
+        const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const toTime = Math.floor(yesterday.getTime() / 1000); 
+        const fromTime = toTime - 86400;
+
+        const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${cleanSymbol}&resolution=1&from=${fromTime}&to=${toTime}`;
+        
         try {
-            const toTime = Math.floor(Date.now() / 1000);
-            const fromTime = toTime - 86400 * 2; // Lấy rộng hơn ra 48h để chắc chắn bao gồm cả ngày hôm trước
-            const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${symbol}&resolution=1&from=${fromTime}&to=${toTime}&countback=1000`;
-            
-            const response = await fetch(url);
+            // 3. Truyền signal vào fetch
+            const response = await fetch(url, { signal });
             const data = await response.json();
 
-            if (data && data.s === "ok" && data.t && data.c) {
-                // 1. Chuyển đổi mảng thời gian sang dạng ngày (YYYY-MM-DD)
-                // Chúng ta cần tìm ngày gần nhất mà có dữ liệu (có thể là hôm qua)
-                const timestamps = data.t;
-                const closes = data.c;
-
-                // Tìm timestamp lớn nhất (thời gian mới nhất trong dữ liệu)
-                const latestTime = timestamps[timestamps.length - 1];
-                const latestDate = new Date(latestTime * 1000).toDateString();
-
-                // 2. Tìm giá đóng cửa của ngày cũ nhất (ngày trước ngày mới nhất)
-                // Duyệt ngược từ cuối, bỏ qua tất cả nến của ngày mới nhất, 
-                // nến đầu tiên gặp của ngày cũ hơn chính là ATC hôm trước
-                let prevDate = null;
-                for (let i = timestamps.length - 1; i >= 0; i--) {
-                    const currentDate = new Date(timestamps[i] * 1000).toDateString();
-                    
-                    if (currentDate !== latestDate) {
-                        // Đây là ngày hôm trước
-                        if (!prevDate) prevDate = currentDate; // Ghi nhận ngày đầu tiên tìm thấy
-                        
-                        if (currentDate === prevDate) {
-                            // Nến mới nhất của ngày hôm trước chính là giá đóng cửa (ATC)
-                            return parseFloat(closes[i]);
-                        }
-                    }
-                }
+            if (data && data.s === "ok" && data.c && data.c.length > 0) {
+                const atcPrice = data.c[data.c.length - 1];
+                const price = parseFloat(atcPrice);
+                
+                // 4. Lưu vào Cache
+                refPriceCache[cleanSymbol] = price;
+                console.log("Đã lấy và lưu giá ATC vào Cache cho " + cleanSymbol + ":", price);
+                return price;
             }
-            return null;
         } catch (e) {
-            console.error("Lỗi lấy giá từ history:", e);
-            return null;
+            if (e.name === 'AbortError') {
+                console.log("Fetch giá tham chiếu bị hủy do chuyển tab.");
+            } else {
+                console.error("Lỗi lấy giá ATC:", e);
+            }
         }
+        return null;
     }
 
-    // Hàm cập nhật dữ liệu chính
-    async function fetchVPSData() {
-        try {
-            // 1. Nếu chưa có giá tham chiếu hoặc đang đổi mã, thì lấy lại
-            if (globalRefPrice === null) {
-                globalRefPrice = await getPreviousClosePrice(currentSymbol);
-            }
 
+    // Hàm cập nhật dữ liệu chính
+    async function fetchVPSData(signal) { 
+            
+        // 1. Kiểm tra Cache trước, nếu có thì dùng luôn, không cần gọi API lịch sử
+        if (globalRefPrice === null) {
+            // Truyền 'signal' vào để nếu chuyển tab, việc lấy giá tham chiếu cũng bị hủy
+            globalRefPrice = await getPreviousClosePrice(currentSymbol, signal);
+        }
+
+        if (globalRefPrice === null) {
+            console.warn("Chưa lấy được giá tham chiếu, đợi lần cập nhật sau...");
+            return; 
+        }
+
+        try {
             const toTime = Math.floor(Date.now() / 1000);
             const fromTime = toTime - 86400; 
             const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${currentSymbol}&resolution=1&from=${fromTime}&to=${toTime}&countback=500`;
-            const response = await fetch(url);
+            
+            // 2. Lệnh fetch có sử dụng signal để hủy nếu chuyển tab
+            const response = await fetch(url, { signal }); 
             const data = await response.json();
                 
-            if (data && data.s === "ok" && data.c && data.c.length > 0) {
+            // Kiểm tra dữ liệu: s === "ok" và mảng c, h, l phải có phần tử
+            if (data && data.s === "ok" && data.c?.length > 0 && data.h?.length > 0 && data.l?.length > 0) {
                 const len = data.c.length;
                 const currentPrice = data.c[len - 1];
-                const sessionOpenPrice = data.o[0];
                 
-                let sessionHighPrice = data.h[0];
-                let sessionLowPrice = data.l[0];
-                for (let i = 0; i < len; i++) {
-                    if (data.h[i] > sessionHighPrice) sessionHighPrice = data.h[i];
-                    if (data.l[i] < sessionLowPrice) sessionLowPrice = data.l[i];
-                }
+                // TÍNH TOÁN AN TOÀN
+                const sessionHighPrice = Math.max(...data.h);
+                const sessionLowPrice = Math.min(...data.l);
 
-                // Sử dụng giá tham chiếu lấy được, dự phòng bằng giá mở cửa nếu lỗi
-                const ref = (globalRefPrice !== null) ? globalRefPrice : sessionOpenPrice;
-                
-                const diff = currentPrice - ref;
-                const pct = (diff / ref) * 100;
+                const diff = currentPrice - globalRefPrice;
+                const pct = (diff / globalRefPrice) * 100;
                 const prefix = diff > 0 ? "↑ +" : (diff < 0 ? "↓ " : "");
                 let tradeColor = diff > 0 ? "color-up" : (diff < 0 ? "color-down" : "color-ref");
                     
-                // Cập nhật DOM
-                const pEl = document.getElementById('display_price');
-                const cEl = document.getElementById('display_change');
-                
-                pEl.innerText = Number(currentPrice).toFixed(2);
-                pEl.className = `vps-main-price ${tradeColor}`;
+                document.getElementById('display_price').innerText = Number(currentPrice).toFixed(2);
+                document.getElementById('display_price').className = `vps-main-price ${tradeColor}`;
                 document.getElementById('display_symbol').className = `vps-widget-header ${tradeColor}`;
                 
-                cEl.innerText = `${prefix}${diff.toFixed(2)} (${pct.toFixed(2)}%)`;
-                cEl.className = `vps-change ${tradeColor}`;
+                document.getElementById('display_change').innerText = `${prefix}${diff.toFixed(2)} (${pct.toFixed(2)}%)`;
+                document.getElementById('display_change').className = `vps-change ${tradeColor}`;
                 
-                document.getElementById('val_open').innerText = Number(sessionOpenPrice).toFixed(2);
+                document.getElementById('val_open').innerText = Number(data.o[0]).toFixed(2);
                 document.getElementById('val_high').innerText = Number(sessionHighPrice).toFixed(2);
                 document.getElementById('val_low').innerText = Number(sessionLowPrice).toFixed(2);
-                document.getElementById('val_prev').innerText = Number(ref).toFixed(2);
+                document.getElementById('val_prev').innerText = Number(globalRefPrice).toFixed(2);
+            } else {
+                console.warn("Dữ liệu thị trường trả về rỗng hoặc không hợp lệ");
             }
-        } catch (err) { console.error("Lỗi:", err); }
+        } catch (err) { 
+            // 3. Xử lý không hiển thị lỗi nếu bị người dùng chủ động click đổi tab
+            if (err.name === 'AbortError') {
+                console.log("Fetch VPS Data bị hủy (do đổi tab).");
+            } else {
+                console.error("Lỗi:", err); 
+            }
+        }
     }
-
 
     // Danh sách các chỉ số
     const indexList = ["VN30", "VN100", "VN50", "VNINDEX", "HNX", "HNX30", "UPCOM"];
@@ -242,10 +301,10 @@
         return "STOCK";
     }
 
-    async function updateOrderBook() {
+    async function updateOrderBook(signal) { // Thêm signal vào đây
         const type = getSymbolType(currentSymbol);
         
-        // Nếu là chỉ số thì dừng
+        // 1. Kiểm tra chỉ số
         if (type === "INDEX") {
             document.getElementById('ob-body').innerHTML = "<tr><td colspan='4' style='text-align:center;'>Không hỗ trợ chỉ số</td></tr>";
             return;
@@ -253,19 +312,27 @@
 
         try {
             let b = [], s = [];
+            
             if (type === "DERIVATIVE") {
-                // Logic phái sinh
-                const code = symbolMap[currentSymbol] || "41I1G7000";
+                const code = symbolMap[currentSymbol];
+                if (!code) {
+                    document.getElementById('ob-body').innerHTML = "<tr><td colspan='4' style='text-align:center;'>Mã phái sinh chưa hỗ trợ</td></tr>";
+                    return;
+                }
+                
+                // Thêm { signal } vào các lệnh fetch bên dưới
                 const [rB, rS] = await Promise.all([
-                    fetch(`https://bgapidatafeed.vps.com.vn/getps10pricesnapshot/${code},B`).then(r => r.json()),
-                    fetch(`https://bgapidatafeed.vps.com.vn/getps10pricesnapshot/${code},S`).then(r => r.json())
+                    fetch(`https://bgapidatafeed.vps.com.vn/getps10pricesnapshot/${code},B`, { signal }).then(r => r.json()),
+                    fetch(`https://bgapidatafeed.vps.com.vn/getps10pricesnapshot/${code},S`, { signal }).then(r => r.json())
                 ]);
+                
                 const parse = (str) => str ? str.split("SOH").map(i => ({ p: i.split(':')[0], v: i.split(':')[1] })) : [];
                 b = parse(rB.ndata);
                 s = parse(rS.ndata);
             } else {
-                // Logic cổ phiếu cơ sở
-                const res = await fetch(`https://bgapidatafeed.vps.com.vn/getliststockdata/${currentSymbol}`).then(r => r.json());
+                // Logic cổ phiếu cơ sở - thêm { signal } vào đây
+                const res = await fetch(`https://bgapidatafeed.vps.com.vn/getliststockdata/${currentSymbol}`, { signal }).then(r => r.json());
+                if (!res || res.length === 0) throw new Error("No data");
                 const data = res[0];
                 const parseCS = (val) => {
                     if (!val) return { p: '-', v: '-' };
@@ -276,31 +343,53 @@
                 s = [parseCS(data.g5), parseCS(data.g4), parseCS(data.g3), parseCS(data.g2), parseCS(data.g1)];
             }
 
+            // Vẽ bảng
             let html = "";
             for (let i = 0; i < 5; i++) {
                 html += `<tr><td style="color:#00c853">${b[i]?.v || '-'}</td><td>${b[i]?.p || '-'}</td><td>${s[i]?.p || '-'}</td><td style="color:#d50000">${s[i]?.v || '-'}</td></tr>`;
             }
             document.getElementById('ob-body').innerHTML = html;
-        } catch (e) { console.error("Error updating OrderBook:", e); }
+            
+        } catch (e) { 
+            if (e.name !== 'AbortError') { // Chỉ log lỗi nếu không phải là do hủy
+                console.error("Error updating OrderBook:", e); 
+                document.getElementById('ob-body').innerHTML = "<tr><td colspan='4' style='text-align:center;'>Lỗi lấy dữ liệu</td></tr>";
+            }
+        }
     }
 
-    async function fetchTradeHistory() {
+
+
+
+    async function fetchTradeHistory(signal) { // Thêm signal vào đây
         const type = getSymbolType(currentSymbol);
 
-        // Nếu là chỉ số thì dừng
         if (type === "INDEX") {
-            document.getElementById('trade-history-body').innerHTML = "<tr><td colspan='4' style='text-align:center;'>Không hỗ trợ lịch sử</td></tr>";
+            document.getElementById('trade-history-body').innerHTML = "<tr><td colspan='4' style='text-align:center;'>Không hỗ trợ chỉ số</td></tr>";
             return;
         }
 
         try {
-            // Chọn URL dựa trên loại (DERIVATIVE hoặc STOCK)
-            const url = (type === "DERIVATIVE") 
-                ? `https://bgapidatafeed.vps.com.vn/getliststocktrade_ps/${symbolMap[currentSymbol] || "41I1G7000"}?numpage=10`
-                : `https://bgapidatafeed.vps.com.vn/getliststocktrade_cs/${currentSymbol}?numpage=100&nextidx=-1`;
-                
-            const res = await fetch(url).then(r => r.json());
+            let url = "";
+            if (type === "DERIVATIVE") {
+                const code = symbolMap[currentSymbol];
+                if (!code) {
+                    document.getElementById('trade-history-body').innerHTML = "<tr><td colspan='4' style='text-align:center;'>Mã chưa hỗ trợ</td></tr>";
+                    return;
+                }
+                url = `https://bgapidatafeed.vps.com.vn/getliststocktrade_ps/${code}?numpage=10`;
+            } else {
+                url = `https://bgapidatafeed.vps.com.vn/getliststocktrade_cs/${currentSymbol}?numpage=100&nextidx=-1`;
+            }
             
+            // Thêm { signal } vào đây
+            const res = await fetch(url, { signal }).then(r => r.json());
+            
+            if (!res.data || res.data.length === 0) {
+                document.getElementById('trade-history-body').innerHTML = "<tr><td colspan='4' style='text-align:center;'>Không có dữ liệu</td></tr>";
+                return;
+            }
+
             document.getElementById('trade-history-body').innerHTML = (res.data || []).map(i => 
                 `<tr>
                     <td>${i.time}</td>
@@ -309,82 +398,341 @@
                     <td style="color:${i.side==='S'?'red':'green'}">${i.side==='S'?'B':'M'}</td>
                 </tr>`
             ).join('');
-        } catch(e) { console.error("Error fetching trade history:", e); }
-    }
-
-
-
-
-
-
-    function switchTab(e, blockId, symbol) {
-        // 1. Cập nhật nút tab
-        document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
-        e.currentTarget.classList.add('active');
-        
-        // 2. Cập nhật block hiển thị
-        document.querySelectorAll('.tab-content-block').forEach(block => block.classList.remove('active'));
-        const targetBlock = document.getElementById(blockId);
-        if (targetBlock) {
-            targetBlock.classList.add('active');
+        } catch(e) { 
+            if (e.name !== 'AbortError') { // Chỉ log lỗi nếu không phải là do hủy
+                console.error("Error fetching trade history:", e); 
+                document.getElementById('trade-history-body').innerHTML = "<tr><td colspan='4' style='text-align:center;'>Lỗi lấy dữ liệu</td></tr>";
+            }
         }
-        
-        // 3. Cập nhật mã và dữ liệu
-        currentSymbol = symbol;
-        document.getElementById('display_symbol').innerText = currentSymbol;
-        
-        // Cập nhật lại dữ liệu sidebar
-        fetchVPSData();
-        updateOrderBook();
-        fetchTradeHistory();
     }
 
-    function updateAll() {
-        const input = document.getElementById('symbolInput').value.toUpperCase();
-        if (!input) return;
+
+    function getAppState() {
+        const sidebar = document.querySelector(".sidebar-section");
+        const tradeContainer = document.getElementById("trade-history-container");
         
-        currentSymbol = input;
-        document.getElementById('display_symbol').innerText = currentSymbol;
+        return {
+            tabs: Array.from(document.querySelectorAll('.tab-item')).map(t => ({
+                id: t.getAttribute('data-id'),
+                symbol: t.getAttribute('data-symbol'),
+                active: t.classList.contains('active')
+            })),
+            currentSymbol: currentSymbol,
+            inputValue: document.getElementById('symbolInput').value,
+            sidebarScroll: sidebar ? sidebar.scrollTop : 0,
+            tradeScroll: tradeContainer ? tradeContainer.scrollTop : 0
+        };
+    }
+
+
+    // Hàm lưu (đảm bảo không lưu giá trị undefined)
+    function saveAppState() {
+        const sidebar = document.querySelector(".sidebar-section");
+        const tradeContainer = document.getElementById("trade-history-container");
         
-        // 1. Cập nhật tên trên Tab đang active
-        const activeTab = document.querySelector('.tab-item.active');
-        if (activeTab) {
-            // Giữ lại nút đóng (close-btn) nếu có, chỉ thay đổi text mã
-            const closeBtn = activeTab.querySelector('.close-btn');
-            activeTab.innerText = currentSymbol; 
-            if (closeBtn) {
-                activeTab.appendChild(closeBtn);
+        // Thu thập danh sách tabs
+        const tabs = [];
+        document.querySelectorAll('.tab-item:not(.btn-add)').forEach(t => {
+            tabs.push({
+                symbol: t.getAttribute('data-symbol'), 
+                id: t.getAttribute('data-id'),
+                active: t.classList.contains('active') // Lưu luôn trạng thái active
+            });
+        });
+
+        // Tạo đối tượng state duy nhất
+        const state = {
+            tabs: tabs,
+            activeTabId: document.querySelector('.tab-content-block.active')?.id,
+            currentSymbol: currentSymbol,
+            inputValue: document.getElementById('symbolInput')?.value || "",
+            sidebarScroll: sidebar ? sidebar.scrollTop : 0,
+            tradeScroll: tradeContainer ? tradeContainer.scrollTop : 0
+        };
+
+        // Lưu vào localStorage
+        localStorage.setItem('tradingAppState', JSON.stringify(state));
+    }
+
+
+    function restoreState() {
+        const saved = localStorage.getItem('tradingAppState');
+        if (!saved) return;
+        
+        const state = JSON.parse(saved);
+        
+        // 1. Khôi phục Input
+        const inputEl = document.getElementById('symbolInput');
+        if (inputEl) inputEl.value = state.inputValue || "";
+        
+        // 2. Khôi phục Tabs (logic của bạn đã có, chỉ cần áp dụng thêm scroll)
+        // ... (Code tạo lại tab từ state.tabs) ...
+        
+        // 3. Khôi phục Scroll (cần dùng setTimeout để đảm bảo DOM đã render xong)
+        setTimeout(() => {
+            const sidebar = document.querySelector(".sidebar-section");
+            const tradeContainer = document.getElementById("trade-history-container");
+            
+            if (sidebar) sidebar.scrollTop = state.sidebarScroll;
+            if (tradeContainer) tradeContainer.scrollTop = state.tradeScroll;
+        }, 500);
+    }
+
+
+
+
+    // Hàm vẽ tab (Sửa logic truyền tham số)
+    function createTab(symbol, id, isActive = false) {
+        // 1. Kiểm tra symbol
+        const sym = (symbol && symbol !== 'undefined' && symbol !== 'null') ? symbol : "VN30F1M";
+        
+        // 2. Tạo tab
+        const tab = document.createElement("button");
+        tab.className = "tab-item" + (isActive ? " active" : "");
+        tab.setAttribute('data-id', id);
+        tab.setAttribute('data-symbol', sym);
+        // Trong hàm createTab
+        tab.innerHTML = `<span class="tab-title">${sym}</span> <span class="close-btn" onclick="removeTab(event, '${id}')">×</span>`;
+        tab.onclick = (e) => { if(e.target.tagName !== 'SPAN') switchTab(e, id, sym); };
+        
+        const addBtn = document.querySelector(".btn-add");
+        document.getElementById("mainTabMenu").insertBefore(tab, addBtn);
+
+        // 3. Tạo khối nội dung
+        const div = document.createElement("div");
+        div.id = id;
+        div.className = "tab-content-block" + (isActive ? " active" : "");
+        div.innerHTML = `<div class="chart-section"><iframe src="https://chart.vps.com.vn/tv/?symbol=${sym}&resolution=D&theme=light"></iframe></div>`;
+        
+        // 4. Chèn vào container
+        const container = document.querySelector(".content-container");
+        const sidebar = document.querySelector(".sidebar-section");
+        
+        if (sidebar) {
+            container.insertBefore(div, sidebar);
+        } else {
+            container.appendChild(div);
+        }
+
+        // --- VỊ TRÍ ĐẶT LỆNH CUỘN ---
+        // Chỉ cuộn khi tab đó được kích hoạt ngay lúc tạo
+        if (isActive) {
+            // Cuộn vào nội dung tab (div)
+            div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            // Hoặc nếu bạn muốn cuộn đến Tab Button trên menu, hãy dùng:
+            // tab.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+
+
+    // Cập nhật hàm addNewChart
+    function addNewChart() {
+        // 1. Loại bỏ trạng thái active của TẤT CẢ các tab và nội dung cũ
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content-block').forEach(b => b.classList.remove('active'));
+
+        // 2. Tạo ID mới cho tab sắp tạo
+        const id = "c" + Date.now();
+        
+        // 3. Lấy symbol hiện tại (để mặc định hoặc theo mã đang chọn)
+        const sym = currentSymbol || "VN30F1M"; 
+        
+        // 4. Tạo tab mới với trạng thái active = true
+        createTab(sym, id, true);
+        
+        // 5. Cập nhật mã hiện tại sang mã của tab mới tạo
+        currentSymbol = sym;
+        document.getElementById('display_symbol').innerText = sym;
+        
+        // 6. Lưu trạng thái
+        debouncedSave();
+    }
+
+    // Hàm khởi tạo khi load trang
+    function initApp() {
+        // 1. DỌN SẠCH GIAO DIỆN (Tuyệt đối không để lại gì)
+        const tabContainer = document.querySelector('.tab-bar-container'); 
+        const contentContainer = document.querySelector('.tab-content-wrapper');
+        if (tabContainer) tabContainer.innerHTML = ''; 
+        if (contentContainer) contentContainer.innerHTML = '';
+
+        // 2. Lấy dữ liệu
+        const saved = localStorage.getItem('tradingAppState');
+        
+        // 3. Xử lý khởi tạo
+        if (!saved) {
+            // Chỉ tạo 1 tab duy nhất khi lần đầu chạy
+            createTab("VN30F1M", "c_default", true);
+        } else {
+            try {
+                const state = JSON.parse(saved);
+                // Vẽ lại từ dữ liệu đã lưu
+                state.tabs.forEach(t => createTab(t.symbol, t.id, t.active));
+                
+                // Khôi phục giá trị khác
+                currentSymbol = state.currentSymbol || "VN30F1M";
+                if (document.getElementById('symbolInput')) 
+                    document.getElementById('symbolInput').value = state.inputValue || "";
+            } catch (e) {
+                console.error(e);
+                createTab("VN30F1M", "c_default", true);
             }
         }
         
-        // 2. Cập nhật iframe của tab đang active
-        const activeIframe = document.querySelector('.tab-content-block.active iframe');
-        if (activeIframe) {
-            // Cập nhật lại URL với mã mới
-            activeIframe.src = `https://chart.vps.com.vn/tv/?symbol=${currentSymbol}&resolution=5&theme=light`;
+        startRealtime();
+    }
+
+
+
+    // Hàm xóa tab
+    function removeTab(e, id) {
+        e.stopPropagation();
+        
+        const tabItem = document.querySelector(`.tab-item[data-id="${id}"]`);
+        const contentBlock = document.getElementById(id);
+        
+        // Kiểm tra xem tab bị xóa có đang active không
+        const isRemovingActive = tabItem.classList.contains('active');
+        
+        // Nếu tab bị xóa đang active, hãy xác định tab kế tiếp trước khi xóa DOM
+        if (isRemovingActive) {
+            // Tìm "anh em" kế tiếp (bên phải), nếu không có thì tìm bên trái
+            const nextTab = tabItem.nextElementSibling || tabItem.previousElementSibling;
+            
+            // Loại bỏ tab hiện tại ra khỏi DOM
+            tabItem.remove();
+            if (contentBlock) contentBlock.remove();
+            
+            // Nếu còn tab, switch sang tab mới
+            if (nextTab && !nextTab.classList.contains('btn-add')) {
+                const nextId = nextTab.getAttribute('data-id');
+                const nextSymbol = nextTab.getAttribute('data-symbol');
+                switchTab({ currentTarget: nextTab }, nextId, nextSymbol);
+            } else {
+                // Nếu không còn tab nào khác, tạo tab mặc định
+                createTab("VN30F1M", "c_default", true);
+            }
+        } else {
+            // Nếu xóa tab không active, chỉ việc xóa DOM
+            tabItem.remove();
+            if (contentBlock) contentBlock.remove();
         }
         
+        debouncedSave();
+    }
+
+
+
+    let currentAbortController = null;
+    let isSwitching = false;
+
+    function switchTab(e, blockId, symbol) {
+        if (e.target.classList.contains('close-btn')) return;
+
+        // 1. Đổi UI ngay lập tức
+        document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        
+        document.querySelectorAll('.tab-content-block').forEach(b => b.classList.remove('active'));
+        document.getElementById(blockId).classList.add('active');
+
+        // 2. Cập nhật biến trạng thái
+        currentSymbol = symbol;
+        
+        // Sử dụng cache thay vì gán null trực tiếp
+        // globalRefPrice = refPriceCache[symbol] ?? null; 
+        globalRefPrice = null; 
+        
+        document.getElementById('display_symbol').innerText = symbol;
+
+        // 3. KÍCH HOẠT TẢI DỮ LIỆU ĐỢI BROWSER RENDER XONG
+        // Dùng requestAnimationFrame để đảm bảo UI đã đổi xong mới fetch
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                loadTabDataImmediately();
+            }, 0);
+        });
+        
+        // Lưu trạng thái
+        debouncedSave();
+    }
+
+    async function loadTabDataImmediately() {
+        // Nếu có request cũ đang chạy, hủy ngay
+        if (currentAbortController) {
+            currentAbortController.abort();
+        }
+        
+        // Tạo controller mới cho lần fetch này
+        currentAbortController = new AbortController();
+        
+        try {
+            // Chỉ chạy các hàm này với signal để theo dõi việc hủy
+            await Promise.all([
+                fetchVPSData(currentAbortController.signal),
+                updateOrderBook(currentAbortController.signal),
+                fetchTradeHistory(currentAbortController.signal)
+            ]);
+        } catch (err) {
+            if (err.name === 'AbortError') {
+                console.log("Request cũ đã bị hủy, bỏ qua...");
+            } else {
+                console.error("Lỗi tải dữ liệu:", err);
+            }
+        }
+    }
+
+
+
+    async function updateAll() {
+        const inputEl = document.getElementById('symbolInput');
+        if (!inputEl) return;
+        
+        const input = inputEl.value.trim().toUpperCase();
+        if (!input) return;
+        
+        inputEl.value = input;
+        currentSymbol = input;
+        
+        // 1. Lấy giá tham chiếu
+        const refPrice = await getPreviousClosePrice(currentSymbol);
+        
+        // --- TỐI ƯU TẠI ĐÂY ---
+        // Gán giá trị vừa lấy được vào biến toàn cục ngay lập tức
+        globalRefPrice = refPrice; 
+        
+        // Cập nhật UI
+        document.getElementById('display_symbol').innerText = currentSymbol;
+        document.getElementById('val_prev').innerText = refPrice ? refPrice.toLocaleString() : "---.--";
+        
+        // 2. Cập nhật tên trên Tab
+        const activeTab = document.querySelector('.tab-item.active');
+        if (activeTab) {
+            const titleSpan = activeTab.querySelector('.tab-title');
+            if (titleSpan) titleSpan.innerText = currentSymbol;
+            activeTab.setAttribute('data-symbol', currentSymbol);
+        }
+
+        // 3. Cập nhật iframe
+        const activeIframe = document.querySelector('.tab-content-block.active iframe');
+        if (activeIframe) {
+            activeIframe.src = `https://chart.vps.com.vn/tv/?symbol=${currentSymbol}&resolution=D&theme=light`;
+        }
+        
+        // 4. Các hàm cập nhật dữ liệu realtime
+        // Vì globalRefPrice đã có giá trị, fetchVPSData sẽ KHÔNG gọi lại getPreviousClosePrice() nữa
         fetchVPSData(); 
         updateOrderBook(); 
         fetchTradeHistory();
+        
+        // 5. Lưu trạng thái
+        debouncedSave();
     }
 
-
-    function addNewChart() {
-        const id = "c" + Date.now();
-        const tab = document.createElement("button");
-        tab.className = "tab-item";
-        tab.innerHTML = `${currentSymbol} <span class="close-btn" onclick="this.parentElement.remove(); document.getElementById('${id}').remove()">×</span>`;
-        tab.onclick = (e) => { if(e.target.tagName !== 'SPAN') switchTab(e, id, currentSymbol); };
-        document.getElementById("mainTabMenu").insertBefore(tab, document.querySelector(".btn-add"));
-        const div = document.createElement("div");
-        div.id = id; div.className = "tab-content-block";
-        div.innerHTML = `<div class="chart-section"><iframe src="https://chart.vps.com.vn/tv/?symbol=${currentSymbol}&resolution=5&theme=light"></iframe></div>`;
-        document.querySelector(".content-container").insertBefore(div, document.querySelector(".sidebar-section"));
-    }
-
-    setInterval(() => { fetchVPSData(); updateOrderBook(); fetchTradeHistory(); }, 3000);
-    updateAll();
+    window.addEventListener('DOMContentLoaded', initApp);
+    
 </script>
 </body>
 </html>
