@@ -92,7 +92,16 @@
         .qr-card-zalo { background: #0066cc; padding: 20px; border-radius: 40px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); width: 100%; max-width: 260px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; }
         .qr-card-zalo img { border-radius: 15px; }
         .qr-image { width: 100%; height: auto; display: block; }
-        
+        /* --- ĐIỀU CHỈNH ẢNH QR MỜI CAFE VỪA VẶN --- */
+        .bank-qr-img {
+            width: 100%;          /* Đảm bảo ảnh không vượt quá chiều rộng của hộp thoại */
+            max-width: 250px;     /* Giới hạn kích thước tối đa (bạn có thể đổi thành 280px hoặc 300px tùy ý) */
+            height: auto;         /* Giữ nguyên tỷ lệ ảnh không bị bóp méo */
+            display: block;       /* Căn giữa ảnh */
+            margin: 15px auto;    /* Tạo khoảng cách trên dưới và tự động căn giữa */
+            border-radius: 10px;  /* Bo tròn góc nhẹ cho đẹp */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Thêm đổ bóng nhẹ */
+        }
         /* --- CÁC PHẦN KHÁC (GIỮ NGUYÊN) --- */
         .blog-section { display: flex; flex-direction: column; gap: 20px; }
         .blog-header { font-size: 26px; font-weight: bold; color: #002060; border-bottom: 2px solid #002060; padding-bottom: 10px; margin-bottom: 10px; text-align: left; }
