@@ -615,7 +615,7 @@
         const div = document.createElement("div");
         div.id = id;
         div.className = "tab-content-block" + (isActive ? " active" : "");
-        div.innerHTML = `<div class="chart-section"><iframe src="https://web5.vps.com.vn/?sym=${sym}&interval=D&theme=light&lang=vi"></iframe></div>`;
+        div.innerHTML = `<div class="chart-section"><iframe src="https://chart.vps.com.vn/tv/?symbol=${sym}&resolution=D&theme=light"></iframe></div>`;
         
         // 4. Chèn vào container
         const container = document.querySelector(".content-container");
@@ -831,7 +831,7 @@
         // 3. Cập nhật iframe
         const activeIframe = document.querySelector('.tab-content-block.active iframe');
         if (activeIframe) {
-            activeIframe.src = `https://web5.vps.com.vn/?sym=${currentSymbol}&interval=D&theme=light&lang=vi`;
+            activeIframe.src = `https://chart.vps.com.vn/tv/?symbol=${currentSymbol}&resolution=D&theme=light`;
         }
         
         // 4. Các hàm cập nhật dữ liệu realtime
@@ -843,8 +843,6 @@
         // 5. Lưu trạng thái
         debouncedSave();
     }
-
-
 
     window.addEventListener('DOMContentLoaded', initApp);
     
