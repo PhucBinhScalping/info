@@ -241,106 +241,165 @@
     // Khai báo biến cache ở ngoài cùng (cùng cấp với các biến global khác)
     const refPriceCache = {};
 
-    async function getPreviousClosePrice(symbol, signal) {
-        const cleanSymbol = symbol ? symbol.trim().toUpperCase() : "VN30F1M";
-        
-        // 1. Kiểm tra Cache trước
-        if (refPriceCache[cleanSymbol]) {
-            console.log("Lấy giá tham chiếu từ Cache:", cleanSymbol);
-            return refPriceCache[cleanSymbol];
-        }
-        
-        // 2. Tính thời gian
-        const now = new Date();
-        const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const toTime = Math.floor(yesterday.getTime() / 1000); 
-        const fromTime = toTime - 86400;
 
-        const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${cleanSymbol}&resolution=1&from=${fromTime}&to=${toTime}`;
+    async function getLatestSessionData(symbol, signal) {
+        const code = (typeof symbolMap !== 'undefined' && symbolMap[symbol]) ? symbolMap[symbol] : symbol;
         
-        try {
-            // 3. Truyền signal vào fetch
-            const response = await fetch(url, { signal });
-            const data = await response.json();
-
-            if (data && data.s === "ok" && data.c && data.c.length > 0) {
-                const atcPrice = data.c[data.c.length - 1];
-                const price = parseFloat(atcPrice);
+        // Thử lùi tối đa 7 ngày để tìm phiên gần nhất
+        for (let i = 0; i < 7; i++) {
+            const targetDate = new Date();
+            targetDate.setDate(targetDate.getDate() - i);
+            
+            const from = Math.floor(new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 0, 0, 0).getTime() / 1000);
+            const to = Math.floor(new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 23, 59, 59).getTime() / 1000);
+            
+            const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${code}&resolution=1&from=${from}&to=${to}`;
+            
+            try {
+                const res = await fetch(url, { signal });
+                const data = await res.json();
                 
-                // 4. Lưu vào Cache
-                refPriceCache[cleanSymbol] = price;
-                console.log("Đã lấy và lưu giá ATC vào Cache cho " + cleanSymbol + ":", price);
-                return price;
-            }
-        } catch (e) {
-            if (e.name === 'AbortError') {
-                console.log("Fetch giá tham chiếu bị hủy do chuyển tab.");
-            } else {
-                console.error("Lỗi lấy giá ATC:", e);
+                // Nếu tìm thấy dữ liệu phiên (có nến từ 9h sáng)
+                if (data && data.s === "ok" && data.t?.length > 0) {
+                    const firstBarIdx = data.t.findIndex(t => new Date(t * 1000).getHours() >= 9);
+                    if (firstBarIdx !== -1) {
+                        // Trả về toàn bộ dữ liệu cần thiết của phiên gần nhất
+                        return {
+                            date: targetDate.toISOString().split('T')[0],
+                            opens: data.o.slice(firstBarIdx),
+                            highs: data.h.slice(firstBarIdx),
+                            lows: data.l.slice(firstBarIdx),
+                            closes: data.c.slice(firstBarIdx),
+                            // Lưu ý: Giá tham chiếu cần lấy từ nến ngày hôm trước (D)
+                            // Để đơn giản, ta có thể gọi thêm 1 lệnh lấy nến D tại đây hoặc truyền từ bên ngoài
+                        };
+                    }
+                }
+            } catch (e) {
+                if (e.name !== 'AbortError') console.error("Lỗi fetch phiên gần nhất:", e);
             }
         }
         return null;
     }
 
 
+
+
+    async function getPreviousClosePrice(symbol, signal) {
+        const cleanSymbol = symbol ? symbol.trim().toUpperCase() : "VN30F1M";
+        const code = (typeof symbolMap !== 'undefined' && symbolMap[cleanSymbol]) ? symbolMap[cleanSymbol] : cleanSymbol;
+        
+        if (refPriceCache[code]) {
+            return refPriceCache[code];
+        }
+        
+        // Lấy thời điểm 00:00:00 của ngày hiện tại
+        const now = new Date();
+        const todayZero = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000;
+
+        // Để lấy giá tham chiếu, ta cần nến của ngày hôm trước (hoặc gần nhất trước đó)
+        // Lấy dữ liệu trong khoảng từ 3 ngày trước đến ngày hôm nay
+        const toTime = todayZero; 
+        const fromTime = todayZero - (3 * 86400); // Lùi 3 ngày để chắc chắn bao gồm ngày giao dịch gần nhất
+
+        const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${code}&resolution=D&from=${fromTime}&to=${toTime}`;
+        
+        try {
+            const response = await fetch(url, { signal });
+            const data = await response.json();
+
+            // Kiểm tra data hợp lệ và có ít nhất 2 cây nến (nến hiện tại và nến trước đó)
+            if (data && data.s === "ok" && data.c && data.c.length >= 2) {
+                // data.c là mảng giá đóng cửa. 
+                // Nếu hôm nay là ngày giao dịch, index cuối là hôm nay, index kế cuối là ngày hôm qua (tham chiếu)
+                const refPrice = parseFloat(data.c[data.c.length - 2]);
+                refPriceCache[code] = refPrice;
+                console.log("Giá tham chiếu cho " + code + ":", refPrice);
+                return refPrice;
+            } else if (data && data.c && data.c.length === 1) {
+                // Nếu chỉ có 1 nến (ví dụ ngoài giờ giao dịch), lấy nến đó
+                const refPrice = parseFloat(data.c[0]);
+                refPriceCache[code] = refPrice;
+                return refPrice;
+            }
+        } catch (e) {
+            if (e.name === 'AbortError') return null;
+            console.error("Lỗi lấy giá tham chiếu:", e);
+        }
+        return null;
+    }
+
+
     // Hàm cập nhật dữ liệu chính
-    async function fetchVPSData(signal) { 
-            
-        // 1. Kiểm tra Cache trước, nếu có thì dùng luôn, không cần gọi API lịch sử
+    async function fetchVPSData(signal) {
+        // 1. Lấy giá tham chiếu (nếu chưa có)
         if (globalRefPrice === null) {
-            // Truyền 'signal' vào để nếu chuyển tab, việc lấy giá tham chiếu cũng bị hủy
             globalRefPrice = await getPreviousClosePrice(currentSymbol, signal);
         }
-
-        if (globalRefPrice === null) {
-            console.warn("Chưa lấy được giá tham chiếu, đợi lần cập nhật sau...");
-            return; 
-        }
+        if (globalRefPrice === null) return;
 
         try {
-            const toTime = Math.floor(Date.now() / 1000);
-            const fromTime = toTime - 86400; 
-            const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${currentSymbol}&resolution=1&from=${fromTime}&to=${toTime}&countback=500`;
-            
-            // 2. Lệnh fetch có sử dụng signal để hủy nếu chuyển tab
-            const response = await fetch(url, { signal }); 
-            const data = await response.json();
-                
-            // Kiểm tra dữ liệu: s === "ok" và mảng c, h, l phải có phần tử
-            if (data && data.s === "ok" && data.c?.length > 0 && data.h?.length > 0 && data.l?.length > 0) {
-                const len = data.c.length;
-                const currentPrice = data.c[len - 1];
-                
-                // TÍNH TOÁN AN TOÀN
-                const sessionHighPrice = Math.max(...data.h);
-                const sessionLowPrice = Math.min(...data.l);
+            let sessionData = null;
 
-                const diff = currentPrice - globalRefPrice;
-                const pct = (diff / globalRefPrice) * 100;
-                const prefix = diff > 0 ? "↑ +" : (diff < 0 ? "↓ " : "");
-                let tradeColor = diff > 0 ? "color-up" : (diff < 0 ? "color-down" : "color-ref");
-                    
-                document.getElementById('display_price').innerText = Number(currentPrice).toFixed(2);
-                document.getElementById('display_price').className = `vps-main-price ${tradeColor}`;
-                document.getElementById('display_symbol').className = `vps-widget-header ${tradeColor}`;
+            // 2. Vòng lặp tìm phiên giao dịch gần nhất (xử lý ngày nghỉ/cuối tuần)
+            for (let i = 0; i < 7; i++) {
+                const targetDate = new Date();
+                targetDate.setDate(targetDate.getDate() - i);
                 
-                document.getElementById('display_change').innerText = `${prefix}${diff.toFixed(2)} (${pct.toFixed(2)}%)`;
-                document.getElementById('display_change').className = `vps-change ${tradeColor}`;
+                const from = Math.floor(new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 0, 0, 0).getTime() / 1000);
+                const to = Math.floor(new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 23, 59, 59).getTime() / 1000);
                 
-                document.getElementById('val_open').innerText = Number(data.o[0]).toFixed(2);
-                document.getElementById('val_high').innerText = Number(sessionHighPrice).toFixed(2);
-                document.getElementById('val_low').innerText = Number(sessionLowPrice).toFixed(2);
-                document.getElementById('val_prev').innerText = Number(globalRefPrice).toFixed(2);
-            } else {
-                console.warn("Dữ liệu thị trường trả về rỗng hoặc không hợp lệ");
+                const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${currentSymbol}&resolution=1&from=${from}&to=${to}`;
+                
+                const res = await fetch(url, { signal });
+                const data = await res.json();
+                
+                if (data && data.s === "ok" && data.t?.length > 0) {
+                    // Tìm nến đầu tiên từ 9h sáng trở đi
+                    const firstBarIdx = data.t.findIndex(t => new Date(t * 1000).getHours() >= 9);
+                    if (firstBarIdx !== -1) {
+                        sessionData = {
+                            opens: data.o.slice(firstBarIdx),
+                            highs: data.h.slice(firstBarIdx),
+                            lows: data.l.slice(firstBarIdx),
+                            closes: data.c.slice(firstBarIdx)
+                        };
+                        break; // Tìm thấy phiên gần nhất rồi, thoát vòng lặp
+                    }
+                }
             }
+
+            // 3. Nếu không tìm thấy dữ liệu sau 7 ngày
+            if (!sessionData) {
+                console.warn("Không tìm thấy phiên giao dịch nào trong 7 ngày qua.");
+                return;
+            }
+
+            // 4. Tính toán dữ liệu
+            const currentPrice = sessionData.closes[sessionData.closes.length - 1];
+            const sessionOpenPrice = sessionData.opens[0];
+            const sessionHighPrice = Math.max(...sessionData.highs);
+            const sessionLowPrice = Math.min(...sessionData.lows);
+
+            // 5. Cập nhật UI
+            const diff = currentPrice - globalRefPrice;
+            const pct = (diff / globalRefPrice) * 100;
+            const prefix = diff > 0 ? "↑ +" : (diff < 0 ? "↓ " : "");
+            let tradeColor = diff > 0 ? "color-up" : (diff < 0 ? "color-down" : "color-ref");
+                
+            document.getElementById('display_price').innerText = Number(currentPrice).toFixed(2);
+            document.getElementById('display_price').className = `vps-main-price ${tradeColor}`;
+            document.getElementById('display_symbol').className = `vps-widget-header ${tradeColor}`;
+            document.getElementById('display_change').innerText = `${prefix}${diff.toFixed(2)} (${pct.toFixed(2)}%)`;
+            document.getElementById('display_change').className = `vps-change ${tradeColor}`;
+            
+            document.getElementById('val_open').innerText = Number(sessionOpenPrice).toFixed(2);
+            document.getElementById('val_high').innerText = Number(sessionHighPrice).toFixed(2);
+            document.getElementById('val_low').innerText = Number(sessionLowPrice).toFixed(2);
+            document.getElementById('val_prev').innerText = Number(globalRefPrice).toFixed(2);
+
         } catch (err) { 
-            // 3. Xử lý không hiển thị lỗi nếu bị người dùng chủ động click đổi tab
-            if (err.name === 'AbortError') {
-                console.log("Fetch VPS Data bị hủy (do đổi tab).");
-            } else {
-                console.error("Lỗi:", err); 
-            }
+            if (err.name !== 'AbortError') console.error("Lỗi fetchVPSData:", err); 
         }
     }
 
