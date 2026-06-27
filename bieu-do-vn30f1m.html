@@ -844,17 +844,6 @@
         debouncedSave();
     }
 
-    //ham dang nhap VPS
-    function openLoginPopup() {
-        const url = "https://banggia.vps.com.vn/chung-khoan/VN30";
-        // Thiết lập kích thước popup
-        const width = 1000;
-        const height = 700;
-        const left = (window.screen.width / 2) - (width / 2);
-        const top = (window.screen.height / 2) - (height / 2);
-        
-        window.open(url, "LoginVPS", `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,resizable=yes`);
-    }
 
 
     window.addEventListener('DOMContentLoaded', initApp);
