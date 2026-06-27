@@ -709,6 +709,84 @@ w\:* {behavior:url(#default#VML);}
 </xml><![endif]-->
 <style>
 <!--
+
+
+
+	/* --- ĐIỀU CHỈNH TOÀN TRANG ĐỂ MENU KHÔNG BỊ LỖI --- */
+	html { scroll-behavior: smooth; }
+	
+	body {
+		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+		background: linear-gradient(to right, #f9c851, #f15238);
+		margin: 0; padding: 0; min-height: 100vh; box-sizing: border-box; color: #000000;
+	}
+
+	.main-wrapper { display: flex; flex-direction: column; align-items: center; gap: 25px; padding: 20px 10px; box-sizing: border-box; width: 100%; }
+
+	/* --- MENU ĐIỀU HƯỚNG FIXED CHUẨN --- */
+	.navbar { position: sticky; top: 0; width: 100%; background: #002060; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); padding: 15px 0; box-sizing: border-box; }
+	.navbar-container { max-width: 1100px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: flex-start; }
+	.navbar-menu { display: flex; gap: 30px; list-style: none; margin: 0; padding: 0; }
+	.navbar-item a { color: #ffffff; text-decoration: none; font-size: 16px; font-weight: bold; transition: color 0.2s; }
+	.navbar-item a:hover { color: #fff200; }
+
+	/* --- CÁC CONTAINER NỘI DUNG --- */
+	.container { max-width: 1100px; width: 100%; background: rgba(255, 255, 255, 0.15); padding: 30px 40px; border-radius: 20px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); box-sizing: border-box; scroll-margin-top: 80px; }
+
+	/* --- TRANG 1 --- */
+	.header-section { display: flex; align-items: center; gap: 20px; border-bottom: 3px solid #002060; padding-bottom: 15px; margin-bottom: 30px; text-align: left; }
+	.avatar { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+	.header-title { font-size: 42px; font-weight: bold; color: #ffffff; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+	.main-content { display: flex; gap: 50px; flex-wrap: wrap; }
+	.left-column { flex: 1; min-width: 320px; text-align: center; }
+	.software-title { font-size: 24px; font-weight: bold; color: #002060; margin-top: 0; margin-bottom: 5px; }
+	.software-subtitle { font-size: 26px; font-weight: bold; color: #002060; margin-bottom: 20px; }
+	.slider-container { width: 100%; max-width: 450px; height: 300px; margin: 0 auto; overflow: hidden; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); background: #fff; position: relative; }
+	.slider-wrapper { display: flex; width: 300%; height: 100%; animation: slideAnimation 12s infinite ease-in-out; }
+	.slider-wrapper img { width: 33.33%; height: 100%; object-fit: contain; background: #fff; }
+	@keyframes slideAnimation { 0% { transform: translateX(0); } 30% { transform: translateX(0); } 33% { transform: translateX(-33.33%); } 63% { transform: translateX(-33.33%); } 66% { transform: translateX(-66.66%); } 96% { transform: translateX(-66.66%); } 100% { transform: translateX(0); } }
+	.right-column { flex: 1; min-width: 320px; display: flex; flex-direction: column; justify-content: flex-start; text-align: left; }
+	.vps-info { font-size: 18px; font-weight: bold; color: #002060; margin-bottom: 8px; text-align: right; }
+	.phone-info { font-size: 18px; font-weight: bold; color: #fff200; margin-bottom: 25px; text-align: right; }
+	.description-list { font-size: 16px; line-height: 1.6; margin-bottom: 30px; padding-left: 20px; font-weight: 500; }
+	.description-list li { margin-bottom: 12px; }
+	
+	.buttons-row { display: flex; gap: 20px; justify-content: center; margin-top: auto; margin-bottom: 15px; }
+	.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 30px; border-radius: 30px; font-size: 18px; font-weight: bold; text-decoration: none; transition: transform 0.2s, background-color 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.15); cursor: pointer; border: none; }
+	.btn:hover { transform: scale(1.05); }
+	.btn-download { background-color: #29b6f6; color: #ffffff; }
+	.btn-youtube { background-color: #ff0000; color: #ffffff; }
+	
+	/* --- NÚT ĐÃ CHỈNH SỬA --- */
+	.btn-link-vps { 
+		background-color: #ff4500; /* Thay mã màu ở đây */
+		color: #ffffff; /* Đổi chữ sang trắng để nổi trên nền cam đỏ */
+		padding: 10px 20px; 
+		border-radius: 4px; 
+		font-weight: bold; 
+		text-decoration: none; 
+		border: none; 
+		cursor: pointer; 
+		transition: background 0.3s;
+	}
+	/* --- CÁC PHẦN KHÁC (GIỮ NGUYÊN) --- */
+	.blog-section { display: flex; flex-direction: column; gap: 20px; }
+	.blog-header { font-size: 26px; font-weight: bold; color: #002060; border-bottom: 2px solid #002060; padding-bottom: 10px; margin-bottom: 10px; text-align: left; }
+	.blog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
+	.blog-card { background: #ffffff; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; transition: transform 0.2s; text-decoration: none; color: inherit; }
+	.blog-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+	.blog-img { width: 100%; height: 180px; object-fit: cover; background: #eee; }
+	.blog-content { padding: 20px; display: flex; flex-direction: column; flex: 1; text-align: left; }
+	.blog-title { font-size: 18px; font-weight: bold; color: #002060; margin: 0 0 10px 0; line-height: 1.4; }
+	.blog-excerpt { font-size: 14px; color: #555555; margin: 0 0 20px 0; line-height: 1.5; flex: 1; }
+	.blog-date { font-size: 12px; color: #999999; font-weight: 500; }
+	.sticky-contact-btn { position: fixed; bottom: 30px; right: 30px; background-color: #002060; color: #ffffff; padding: 15px 25px; border-radius: 40px; font-size: 16px; font-weight: bold; box-shadow: 0 8px 25px rgba(0,0,0,0.3); border: 2px solid #ffffff; text-decoration: none; cursor: pointer; z-index: 999; display: inline-flex; align-items: center; gap: 10px; transition: transform 0.2s, background-color 0.2s; animation: pulseAnimation 2s infinite; }
+	.minigame-btn { bottom: 95px !important; background: linear-gradient(135deg, #ff4757, #ff6b81) !important; border-color: #ffffff !important; animation: pulseMiniGame 2s infinite !important; }
+	.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+	.modal-overlay.active { opacity: 1; pointer-events: auto; }
+	.modal-box { background: #ffffff; padding: 25px; border-radius: 20px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.3); transform: scale(0.8); transition: transform 0.3s ease; position: relative; max-height: 90vh; overflow-y: auto; }
+	.btn-submit-form { background-color: #002060; color: #ffffff; width: 100%; padding: 12px; font-size: 16px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; }
+	.btn-close { background-color: #757575; color: #ffffff; font-size: 14px; padding: 8px 25px; border-radius: 20px; border: none; cursor: pointer; font-weight: bold; }
  /* Font Definitions */
  @font-face
 	{font-family:"Cambria Math";
@@ -4527,15 +4605,18 @@ table.TableGrid
 
 <body lang=VI style='tab-interval:36.0pt;word-wrap:break-word'>
 
+
 <nav class="navbar">
 	<div class="navbar-container">
 		<ul class="navbar-menu">
 			<li class="navbar-item"><a href="https://phucbinhscalping.online">Trang chủ</a></li>
 			<li class="navbar-item"><a href="dien-bien-thi-truong.html">Diễn biến thị trường</a></li>
-			<li class="navbar-item"><a href="#bai-viet">Bài Viết</a></li>
+			<li class="navbar-item"><a href="bieu-do-vn30f1m.html" onclick="showSection('bieudo')">Biểu đồ kỹ thuật</a</li>
+			<li class="navbar-item"><a href="tat-ca-bai-viet.html">Bài Viết</a></li>
 		</ul>
 	</div>
 </nav>
+
 <div class=WordSection1>
 
 <p class=MsoNormal align=center style='margin-top:0cm;margin-right:165.05pt;
