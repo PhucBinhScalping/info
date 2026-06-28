@@ -115,11 +115,35 @@
         .blog-date { font-size: 12px; color: #999999; font-weight: 500; }
         .sticky-contact-btn { position: fixed; bottom: 30px; right: 30px; background-color: #002060; color: #ffffff; padding: 15px 25px; border-radius: 40px; font-size: 16px; font-weight: bold; box-shadow: 0 8px 25px rgba(0,0,0,0.3); border: 2px solid #ffffff; text-decoration: none; cursor: pointer; z-index: 999; display: inline-flex; align-items: center; gap: 10px; transition: transform 0.2s, background-color 0.2s; animation: pulseAnimation 2s infinite; }
         .minigame-btn { bottom: 95px !important; background: linear-gradient(135deg, #ff4757, #ff6b81) !important; border-color: #ffffff !important; animation: pulseMiniGame 2s infinite !important; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+                .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-box { background: #ffffff; padding: 25px; border-radius: 20px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.3); transform: scale(0.8); transition: transform 0.3s ease; position: relative; max-height: 90vh; overflow-y: auto; }
-        .btn-submit-form { background-color: #002060; color: #ffffff; width: 100%; padding: 12px; font-size: 16px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+        .modal-box h3 { margin-top: 0; color: #002060; font-size: 22px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; font-weight: bold; color: #002060; margin-bottom: 5px; font-size: 14px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #cccccc; border-radius: 8px; font-size: 15px; box-sizing: border-box; font-family: inherit; }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #002060; box-shadow: 0 0 5px rgba(0, 32, 96, 0.2); }
+        .btn-submit-form { background-color: #002060; color: #ffffff; width: 100%; padding: 12px; font-size: 16px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.15); margin-bottom: 15px; }
+        .bank-qr-img { width: 100%; max-width: 250px; height: auto; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 15px; }
         .btn-close { background-color: #757575; color: #ffffff; font-size: 14px; padding: 8px 25px; border-radius: 20px; border: none; cursor: pointer; font-weight: bold; }
+        .btn-close:hover { background-color: #555555; }
     </style>
 </head>
 <body>
@@ -174,7 +198,7 @@
                     </ul>
 
                     <div class="buttons-row">
-                        <a href="https://drive.google.com/file/d/1NPeIdaIEjnSWXf_H2daNF1UNglWtJ6c1/view?usp=sharing" target="_blank" class="btn btn-download">
+                        <a href="https://drive.google.com/file/d/1ufsJoi6CjmmXk9QTm08ZIcxa-ccF21hX/view" target="_blank" class="btn btn-download">
                             Tải Bot
                         </a>
                         <a href="https://www.youtube.com/@PhucBinhScalping" target="_blank" class="btn btn-youtube">
@@ -251,7 +275,7 @@
     </div> <div class="modal-overlay" id="contactModal">
         <div class="modal-box">
             <h3>💬 Đăng Ký Tư Vấn</h3>
-            <form action="https://formspree.io/f/THAY_ID_FORM_TẠI_ĐÂY" method="POST">
+            <form action="https://formspree.io/f/xrewzpjl" method="POST">
                 <div class="form-group">
                     <label for="name">Họ và Tên:</label>
                     <input type="text" id="name" name="Họ Tên" placeholder="Nguyễn Văn A" required>
