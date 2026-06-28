@@ -2,6 +2,9 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=1200, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
     <title>Phúc Bình Scalping - Biểu đồ</title>
     <style>
         /* Thiết lập nền tảng */
@@ -703,7 +706,17 @@
 
     // Hàm khởi tạo khi load trang
     function initApp() {
-        // 1. DỌN SẠCH GIAO DIỆN (Tuyệt đối không để lại gì)
+        // --- BỔ SUNG: LẤY DỮ LIỆU AUTH TỪ SESSION STORAGE ---
+        const savedUid = sessionStorage.getItem('vps_uid');
+        const savedSess = sessionStorage.getItem('vps_sess');
+        
+        if (savedUid && savedSess) {
+            globalUserID = savedUid;
+            globalSession = savedSess;
+        }
+        // ----------------------------------------------------
+
+        // 1. DỌN SẠCH GIAO DIỆN
         const tabContainer = document.querySelector('.tab-bar-container'); 
         const contentContainer = document.querySelector('.tab-content-wrapper');
         if (tabContainer) tabContainer.innerHTML = ''; 
@@ -714,15 +727,12 @@
         
         // 3. Xử lý khởi tạo
         if (!saved) {
-            // Chỉ tạo 1 tab duy nhất khi lần đầu chạy
             createTab("VN30F1M", "c_default", true);
         } else {
             try {
                 const state = JSON.parse(saved);
-                // Vẽ lại từ dữ liệu đã lưu
                 state.tabs.forEach(t => createTab(t.symbol, t.id, t.active));
                 
-                // Khôi phục giá trị khác
                 currentSymbol = state.currentSymbol || "VN30F1M";
                 if (document.getElementById('symbolInput')) 
                     document.getElementById('symbolInput').value = state.inputValue || "";
@@ -731,6 +741,12 @@
                 createTab("VN30F1M", "c_default", true);
             }
         }
+
+        // --- BỔ SUNG: CẬP NHẬT LẠI IFRAME NẾU ĐÃ CÓ AUTH ---
+        if (globalUserID && globalSession) {
+            updateActiveIframe();
+        }
+        // --------------------------------------------------
         
         startRealtime();
     }
@@ -879,6 +895,17 @@
     }
 
 
+    function updateActiveIframe() {
+        const activeIframe = document.querySelector('.tab-content-block.active iframe');
+        if (activeIframe) {
+            const activeTab = document.querySelector('.tab-item.active');
+            const sym = activeTab ? activeTab.getAttribute('data-symbol') : "VN30F1M";
+            activeIframe.src = `https://web5.vps.com.vn/?sym=${sym}&interval=D&theme=light&lang=vi&u=${globalUserID}&s=${globalSession}&loadLastChart=true`;
+        }
+    }
+
+
+
     function syncAuthData() {
         const uidInput = document.getElementById('uidInput');
         const sessInput = document.getElementById('sessInput');
@@ -891,23 +918,22 @@
             return;
         }
 
-        // 1. Gán vào biến toàn cục
+        // 1. Lưu vào sessionStorage
+        sessionStorage.setItem('vps_uid', uVal);
+        sessionStorage.setItem('vps_sess', sVal);
+        
+        // Gán vào biến toàn cục để dùng ngay
         globalUserID = uVal;
         globalSession = sVal;
 
         // 2. Cập nhật URL biểu đồ
-        const activeIframe = document.querySelector('.tab-content-block.active iframe');
-        if (activeIframe) {
-            const activeTab = document.querySelector('.tab-item.active');
-            const sym = activeTab ? activeTab.getAttribute('data-symbol') : "VN30F1M";
-            activeIframe.src = `https://web5.vps.com.vn/?sym=${sym}&interval=D&theme=light&lang=vi&u=${globalUserID}&s=${globalSession}&loadLastChart=true`;
-        }
+        updateActiveIframe(); // Gọi hàm phụ để code gọn hơn
 
-        // 3. XÓA DỮ LIỆU Ở Ô NHẬP ĐỂ ĐẢM BẢO AN TOÀN
+        // 3. XÓA DỮ LIỆU Ở Ô NHẬP
         uidInput.value = "";
         sessInput.value = "";
         
-        alert("Đã ghi dữ liệu thành công! Thông tin đã được xóa khỏi ô nhập.");
+        alert("Đã ghi dữ liệu thành công! Thông tin sẽ lưu đến khi bạn đóng trình duyệt.");
     }
 
 
