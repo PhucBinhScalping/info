@@ -2,9 +2,9 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=1200, initial-scale=1.0">
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="apple-touch-icon" href="logo.png">
+    <meta name="viewport" content="width=1200, initial-scale=1.0">
     <title>Phúc Bình Scalping - Biểu đồ</title>
     <style>
         /* Thiết lập nền tảng */
@@ -55,6 +55,7 @@
             width: 100%;
             height: calc(100vh - 150px); /* Dùng vh để đảm bảo chiều cao màn hình */
             overflow: hidden;
+            margin-top: 35px;/* Bạn tăng con số này lên để đẩy nó xuống thấp hơn */
         }
 
         .tab-content-block {
@@ -155,17 +156,17 @@
 </head>
 <body>
 
-<div class="header">
+<div class="header" style="space-between; align-items: center; padding: 5px 5px; font-size: 15px; height: 25px;">
     <a href="index.html" class="back-link" style="flex: 1; text-align: left; color: #ffb700;">⬅ Quay lại Trang chủ</a>
     <div style="flex: 2; text-align: center; font-size: 18px; font-weight: bold; color: #ffb700; letter-spacing: 0.5px;">
           Dữ liệu được lấy trực tiếp từ Công ty Cổ phần Chứng khoán VPS
     </div>
-    <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #ffb700;">
+    <div style="flex: 1; text-align: right; font-size: 18px; font-weight: bold; color: #ffb700; padding-right: 20px;">
         SĐT: 0853.525.379 - ID VPS: BOR5
     </div>
 </div>
 
-<div class="header" style="display: flex; justify-content: space-between; align-items: center; padding: 0 20px;">
+<div class="header" style="display: flex; justify-content: space-between; align-items: center; padding: 5px 5px; font-size: 15px; height: 25px;">
     
     <div class="input-group" style="display: flex; align-items: center; gap: 10px;">
         <label for="symbolInput"><strong>Nhập mã:</strong></label>
@@ -220,8 +221,8 @@
 
 
 
-<div class="tab-menu" id="mainTabMenu">
-    <button class="btn-add" onclick="addNewChart()">+ Thêm biểu đồ</button>
+<div class="tab-menu" id="mainTabMenu" style="display: flex; width: fit-content; gap: 5px; padding: 5px; height: 25px;">
+    <button class="btn-add" onclick="addNewChart()" style="font-size: 12px; padding: 0 8px; height: 100%; border: 1px solid #ccc; cursor: pointer;">+ Thêm biểu đồ</button>
 </div>
 
 
