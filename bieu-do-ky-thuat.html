@@ -641,7 +641,7 @@
         // --- THAY ĐỔI TẠI ĐÂY ---
         // Sử dụng biến toàn cục thay vì lấy trực tiếp từ ô input
         // Điều này giúp tab luôn sử dụng thông tin mới nhất đã được "Ghi dữ liệu"
-        let chartUrl = `https://web5.vps.com.vn/?sym=${sym}&interval=D&theme=light&lang=vi`;
+        let chartUrl = `https://chart.vps.com.vn/tv/?symbol=${sym}&allowFullscreen=true&resolution=D&theme=light`;
         
         if (globalUserID && globalSession) {
             chartUrl += `&u=${globalUserID}&s=${globalSession}&loadLastChart=true`;
@@ -877,7 +877,7 @@
         // 3. Cập nhật iframe: SỬ DỤNG BIẾN TOÀN CỤC
         const activeIframe = document.querySelector('.tab-content-block.active iframe');
         if (activeIframe) {
-            let newUrl = `https://web5.vps.com.vn/?sym=${currentSymbol}&interval=D&theme=light&lang=vi`;
+            let newUrl = `https://chart.vps.com.vn/tv/?symbol=${currentSymbol}&allowFullscreen=true&resolution=D&theme=light`;
             
             // KIỂM TRA BIẾN TOÀN CỤC
             if (globalUserID && globalSession) {
@@ -900,9 +900,10 @@
         if (activeIframe) {
             const activeTab = document.querySelector('.tab-item.active');
             const sym = activeTab ? activeTab.getAttribute('data-symbol') : "VN30F1M";
-            activeIframe.src = `https://web5.vps.com.vn/?sym=${sym}&interval=D&theme=light&lang=vi&u=${globalUserID}&s=${globalSession}&loadLastChart=true`;
+            activeIframe.src = `https://chart.vps.com.vn/tv/?symbol=${sym}&allowFullscreen=true&resolution=D&theme=light&lang=vi&u=${globalUserID}&s=${globalSession}&loadLastChart=true`;
         }
     }
+    /*https://chart.vps.com.vn/tv/?symbol=${currentSymbol}&resolution=D&theme=light*/
 
 
 
