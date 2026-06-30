@@ -36,7 +36,7 @@
 
         /* Các thành phần khác */
         .vps-widget-header { font-size: 22px; font-weight: bold; color: #00c853; }
-        .vps-main-price { font-size: 32px; font-weight: bold; margin: 10px 0;transition: color 0.3s ease; }
+        .vps-main-price { font-size: 32px; font-weight: bold; margin: 10px 0;transition: color 0.2s ease, opacity 0.2s ease; }
         /* Container bao bọc giá và % */
         .price-change-wrapper {
             display: flex;
@@ -52,12 +52,8 @@
             gap: 12px;            /* Khoảng cách giữa giá và % */
             margin: 5px 0;
         }
-
-        .vps-main-price {
-            font-size: 42px !important; /* Kích thước giá */
-            font-weight: 800;
-            margin: 0;
-            line-height: 1;
+        #ob-body td {
+            transition: background-color 0.3s ease;
         }
 
         .vps-change {
@@ -622,19 +618,49 @@
     }
 
 
+    async function getLatestPriceFromHistory(symbol = "VN30F1M") {
+        const to = Math.floor(Date.now() / 1000);
+        const from = to - (3 * 24 * 3600); // Lấy dữ liệu 3 ngày gần nhất để chắc chắn bao gồm phiên cũ
+        
+        const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${symbol}&resolution=1&from=${from}&to=${to}&countback=1`;
+
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            // Kiểm tra dữ liệu: Nếu data.s trả về 'no_data' hoặc mảng c rỗng
+            if (data && data.s === "ok" && data.c && data.c.length > 0) {
+                const latestPrice = data.c[data.c.length - 1]; 
+                return latestPrice;
+            } else {
+                console.log("Thị trường đóng cửa hoặc không có dữ liệu (cuối tuần/lễ).");
+                return null; // Trả về null để UI có thể xử lý hiển thị trạng thái "Đóng cửa"
+            }
+        } catch (error) {
+            return null;
+        }
+    }
+
+
+
+
     // Hàm cập nhật dữ liệu chính
     async function fetchVPSData(signal) {
         const data = await loadSnapshotData(currentSymbol);
         
-        // Kiểm tra dữ liệu hợp lệ
-        if (!data || isNaN(data.lastPrice) || isNaN(data.closePrice)) {
-            console.warn("Dữ liệu chưa sẵn sàng hoặc lỗi.");
-            return;
+        // Nếu không có dữ liệu hoặc lastPrice là 0/không hợp lệ, gán lastPrice = closePrice
+        if (!data || isNaN(data.lastPrice) || data.lastPrice === 0) {
+            // Chỉ tiếp tục nếu có closePrice (giá tham chiếu)
+            if (!data || !data.closePrice) {
+                console.warn("Không có dữ liệu giá.");
+                return;
+            }
+            data.lastPrice = data.closePrice;
         }
 
         const { lastPrice, closePrice } = data;
         const diff = lastPrice - closePrice;
-        const pct = (diff / closePrice) * 100;
+        const pct = closePrice !== 0 ? (diff / closePrice) * 100 : 0;
 
         // Cập nhật UI
         const dispPrice = document.getElementById('display_price');
@@ -645,8 +671,7 @@
         dispChange.innerText = `${diff > 0 ? '+' : ''}${diff.toFixed(2)} (${pct.toFixed(2)}%)`;
 
         // 2. Định nghĩa màu sắc
-        // Màu xanh (tăng), Đỏ (giảm), Xám/Trắng (tham chiếu)
-        let color = '#787b86'; // Màu mặc định (tham chiếu)
+        let color = '#ffab00'; // Mặc định là màu vàng (khi diff === 0)
         if (diff > 0) {
             color = '#089981'; // Màu xanh lá cây (tăng)
         } else if (diff < 0) {
@@ -659,7 +684,7 @@
         dispPrice.style.fontSize = "38px";
         dispChange.style.fontSize = "18px";
     }
-
+    
     // Danh sách các chỉ số
     const indexList = ["VN30", "VN100", "VN50", "VNINDEX", "HNX", "HNX30", "UPCOM"];
 
@@ -946,7 +971,7 @@
     function startRealtimeSchedulers() {
         // Tự động chạy ngầm, mỗi cái một chu kỳ riêng
         runScheduler('snapshot', fetchVPSData, 1000);
-        runScheduler('orderBook', updateOrderBook, 300);
+        runScheduler('orderBook', updateOrderBook, 200);
         runScheduler('tradeHistory', fetchTradeHistory, 300);
     }
 
