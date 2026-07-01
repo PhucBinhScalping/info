@@ -638,49 +638,56 @@
     // Hàm cập nhật dữ liệu chính
     // Dùng biến tĩnh (static) hoặc biến ngoài hàm để lưu giá trị cũ
     let lastKnownPrice = null;
-
     async function fetchVPSData(signal) {
         // 1. Gọi dữ liệu thô
         const data = await loadSnapshotData(currentSymbol, signal);
-        
         if (!data) return;
 
-        const { lastPrice, closePrice } = data;
+        let { lastPrice, closePrice } = data;
+        const dispPrice = document.getElementById('display_price');
+        const dispChange = document.getElementById('display_change');
+
+        // --- LOGIC MỚI ---
+        // Nếu giá hiện tại không tồn tại hoặc bằng 0, hiển thị giá tham chiếu và dừng lại
+        if (!lastPrice || lastPrice === 0) {
+            if (dispPrice) {
+                dispPrice.innerText = closePrice.toFixed(2);
+                dispPrice.style.color = '#ffab00'; // Màu vàng (tham chiếu)
+            }
+            if (dispChange) {
+                //dispChange.innerText = "Tham chiếu"; // Hoặc chuỗi bạn muốn hiển thị
+                dispChange.style.color = '#ffab00';
+                dispPrice.style.fontSize = "36px";
+            }
+            lastKnownPrice = 0; // Reset để lần tới nếu có giá mới sẽ cập nhật
+            return; 
+        }
+        // -----------------
+
+        // Tiếp tục logic cũ nếu có lastPrice
         const diff = lastPrice - closePrice;
         
-        // 2. TỐI ƯU: Chỉ cập nhật khi giá thay đổi
         if (lastKnownPrice === lastPrice) return;
-        
         lastKnownPrice = lastPrice; 
 
-        // 3. Tính toán 
         const pct = closePrice !== 0 ? (diff / closePrice) * 100 : 0;
         const priceText = lastPrice.toFixed(2);
-        
-        // Định dạng lại theo yêu cầu: -12.40/(-0.62%)
-        // Dấu + chỉ thêm vào nếu diff > 0
         const prefix = diff > 0 ? '+' : '';
         const changeText = `${prefix}${diff.toFixed(2)} / (${pct.toFixed(2)}%)`;
 
-        // 4. Cập nhật giao diện
-        const dispPrice = document.getElementById('display_price');
-        const dispChange = document.getElementById('display_change');
-        
         if (dispPrice) {
             dispPrice.innerText = priceText;
-            dispPrice.style.fontSize = "36px"; // Kích thước giá
+            dispPrice.style.fontSize = "36px";
         }
         
         if (dispChange) {
             dispChange.innerText = changeText;
         }
 
-        // Định nghĩa màu sắc
-        let color = '#ffab00'; // Vàng
-        if (diff > 0) color = '#089981'; // Xanh
-        else if (diff < 0) color = '#f23645'; // Đỏ
+        let color = '#ffab00';
+        if (diff > 0) color = '#089981';
+        else if (diff < 0) color = '#f23645';
 
-        // Áp dụng màu cho cả hai
         if (dispPrice) dispPrice.style.color = color;
         if (dispChange) dispChange.style.color = color;
     }
