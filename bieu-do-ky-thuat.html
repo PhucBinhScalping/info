@@ -8,298 +8,75 @@
     <title>Phúc Bình Scalping - Biểu đồ</title>
     <style>
         /* Thiết lập nền tảng */
-
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: sans-serif; overflow: hidden; background: #fff; } /*overflow: hidden;*/
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: sans-serif; overflow: hidden; background: #fff; }
 
         /* Header & Containers */
         .header { height: 50px; background: #f0f3fa; display: flex; align-items: center; padding: 0 20px; gap: 10px; border-bottom: 1px solid #ddd; }
-        .content-container { display: flex; position: relative; height: calc(100% - 100px); width: 100%; }
-
-        /* Xử lý Tabs để không bị mất Iframe */
-        .tab-content-block { 
-            position: absolute;
-            top: 0;
-            left: -9999px; /* Ẩn bằng cách đẩy ra ngoài màn hình */
-            width: 100%;
-            height: 100%;
-            display: flex; /* Dùng flex để iframe con lấp đầy */
-        }
-        .tab-content-block.active { 
-            position: relative; 
-            left: 0; /* Hiện lại tab đang chọn */
-        }
+        .content-container { display: flex; position: relative; height: calc(100% - 90px); width: 100%; }
 
         /* Biểu đồ và Sidebar */
-        .chart-section { flex: 1; height: 100%; width: 100%; }
-        .sidebar-section { width: 320px; height: 100%; border-left: 1px solid #ddd; padding: 15px; overflow-y: auto; flex-shrink: 0; }
+        #tabChartsContainer { flex: 1; height: 100%; position: relative; }
+        .tab-content-block { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; display: none; }
+        .tab-content-block.active { z-index: 1; opacity: 1; pointer-events: auto; display: flex; }
+        .chart-section { flex: 1; height: 100%; display: block; }
+        .sidebar-section { width: 286px; height: 100%; border-left: 1px solid #ddd; padding: 10px; overflow-y: auto; flex-shrink: 0; }
         iframe { width: 100%; height: 100%; border: none; }
 
         /* Các thành phần khác */
-        .vps-widget-header { font-size: 22px; font-weight: bold; color: #00c853;margin: 5px; }
-        .header-price-group {
-            display: flex;
-            flex-direction: column; /* Đưa các phần tử về dạng cột (xếp chồng) */
-            align-items: flex-start; /* Căn lề trái */
-            gap: 2px; /* Khoảng cách nhỏ giữa giá và phần thay đổi */
-            margin: 5px 0;
-        }
-
-        .vps-main-price {
-            font-size: 38px;
-            font-weight: bold;
-            line-height: 1; /* Giúp các dòng không bị giãn quá xa */
-            margin: 0;
-            transition: color 0.2s ease, opacity 0.2s ease;    
-        }
-
-        .vps-change {
-            font-size: 16px !important;
-            font-weight: 700;
-            margin: 1;
-            line-height: 1.2;
-        }
-        /* Container bao bọc giá và % */
-        .price-change-wrapper {
-            display: flex;
-            align-items: baseline; /* Căn thẳng hàng theo chân chữ */
-            gap: 15px;             /* Khoảng cách giữa Giá và % */
-            margin: 5px 0;
-        }
-
-        #ob-body td {
-            transition: background-color 0.3s ease;
-            font-size: 13px;
-        }
-        .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+        .vps-widget-header { font-size: 22px; font-weight: bold; color: #00c853; margin: 5px; }
+        .header-price-group { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; margin: 5px 0; }
+        .vps-main-price { font-size: 38px; font-weight: bold; line-height: 1; margin: 0; transition: color 0.2s ease, opacity 0.2s ease; }
+        .vps-change { font-size: 16px !important; font-weight: 700; margin: 1; line-height: 1.2; }
+        
+        #ob-body td { transition: background-color 0.3s ease; font-size: 13px; }
         table { width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; margin-top: 10px; }
         th { background: #f0f3fa; color: #474f66; padding: 5px; }
-        .color-up { color: #00c853 !important; }
-        .color-down { color: #d50000 !important; }
-        .color-ref { color: #ffab00 !important; }
-        .tab-menu { display: flex; background: #f0f3fa; border-bottom: 1px solid #ddd; padding-left: 10px; }
-        .tab-item { padding: 10px 20px; cursor: pointer; border: none; background: transparent; font-weight: bold; color: #666; }
-        .tab-item.active { background: #fff; border-bottom: 2px solid #00c853; color: #00c853; }
+        
+        .tab-menu { display: flex; background: #f0f3fa; border-bottom: 1px solid #ddd; padding-left: 10px; height: 35px; align-items: center; }
+        .tab-item { display: inline-flex; align-items: center; justify-content: center; padding: 6px 12px; cursor: pointer; border: 1px solid #ccc; border-radius: 4px 4px 0 0; background-color: #f9f9f9; font-weight: bold; color: #666; white-space: nowrap; margin-right: 5px; transition: background 0.2s; }
+        .tab-item:hover { background: #e9ecef; }
+        .tab-item.active { border: 1px solid #ffb700; background-color: #fff; border-bottom: 1px solid #fff; margin-bottom: -1px; z-index: 2; color: #00c853; }
+        
         #trade-history-container { height: 200px; overflow-y: auto; border: 1px solid #ddd; background: #fff; border-radius: 4px; }
-        .btn-add { cursor: pointer; padding: 10px 15px; background: #e0e0e0; border: none; font-weight: bold; margin-left: 10px; }
-        .close-btn { margin-left: 8px; padding: 0 5px; border-radius: 50%; background: #ffcccc; cursor: pointer; }
-        /* Tìm đoạn này trong thẻ <style> dành cho biểu đồ */
-        .content-container { 
-            display: flex; 
-            position: relative; 
-            /* Giảm từ 100px xuống còn 50px hoặc 60px để mở rộng biểu đồ xuống dưới */
-            height: calc(100% - 90px); 
-            width: 100%; 
-        }
-
-        .tab-content-block {
-            flex: 1; /* BẮT BUỘC ĐỂ BIỂU ĐỒ CHIẾM HẾT KHOẢNG TRỐNG */
-            height: 100%;
-            display: none; /* Ẩn mặc định */
-        }
-
-        .tab-content-block.active {
-            display: flex; /* Hiện khi active */
-        }
-
-        .sidebar-section {
-            width: 286px;
-            flex-shrink: 0;
-            overflow-y: auto;     /* Cho phép cuộn nếu bảng giá dài */
-            padding: 10px;
-            border-left: 1px solid #ddd;
-        }
-        .chart-section {
-            flex: 1;              /* Biểu đồ chiếm không gian còn lại */
-            height: 100%;
-            display: block;       /* Đảm bảo hiển thị */
-        }
-
-        /* Container chứa các tab */
-        .tab-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            margin-top: 0px;
-        }
-        .tab-title {
-            /* Cho phép click xuyên qua thẻ span này */
-            pointer-events: none;
-        }
-        /* Các block tab */
-        .tab-content-block {
-            position: absolute; /* Giữ vị trí trong container */
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            opacity: 0;
-            pointer-events: none; /* Không cho tương tác khi đang ẩn */
-            transition: opacity 0.2s ease;
-        }
-
-        .tab-content-block.active {
-            z-index: 1;
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .tab-item {
-            display: flex;         /* Giúp căn giữa chữ trong ô */
-            align-items: center;   /* Căn dọc */
-            justify-content: center; /* Căn ngang */
-            padding: 12px 24px;    /* Tăng vùng nhấn (tăng padding) */
-            cursor: pointer;
-            border: none;
-            background: transparent;
-            font-weight: bold;
-            color: #666;
-            white-space: nowrap;   /* Giữ chữ không bị xuống dòng */
-            height: 100%;          /* Để ô cao bằng menu tab */
-            transition: background 0.2s;
-        }
-
-        .tab-item:hover {
-            background: #e9ecef;   /* Thêm hiệu ứng hover để người dùng biết đó là nút */
-        }
-
-
-        .tab-item {
-            border: 1px solid #ccc; /* Màu viền xám nhạt */
-            border-radius: 4px 4px 0 0; /* Bo góc trên để trông giống tab thật */
-            padding: 8px 12px;
-            margin-right: 5px;
-            cursor: pointer;
-            background-color: #f9f9f9;
-            display: inline-flex; /* Giữ icon và chữ thẳng hàng */
-            align-items: center;
-        }
-
-        /* Style khi thẻ tab đang được chọn (active) */
-        .tab-item.active {
-            border: 1px solid #ffb700; /* Viền màu */
-            background-color: #fff; /* Nền trắng khi chọn */
-            border-bottom: 1px solid #fff; /* Quan trọng: tạo cảm giác liền mạch với nội dung bên dưới */
-            margin-bottom: -1px; /* Đè lên vạch ngăn cách của khối nội dung bên dưới */
-            z-index: 2; /* Đảm bảo viền nằm trên các phần tử khác */
-        }
-        /* Màu sắc cố định */
-        .color-yellow { color: #d9a000; } /* Màu vàng cho tham chiếu */
-        .color-green  { color: #089981; } /* Màu xanh lá */
-        .color-red    { color: #f23645; } /* Màu đỏ */
-        .info-row { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr 1fr 1fr; /* Chia 4 cột bằng nhau */
-            align-items: center; 
-            padding: 6px 0; 
-            border-bottom: 1px solid #eee; 
-            font-size: 13px; /* Giảm chút để gọn hơn */
-        }
-        .info-label { 
-            font-weight: bold; 
-            color: #474f66; 
-            padding-right: 4px;
-        }
-        .info-value { 
-            font-family: 'Courier New', monospace; 
-            font-weight: 700;        /* 700 là đậm hơn 600, trông sẽ rõ nét hơn */
-            font-size: 15px;         /* Tăng từ 13px lên 14px hoặc 15px tùy ý bạn */
-            text-align: right; 
-            padding-right: 9px;      /* Khoảng cách giữa các cột */
-        }
-        .info-row-net {
-            display: flex;                /* Dùng flex thay vì grid */
-            justify-content: space-between; /* Đẩy 2 phần tử về 2 đầu */
-            align-items: center;
-            padding: 12px 10px;           /* Khoảng cách bên trong hàng */
-            border-top: 1px solid #eee;   /* Đường kẻ phía trên */
-            margin-top: 10px;
-            background-color: #fcfcfc;    /* Màu nền nhẹ để nổi bật hàng này */
-        }
-
-        .info-row-net .info-label {
-            font-weight: bold;
-            color: #474f66;
-        }
-
-        .info-row-net .info-value {
-            font-family: 'Courier New', monospace;
-            font-weight: 700;
-            font-size: 16px;              /* Kích thước số to hơn chút cho dễ nhìn */
-        }
-        .toolbar-container {
-            display: flex;
-            justify-content: flex-end; /* Đẩy hết sang phải */
-            align-items: center;
-            gap: 10px;               /* Khoảng cách giữa các nút/ô */
-            padding: 10px;
-            background: #f0f3fa;
-            border-bottom: 1px solid #ddd;
-        }
+        .btn-add { cursor: pointer; padding: 6px 12px; background: #e0e0e0; border: 1px solid #ccc; font-weight: bold; border-radius: 4px; }
+        .close-btn { margin-left: 8px; padding: 0 5px; border-radius: 50%; background: #ffcccc; cursor: pointer; pointer-events: auto; }
+        
+        .color-yellow { color: #d9a000; }
+        .color-green  { color: #089981; }
+        .color-red    { color: #f23645; }
+        
+        .info-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; align-items: center; padding: 6px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+        .info-label { font-weight: bold; color: #474f66; padding-right: 4px; }
+        .info-value { font-family: 'Courier New', monospace; font-weight: 700; font-size: 15px; text-align: right; padding-right: 9px; }
     </style>
 </head>
 <body>
 
-<div class="header" style="display: flex; justify-content: space-between; align-items: center; padding: 5px 5px; font-size: 15px; height: 35px;">
+<div class="header">
     <div style="flex: 1; display: flex; align-items: center; gap: 10px;">
         <a href="index.html" style="color: #ffb700; text-decoration: none; margin-right: 5px;">⬅ Quay lại Trang chủ</a>
-        
-        <button onclick="window.open('https://banggia.vps.com.vn/chung-khoan/derivative-INDEX', '_blank')" 
-                style="padding: 4px 8px; font-size: 11px; cursor: pointer; background-color: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold;">
-            Đăng nhập VPS
-        </button>
-        
-        <button onclick="window.open('https://openaccount.vps.com.vn/linktosmo/?MKTID=BOR5', '_blank')" 
-                style="padding: 4px 8px; font-size: 11px; cursor: pointer; background-color: #dc3545; color: white; border: none; border-radius: 4px; font-weight: bold;">
-            Mở Tài khoản VPS
-        </button>
+        <button onclick="window.open('https://banggia.vps.com.vn/chung-khoan/derivative-INDEX', '_blank')" style="padding: 4px 8px; font-size: 11px; cursor: pointer; background-color: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold;">Đăng nhập VPS</button>
+        <button onclick="window.open('https://openaccount.vps.com.vn/linktosmo/?MKTID=BOR5', '_blank')" style="padding: 4px 8px; font-size: 11px; cursor: pointer; background-color: #dc3545; color: white; border: none; border-radius: 4px; font-weight: bold;">Mở Tài khoản VPS</button>
     </div>
-
-    <div style="flex: 2; text-align: center; font-size: 18px; font-weight: bold; color: #ffb700; letter-spacing: 0.5px;">
-        Dữ liệu được lấy trực tiếp từ Công ty Cổ phần Chứng khoán VPS
-    </div>
-
+    <div style="flex: 2; text-align: center; font-size: 18px; font-weight: bold; color: #ffb700; letter-spacing: 0.5px;">Dữ liệu được lấy trực tiếp từ Công ty Cổ phần Chứng khoán VPS</div>
     <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end; padding-right: 20px;">
-        <span style="font-size: 18px; font-weight: bold; color: #ffb700; white-space: nowrap; margin-right: 10px;">
-            SĐT: 0853.525.379 - ID VPS: BOR5
-        </span>
-        
-        <button onclick="toggleInstructions()" 
-                style="padding: 5px 12px; font-size: 12px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 4px; font-weight: bold; transition: background 0.3s; white-space: nowrap;">
-            Hướng dẫn đồng bộ
-        </button>
+        <span style="font-size: 18px; font-weight: bold; color: #ffb700; white-space: nowrap; margin-right: 10px;">SĐT: 0853.525.379 - ID VPS: BOR5</span>
+        <button onclick="toggleInstructions()" style="padding: 5px 12px; font-size: 12px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 4px; font-weight: bold; transition: background 0.3s; white-space: nowrap;">Hướng dẫn đồng bộ</button>
     </div>
 </div>
-
 
 <div id="instructionsPanel" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 800px; background: white; border: 1px solid #ccc; padding: 20px; z-index: 9999; box-shadow: 0 10px 20px rgba(0,0,0,0.2); border-radius: 12px; max-height: 80vh; overflow-y: auto;">
     <strong style="font-size: 18px;">Hướng dẫn lấy token:</strong>
     <p style="font-size: 15px; margin-bottom: 5px;">Website chỉ là trung gian được thiết kế để NĐT tiện theo dõi khung giá và mở đa tab biểu đồ. Để load các biểu đồ đã lưu bạn cần đăng nhập vào VPS để lấy token.</p>
-    <p style="font-size: 13px; margin-bottom: 5px; margin-top: 10px;">1. Đăng nhập vào VPS.<b>Đăng nhập</b></p>
-    
-    <p style="font-size: 13px; margin-bottom: 5px;">2. Chọn 1 cổ phiếu bất kỳ để mở biểu đồ<b>Chọn cổ phiếu</b>.</p>
-    <img src="api/huong-dan1.png" alt="Hướng dẫn 1" style="width: 100%; border: 1px solid #eee; margin-bottom: 10px; border-radius: 4px;">
-
-    <p style="font-size: 13px; margin-bottom: 5px;">3. Bấm mở biểu đồ sang trang mới <b>[ ↗ ]</b>.</p>
-    <img src="api/huong-dan2.png" alt="Hướng dẫn 2" style="width: 100%; border: 1px solid #eee; margin-bottom: 10px; border-radius: 4px;">
-    
-    <p style="font-size: 13px;">4. Copy token từ sau dấu = đến dấu &</p>
-    <img src="api/huong-dan3.png" alt="Hướng dẫn 3" style="width: 100%; border: 1px solid #eee; margin-bottom: 10px; border-radius: 4px;">
-
-    <p style="font-size: 13px;">5. Nhập TK của bạn và dán token.</p>
-    <img src="api/huong-dan5.png" alt="Hướng dẫn 5" style="width: 100%; border: 1px solid #eee; margin-bottom: 10px; border-radius: 4px;">
-    
     <button onclick="toggleInstructions()" style="width: 100%; margin-top: 15px; padding: 10px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 5px; font-weight: bold;">Đóng</button>
 </div>
 
-
-
-<div class="tab-menu" id="mainTabMenu" style="display: flex; width: fit-content; gap: 5px; padding: 5px; height: 25px;">
-    <button class="btn-add" onclick="addNewChart()" style="font-size: 12px; padding: 0 8px; height: 100%; border: 1px solid #ccc; cursor: pointer;">+ Thêm biểu đồ</button>
+<div class="tab-menu" id="mainTabMenu">
+    <button class="btn-add" onclick="addNewChart()">+ Thêm biểu đồ</button>
 </div>
 
-
 <div class="content-container">
-
+    <div id="tabChartsContainer"></div>
     <div class="sidebar-section">
         <div style="display: flex; gap: 1px;">
             <input type="text" id="uidInput" placeholder="UID" style="width: 69px; padding: 1px; font-size: 15px; text-align: center;">
@@ -308,21 +85,20 @@
         </div>
         <div style="display: flex; gap: 3px;">
             <input type="text" id="symbolInput" placeholder="VN30F1M" style="flex: 3; padding: 2px; font-size: 13px;" onkeypress="if(event.key==='Enter') updateAll()">
-            <button onclick="updateAll()" style="flex: 2; padding: 2px; font-size: 13px;background: #007bff; color: white; cursor: pointer;">Cập nhật</button>
+            <button onclick="updateAll()" style="flex: 2; padding: 2px; font-size: 13px; background: #007bff; color: white; cursor: pointer;">Cập nhật</button>
         </div>
         <div class="vps-widget-header" id="display_symbol">VN30F1M</div>
         <div class="header-price-group">
             <div id="display_price" class="vps-main-price">---.--</div>
             <div id="display_change" class="vps-change">--.--/(--.--%)</div>
         </div>
-        <span class="info-label">Tham chiếu</span><span id="val_prev" class="info-value"style='font-size: 18px;padding: 2px;'>---.--</span>
+        <span class="info-label">Tham chiếu</span><span id="val_prev" class="info-value" style='font-size: 18px;color: #d9a000; padding: 2px;'>---.--</span>
         <h4>Bước Giá</h4>
         <table><thead><tr><th>KL Mua</th><th>Giá Mua</th><th>Giá Bán</th><th>KL Bán</th></tr></thead><tbody id="ob-body"></tbody></table>
         <h4>Khớp Lệnh</h4>
         <div id="trade-history-container"><table><thead><tr><th>Thời gian</th><th>Giá</th><th>KL</th><th>M/B</th></tr></thead><tbody id="trade-history-body"></tbody></table></div>
         
         <div class="info-row">
-
             <span class="info-label">Mở cửa</span><span id="val_open" class="info-value">---.--</span>
             <span class="info-label">Đóng cửa</span><span id="val_close" class="info-value">---.--</span>
         </div>
@@ -342,393 +118,158 @@
             <span class="info-label">NN Mua</span><span id="val_foreign_buy" class="info-value">---</span>
             <span class="info-label">NN Bán</span><span id="val_foreign_sell" class="info-value">---</span>
         </div>
-        
     </div>
 </div>
 
 <script>
     let currentSymbol = "VN30F1M";
-    let apiInterval = null; // Khai báo ở đây
     let symbolMap = {}; 
-    const controllers = {
-        snapshot: null,
-        orderBook: null,
-        tradeHistory: null
+    const controllers = { snapshot: null, heavy: null, orderBook: null, tradeHistory: null };
+    let saveTimeout;
+    let globalRefPrice = null;
+    const refPriceCache = {};
+    let snapshotCache = {};
+    let lastKnownPrice = 0;
+    let lastTradeId = ""; 
+    let currentTradeSymbol = ""; // Khai báo biến check mã hiện tại của Lịch sử khớp lệnh
+
+    const dispPriceEl = document.getElementById('display_price');
+    const dispChangeEl = document.getElementById('display_change');
+
+    const uiEls = {
+        open: document.getElementById('val_open'),
+        high: document.getElementById('val_high'),
+        low: document.getElementById('val_low'),
+        fBuy: document.getElementById('val_foreign_buy'),
+        fSell: document.getElementById('val_foreign_sell'),
+        totalVol: document.getElementById('val_total_vol'),
+        duMua: document.getElementById('val_du_mua'),
+        duBan: document.getElementById('val_du_ban'),
+        netForeign: document.getElementById('val_net_foreign'),
+        tradeBody: document.getElementById('trade-history-body')
     };
 
-    // Hàm sleep helper
-    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-
-
-    let saveTimeout;
     function debouncedSave() {
         clearTimeout(saveTimeout);
-        saveTimeout = setTimeout(() => {
-            saveAppState();
-            console.log("Đã lưu trạng thái ứng dụng.");
-        }, 1000); // Đợi 1 giây để đảm bảo người dùng đã dừng tương tác
+        saveTimeout = setTimeout(() => { saveAppState(); }, 1000);
     }
 
-
-
-    // Chỉ cập nhật mã đang hiển thị trên màn hình
-    function startRealtime() {
-        if (apiInterval) clearInterval(apiInterval);
-        apiInterval = setInterval(() => {
-            // Chỉ fetch dữ liệu cho tab đang active
-            const activeBlock = document.querySelector('.tab-content-block.active');
-            if (activeBlock) {
-                fetchVPSData();
-                updateOrderBook();
-                fetchTradeHistory();
-            }
-        }, 300);
-    }
-
-    // Biến toàn cục để lưu giá tham chiếu
-    let globalRefPrice = null;
-    // Khai báo biến cache ở ngoài cùng (cùng cấp với các biến global khác)
-    const refPriceCache = {};
-
-
-    async function getLatestSessionData(symbol, signal) {
-        const code = (typeof symbolMap !== 'undefined' && symbolMap[symbol]) ? symbolMap[symbol] : symbol;
-        
-        // Thử lùi tối đa 7 ngày để tìm phiên gần nhất
-        for (let i = 0; i < 7; i++) {
-            const targetDate = new Date();
-            targetDate.setDate(targetDate.getDate() - i);
-            
-            const from = Math.floor(new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 0, 0, 0).getTime() / 1000);
-            const to = Math.floor(new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 23, 59, 59).getTime() / 1000);
-            
-            const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${code}&resolution=1&from=${from}&to=${to}`;
-            
-            try {
-                const res = await fetch(url, { signal });
-                const data = await res.json();
-                
-                // Nếu tìm thấy dữ liệu phiên (có nến từ 9h sáng)
-                if (data && data.s === "ok" && data.t?.length > 0) {
-                    const firstBarIdx = data.t.findIndex(t => new Date(t * 1000).getHours() >= 9);
-                    if (firstBarIdx !== -1) {
-                        // Trả về toàn bộ dữ liệu cần thiết của phiên gần nhất
-                        return {
-                            date: targetDate.toISOString().split('T')[0],
-                            opens: data.o.slice(firstBarIdx),
-                            highs: data.h.slice(firstBarIdx),
-                            lows: data.l.slice(firstBarIdx),
-                            closes: data.c.slice(firstBarIdx),
-                            // Lưu ý: Giá tham chiếu cần lấy từ nến ngày hôm trước (D)
-                            // Để đơn giản, ta có thể gọi thêm 1 lệnh lấy nến D tại đây hoặc truyền từ bên ngoài
-                        };
-                    }
-                }
-            } catch (e) {
-                if (e.name !== 'AbortError') console.error("Lỗi fetch phiên gần nhất:", e);
-            }
-        }
-        return null;
-    }
-
-
-    let snapshotCache = {}; // Lưu dữ liệu snapshot toàn cục
-
-    async function loadSymbolMap() {
-        try {
-            const newMap = {};
-
-            // 1. Load Phái sinh
-            const resPS = await fetch('https://bgapidatafeed.vps.com.vn/pslistmap');
-            const dataPS = await resPS.json();
-            dataPS.forEach(item => {
-                if (item.CHART_CODE && item.SYMBOL) {
-                    newMap[item.CHART_CODE.trim()] = { type: 'PS', value: item.SYMBOL.trim() };
-                }
-            });
-
-            // 2. Load Chỉ số
-            const resIndex = await fetch('https://bgapidatafeed.vps.com.vn/getlistckindex/list_allindex');
-            const dataIndex = await resIndex.json();
-            dataIndex.forEach(item => {
-                if (item.code && item.mc) {
-                    newMap[item.code.trim()] = { type: 'INDEX', value: item.mc.trim() };
-                }
-            });
-
-            // 3. TỰ THÊM THỦ CÔNG CÁC MÃ BỊ THIẾU
-            const manualMap = {
-                "VNINDEX": { type: 'INDEX', value: '10' },
-                "HNX":     { type: 'INDEX', value: '02' }
-            };
-            
-            // Ghi đè hoặc thêm vào newMap
-            Object.assign(newMap, manualMap);
-            
-            symbolMap = newMap;
-            
-            // In ra màn hình để kiểm tra (như đã hướng dẫn ở trên)
-            const debugEl = document.getElementById('debug_symbol_map');
-            if (debugEl) {
-                debugEl.innerText = JSON.stringify(symbolMap, null, 2);
-            }
-            
-            console.log("Map đã load đầy đủ kèm thủ công:", symbolMap); 
-        } catch (error) {
-            console.error("Lỗi load map:", error);
-        }
-    }
-
-    // Hàm load dữ liệu chính
-    // 1. Hàm Load Map kèm bổ sung thủ công
     async function loadSymbolMap() {
         try {
             const newMap = {};
             const resPS = await fetch('https://bgapidatafeed.vps.com.vn/pslistmap');
             const dataPS = await resPS.json();
-            dataPS.forEach(item => {
-                if (item.CHART_CODE && item.SYMBOL) {
-                    newMap[item.CHART_CODE.trim()] = { type: 'PS', value: item.SYMBOL.trim() };
-                }
-            });
+            dataPS.forEach(item => { if (item.CHART_CODE && item.SYMBOL) newMap[item.CHART_CODE.trim()] = { type: 'PS', value: item.SYMBOL.trim() }; });
 
             const resIndex = await fetch('https://bgapidatafeed.vps.com.vn/getlistckindex/list_allindex');
             const dataIndex = await resIndex.json();
-            dataIndex.forEach(item => {
-                if (item.code && item.mc) {
-                    newMap[item.code.trim()] = { type: 'INDEX', value: item.mc.trim() };
-                }
-            });
+            dataIndex.forEach(item => { if (item.code && item.mc) newMap[item.code.trim()] = { type: 'INDEX', value: item.mc.trim() }; });
             
-            // Tự thêm mã thiếu
-            Object.assign(newMap, {
-                "VNINDEX": { type: 'INDEX', value: '10' },
-                "HNX": { type: 'INDEX', value: '02' }
-            });
-            
+            Object.assign(newMap, { "VNINDEX": { type: 'INDEX', value: '10' }, "HNX": { type: 'INDEX', value: '02' } });
             symbolMap = newMap;
-            console.log("Map đã load đầy đủ:", symbolMap); 
-        } catch (error) {
-            console.error("Lỗi load map:", error);
-        }
+        } catch (error) { console.error("Lỗi load map:", error); }
     }
 
-    // 2. Hàm Load Data chuẩn xác
-    async function loadSnapshotData(symbol) {
+    async function fetchSnapshotData(symbol, signal) {
         const cleanSymbol = symbol ? symbol.trim().toUpperCase() : "VN30F1M";
-        const info = (typeof symbolMap !== 'undefined') ? symbolMap[cleanSymbol] : null;
-        const debugEl = document.getElementById('debug_link_display');
-        
+        const info = symbolMap[cleanSymbol];
         let url = "";
-        if (info && info.type === 'PS') {
-            url = `https://bgapidatafeed.vps.com.vn/getpsalldatalsnapshot/${info.value}`;
-        } else if (info && info.type === 'INDEX') {
-            url = `https://bgapidatafeed.vps.com.vn/getlistindexdetail/${info.value}`;
-        } else {
-            url = `https://bgapidatafeed.vps.com.vn/getliststockdata/${cleanSymbol}`;
-        }
-        
-        if (debugEl) debugEl.innerText = "Đang gọi: " + url;
-
+        if (info && info.type === 'PS') url = `https://bgapidatafeed.vps.com.vn/getpsalldatalsnapshot/${info.value}`;
+        else if (info && info.type === 'INDEX') url = `https://bgapidatafeed.vps.com.vn/getlistindexdetail/${info.value}`;
+        else url = `https://bgapidatafeed.vps.com.vn/getliststockdata/${cleanSymbol}`;
         try {
-            const response = await fetch(url);
-            const data = await response.json(); 
-            const item = Array.isArray(data) ? data[0] : data;
-
-            if (!item) return null;
-
-            let lastPrice = 0, closePrice = 0, openPrice = 0, highPrice = 0, lowPrice = 0;
-            let fbVol = 0, fsVol = 0;
-            // --- CHỈ BỔ SUNG BIẾN MỚI ---
-            let totalVol = 0, duMua = 0, duBan = 0;
-
-            // --- MAPPING DỮ LIỆU ---
-            if (info && info.type === 'INDEX') {
-                lastPrice = parseFloat(item.cIndex) || 0;
-                closePrice = parseFloat(item.oIndex) || lastPrice;
-            } 
-            else if (info && info.type === 'PS') {
-                lastPrice = parseFloat(item.lastPrice) || 0;
-                closePrice = parseFloat(item.closePrice) || 0;
-                openPrice = parseFloat(item.openPrice) || 0;
-                highPrice = parseFloat(item.highPrice) || 0;
-                lowPrice = parseFloat(item.lowPrice) || 0;
-                fbVol = parseFloat(item.fBVol) || 0;
-                fsVol = parseFloat(item.fSVolume) || 0;
-                // --- CHỈ BỔ SUNG MAPPING PS ---
-                totalVol = parseFloat(item.lot) || 0;
-                if (item.g7) {
-                    const parts = item.g7.split('|');
-                    duMua = parseFloat(parts[0]) || 0;
-                    duBan = parseFloat(parts[1]) || 0;
-                }
-            } 
-            else {
-                const fixPrice = (p) => (p > 1000 ? p / 1000 : p);
-                lastPrice = fixPrice(parseFloat(item.lastPrice) || 0);
-                closePrice = fixPrice(parseFloat(item.closePrice) || 0);
-                openPrice = fixPrice(parseFloat(item.openPrice) || 0);
-                highPrice = fixPrice(parseFloat(item.highPrice) || 0);
-                lowPrice = fixPrice(parseFloat(item.lowPrice) || 0);
-                fbVol = parseFloat(item.fBVol) || 0;
-                fsVol = parseFloat(item.fSVolume) || 0;
-                // --- CHỈ BỔ SUNG MAPPING STOCK ---
-                totalVol = parseFloat(item.lot) || 0;
-                if (item.g7) {
-                    const parts = item.g7.split('|');
-                    duMua = parseFloat(parts[0]) || 0;
-                    duBan = parseFloat(parts[1]) || 0;
-                }
-            }
-
-            const netForeign = fbVol - fsVol;
-            snapshotCache[cleanSymbol] = closePrice;
-
-            // --- CẬP NHẬT UI ---
-            const updateUI = (id, val, colorClass, isFixed = true) => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.innerText = (isNaN(val) || val === 0) ? "---.--" : (isFixed ? val.toFixed(2) : val.toLocaleString());
-                    el.className = "info-value " + (colorClass || "");
-                }
-            };
-
-            updateUI('val_prev', closePrice, 'color-yellow');
-            updateUI('val_open', openPrice, (openPrice > closePrice ? 'color-green' : openPrice < closePrice ? 'color-red' : ''));
-            updateUI('val_close', lastPrice, ''); 
-            updateUI('val_high', highPrice, 'color-green');
-            updateUI('val_low', lowPrice, 'color-red');
-            updateUI('display_price', lastPrice, '');
-            
-            updateUI('val_foreign_buy', fbVol, '', false);
-            updateUI('val_foreign_sell', fsVol, '', false);
-            
-            // --- CHỈ BỔ SUNG CẬP NHẬT UI MỚI ---
-            updateUI('val_total_vol', totalVol, '', false);
-            updateUI('val_du_mua', duMua, '', false);
-            updateUI('val_du_ban', duBan, '', false);
-            
-            const netEl = document.getElementById('val_net_foreign');
-            if (netEl) {
-                netEl.innerText = netForeign.toLocaleString();
-                netEl.className = "info-value " + (netForeign > 0 ? 'color-green' : (netForeign < 0 ? 'color-red' : ''));
-            }
-            
-            return { lastPrice, closePrice, openPrice, totalVol, duMua, duBan };
-        } catch (e) {
-            if (debugEl) debugEl.innerText += " -> LỖI: " + e.message;
-            return null;
-        }
-    }
-
-    async function getPreviousClosePrice(currentSymbol) {
-        const cleanSymbol = currentSymbol ? currentSymbol.trim().toUpperCase() : "";
-        if (!cleanSymbol) return null;
-
-        // 1. Nếu có trong cache, trả về ngay
-        if (snapshotCache[cleanSymbol] !== undefined && snapshotCache[cleanSymbol] !== 0) {
-            return snapshotCache[cleanSymbol];
-        }
-
-        // 2. Gọi load, nó sẽ tự lưu vào snapshotCache
-        const data = await loadSnapshotData(cleanSymbol);
-        
-        // 3. Trả về giá trị
-        return data ? data.closePrice : null;
-    }
-
-
-    async function getLatestPriceFromHistory(symbol = "VN30F1M") {
-        const to = Math.floor(Date.now() / 1000);
-        const from = to - (3 * 24 * 3600); // Lấy dữ liệu 3 ngày gần nhất để chắc chắn bao gồm phiên cũ
-        
-        const url = `https://histdatafeed.vps.com.vn/tradingview/history?symbol=${symbol}&resolution=1&from=${from}&to=${to}&countback=1`;
-
-        try {
-            const response = await fetch(url);
+            const response = await fetch(url, { signal });
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
-
-            // Kiểm tra dữ liệu: Nếu data.s trả về 'no_data' hoặc mảng c rỗng
-            if (data && data.s === "ok" && data.c && data.c.length > 0) {
-                const latestPrice = data.c[data.c.length - 1]; 
-                return latestPrice;
-            } else {
-                console.log("Thị trường đóng cửa hoặc không có dữ liệu (cuối tuần/lễ).");
-                return null; // Trả về null để UI có thể xử lý hiển thị trạng thái "Đóng cửa"
-            }
-        } catch (error) {
-            return null;
-        }
+            return { item: Array.isArray(data) ? data[0] : data, info, cleanSymbol };
+        } catch (e) { return null; }
     }
 
+    async function getBasicPrice(symbol, signal) {
+        const res = await fetchSnapshotData(symbol, signal); 
+        if (!res || !res.item) return null;
+        const { item, info } = res;
+        let lastPrice = 0, closePrice = 0;
+        if (info?.type === 'INDEX') {
+            lastPrice = parseFloat(item.cIndex) || 0;
+            closePrice = parseFloat(item.oIndex) || lastPrice;
+        } else if (info?.type === 'PS') {
+            lastPrice = parseFloat(item.lastPrice) || 0;
+            closePrice = parseFloat(item.closePrice) || 0;
+        } else {
+            const rawLast = parseFloat(item.lastPrice) || 0;
+            const rawClose = parseFloat(item.closePrice) || 0;
+            lastPrice = rawLast > 1000 ? rawLast / 1000 : rawLast;
+            closePrice = rawClose > 1000 ? rawClose / 1000 : rawClose;
+        }
+        if (dispPriceEl) {
+            const newText = lastPrice.toFixed(2);
+            if (dispPriceEl.innerText !== newText) dispPriceEl.innerText = newText;
+        }
+        return { lastPrice, closePrice };
+    }
 
+    async function getFullSnapshotData(symbol, signal) {
+        const res = await fetchSnapshotData(symbol, signal);
+        if (!res || !res.item) return null;
+        const { item, info } = res;
+        let openPrice = 0, highPrice = 0, lowPrice = 0, fbVol = 0, fsVol = 0, totalVol = 0, duMua = 0, duBan = 0;
+        const fix = (p) => (info?.type === 'PS' || info?.type === 'INDEX') ? p : (p > 1000 ? p / 1000 : p);
+        openPrice = fix(parseFloat(item.openPrice || item.oIndex) || 0);
+        highPrice = fix(parseFloat(item.highPrice || item.hIndex) || 0);
+        lowPrice = fix(parseFloat(item.lowPrice || item.lIndex) || 0);
+        fbVol = parseFloat(item.fBVol) || 0;
+        fsVol = parseFloat(item.fSVolume) || 0;
+        totalVol = parseFloat(item.lot) || 0;
+        if (item.g7) { const parts = item.g7.split('|'); duMua = parseFloat(parts[0]) || 0; duBan = parseFloat(parts[1]) || 0; }
+        const setUI = (el, val, isFixed = true) => { if (!el) return; el.innerText = (isNaN(val) || val === 0) ? "---.--" : (isFixed ? val.toFixed(2) : val.toLocaleString()); };
+        setUI(uiEls.open, openPrice);
+        setUI(uiEls.high, highPrice);
+        setUI(uiEls.low, lowPrice);
+        setUI(uiEls.fBuy, fbVol, false);
+        setUI(uiEls.fSell, fsVol, false);
+        setUI(uiEls.totalVol, totalVol, false);
+        setUI(uiEls.duMua, duMua, false);
+        setUI(uiEls.duBan, duBan, false);
+        if (uiEls.netForeign) {
+            const net = fbVol - fsVol;
+            uiEls.netForeign.innerText = net.toLocaleString();
+            uiEls.netForeign.className = "info-value " + (net > 0 ? 'color-green' : (net < 0 ? 'color-red' : ''));
+        }
+        return { openPrice, highPrice, lowPrice, fbVol, fsVol, totalVol, duMua, duBan };
+    }
 
+    async function getPreviousClosePrice(symbol) {
+        const cleanSymbol = symbol ? symbol.trim().toUpperCase() : "";
+        if (!cleanSymbol) return null;
+        const res = await fetchSnapshotData(cleanSymbol);
+        if(!res || !res.item) return null;
+        const info = res.info;
+        const item = res.item;
+        if (info?.type === 'INDEX') return parseFloat(item.oIndex) || 0;
+        const closePrice = parseFloat(item.closePrice) || 0;
+        return (info?.type === 'PS') ? closePrice : (closePrice > 1000 ? closePrice / 1000 : closePrice);
+    }
 
-    // Hàm cập nhật dữ liệu chính
-    // Dùng biến tĩnh (static) hoặc biến ngoài hàm để lưu giá trị cũ
-    let lastKnownPrice = null;
-
-    async function fetchVPSData(signal) {
-        // 1. Gọi dữ liệu thô
-        const data = await loadSnapshotData(currentSymbol, signal);
+    async function fetchVPSData(symbol, signal = null) {
+        const data = await getBasicPrice(symbol, signal);
         if (!data) return;
-
-        let { lastPrice, closePrice } = data;
-        const dispPrice = document.getElementById('display_price');
-        const dispChange = document.getElementById('display_change');
-
-        // --- LOGIC MỚI ---
-        // Nếu giá hiện tại không tồn tại hoặc bằng 0, hiển thị giá tham chiếu và dừng lại
+        const { lastPrice, closePrice } = data;
         if (!lastPrice || lastPrice === 0) {
-            if (dispPrice) {
-                dispPrice.innerText = closePrice.toFixed(2);
-                dispPrice.style.color = '#ffab00'; // Màu vàng (tham chiếu)
-            }
-            if (dispChange) {
-                //dispChange.innerText = "Tham chiếu"; // Hoặc chuỗi bạn muốn hiển thị
-                dispChange.style.color = '#ffab00';
-                dispPrice.style.fontSize = "36px";
-            }
-            lastKnownPrice = 0; // Reset để lần tới nếu có giá mới sẽ cập nhật
+            if (dispPriceEl) { dispPriceEl.innerText = (closePrice || 0).toFixed(2); dispPriceEl.style.color = '#ffab00'; }
+            if (dispChangeEl) dispChangeEl.style.color = '#ffab00';
+            lastKnownPrice = 0; 
             return; 
         }
-        // -----------------
-
-        // Tiếp tục logic cũ nếu có lastPrice
-        const diff = lastPrice - closePrice;
-        
         if (lastKnownPrice === lastPrice) return;
         lastKnownPrice = lastPrice; 
-
+        const diff = lastPrice - closePrice;
         const pct = closePrice !== 0 ? (diff / closePrice) * 100 : 0;
-        const priceText = lastPrice.toFixed(2);
-        const prefix = diff > 0 ? '+' : '';
-        const changeText = `${prefix}${diff.toFixed(2)} / (${pct.toFixed(2)}%)`;
-
-        if (dispPrice) {
-            dispPrice.innerText = priceText;
-            dispPrice.style.fontSize = "36px";
-        }
-        
-        if (dispChange) {
-            dispChange.innerText = changeText;
-        }
-
-        let color = '#ffab00';
-        if (diff > 0) color = '#089981';
-        else if (diff < 0) color = '#f23645';
-
-        if (dispPrice) dispPrice.style.color = color;
-        if (dispChange) dispChange.style.color = color;
+        if (dispPriceEl) { dispPriceEl.innerText = lastPrice.toFixed(2); dispPriceEl.style.color = diff > 0 ? '#089981' : (diff < 0 ? '#f23645' : '#ffab00'); }
+        if (dispChangeEl) { const prefix = diff > 0 ? '+' : ''; dispChangeEl.innerText = `${prefix}${diff.toFixed(2)} / (${pct.toFixed(2)}%)`; dispChangeEl.style.color = diff > 0 ? '#089981' : (diff < 0 ? '#f23645' : '#ffab00'); }
     }
-    
 
-
-    // Danh sách các chỉ số
     const indexList = ["VN30", "VN100", "VN50", "VNINDEX", "HNX", "HNX30", "UPCOM"];
-
-    // Hàm phân loại mã
     function getSymbolType(symbol) {
         const s = symbol.toUpperCase();
         if (indexList.includes(s)) return "INDEX";
@@ -736,528 +277,371 @@
         return "STOCK";
     }
 
-    async function updateOrderBook(signal) { 
-        // 1. Lấy thông tin từ symbolMap mới
-        const info = symbolMap[currentSymbol];
-        const type = getSymbolType(currentSymbol); // Hàm này cần trả về 'DERIVATIVE' hoặc 'STOCK' hoặc 'INDEX'
-            
-        // Kiểm tra chỉ số
-        if (type === "INDEX") {
-            document.getElementById('ob-body').innerHTML = "<tr><td colspan='4' style='text-align:center;'>Không hỗ trợ chỉ số</td></tr>";
-            return;
-        }
-
+    async function updateOrderBook(symbol, signal) { 
+        const body = document.getElementById('ob-body');
+        if (!body) return;
+        const info = symbolMap[symbol];
+        const type = getSymbolType(symbol);
+        if (type === "INDEX") { body.innerHTML = "<tr><td colspan='4' style='text-align:center; color:#999;'>Không hỗ trợ chỉ số</td></tr>"; return; }
         try {
             let b = [], s = [];
-            
             if (type === "DERIVATIVE") {
-                // SỬA LỖI 1: Trích xuất .value thay vì lấy trực tiếp object
-                if (!info || info.type !== 'PS' || !info.value) {
-                    document.getElementById('ob-body').innerHTML = "<tr><td colspan='4' style='text-align:center;'>Mã phái sinh không hợp lệ</td></tr>";
-                    return;
-                }
-                
-                const code = info.value; // Đây là chuỗi 'VN30F2509'
-                
+                if (!info?.value) return;
+                const code = info.value;
                 const [rB, rS] = await Promise.all([
                     fetch(`https://bgapidatafeed.vps.com.vn/getps10pricesnapshot/${code},B`, { signal }).then(r => r.json()),
                     fetch(`https://bgapidatafeed.vps.com.vn/getps10pricesnapshot/${code},S`, { signal }).then(r => r.json())
                 ]);
-                
-                const parse = (str) => str ? str.split("SOH").map(i => ({ p: i.split(':')[0], v: i.split(':')[1] })) : [];
-                b = parse(rB.ndata);
-                s = parse(rS.ndata);
-            } else {
-                // Logic cổ phiếu cơ sở
-                const res = await fetch(`https://bgapidatafeed.vps.com.vn/getliststockdata/${currentSymbol}`, { signal }).then(r => r.json());
-                if (!res || res.length === 0) throw new Error("No data");
-                
-                const data = res[0];
-                const parseCS = (val) => {
-                    if (!val) return { p: '-', v: '-' };
-                    const parts = val.split('|');
-                    return { p: parts[0], v: parts[1] };
+                const parse = (data) => {
+                    const str = data?.ndata;
+                    return str ? str.split("SOH").map(i => { const [p, v] = i.split(':'); return { p: p || '-', v: v || '-' }; }) : Array(5).fill({ p: '-', v: '-' });
                 };
+                b = parse(rB); s = parse(rS);
+            } else {
+                const res = await fetch(`https://bgapidatafeed.vps.com.vn/getliststockdata/${symbol}`, { signal }).then(r => r.json());
+                const data = res?.[0]; if (!data) return;
+                const fix = (p) => (p > 1000 ? (p / 1000).toFixed(2) : p);
+                const parseCS = (val) => { if (!val) return { p: '-', v: '-' }; const parts = val.split('|'); return { p: fix(parts[0]), v: parts[1] || '-' }; };
                 b = [parseCS(data.g1), parseCS(data.g2), parseCS(data.g3), parseCS(data.g4), parseCS(data.g5)];
                 s = [parseCS(data.g5), parseCS(data.g4), parseCS(data.g3), parseCS(data.g2), parseCS(data.g1)];
             }
-
-            // Vẽ bảng
             let html = "";
             for (let i = 0; i < 5; i++) {
                 html += `<tr><td style="color:#00c853">${b[i]?.v || '-'}</td><td>${b[i]?.p || '-'}</td><td>${s[i]?.p || '-'}</td><td style="color:#d50000">${s[i]?.v || '-'}</td></tr>`;
             }
-            document.getElementById('ob-body').innerHTML = html;
-                
-        } catch (e) { 
-            if (e.name !== 'AbortError') { 
-                console.error("Error updating OrderBook:", e); 
-                document.getElementById('ob-body').innerHTML = "<tr><td colspan='4' style='text-align:center;'>Lỗi lấy dữ liệu</td></tr>";
-            }
-        }
+            body.innerHTML = html;
+        } catch (e) {}
     }
 
-
-
-
-    // Biến lưu trữ ID của giao dịch gần nhất để tránh trùng lặp
-    let lastTradeId = ""; 
-
-    async function fetchTradeHistory(signal) {
-        const type = getSymbolType(currentSymbol);
-        const body = document.getElementById('trade-history-body');
-
+    async function fetchTradeHistory(symbol, signal) {
+        if (!uiEls.tradeBody) return;
+        const type = getSymbolType(symbol);
+        
+        // SỬA ĐỔI CHÍNH: Nếu đổi sang mã khác HOẶC mã là INDEX, xóa trắng bảng và reset ngay lập tức
         if (type === "INDEX") {
-            body.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Không hỗ trợ chỉ số</td></tr>";
+            uiEls.tradeBody.innerHTML = "<tr><td colspan='4' style='text-align:center; color:#999;'>Không hỗ trợ chỉ số</td></tr>";
+            lastTradeId = "";
+            currentTradeSymbol = symbol;
             return;
         }
 
+        if (currentTradeSymbol !== symbol) {
+            uiEls.tradeBody.innerHTML = "";
+            lastTradeId = "";
+            currentTradeSymbol = symbol;
+        }
+
         try {
-            const info = symbolMap[currentSymbol];
+            const info = symbolMap[symbol];
             let url = (type === "DERIVATIVE") 
                 ? `https://bgapidatafeed.vps.com.vn/getliststocktrade_ps/${info.value}?numpage=10`
-                : `https://bgapidatafeed.vps.com.vn/getliststocktrade_cs/${currentSymbol}?numpage=10&nextidx=-1`;
+                : `https://bgapidatafeed.vps.com.vn/getliststocktrade_cs/${symbol}?numpage=10`;
             
             const res = await fetch(url, { signal }).then(r => r.json());
-            if (!res.data || res.data.length === 0) return;
+            if (!res?.data || res.data.length === 0) {
+                if(uiEls.tradeBody.innerHTML === "") {
+                    uiEls.tradeBody.innerHTML = "<tr><td colspan='4' style='text-align:center; color:#999;'>Không có dữ liệu</td></tr>";
+                }
+                return;
+            }
 
-            // TỐI ƯU RENDER: Chỉ thêm các dòng mới (tránh vẽ lại toàn bộ bảng)
+            // Nếu bảng đang có thông báo cũ thì làm trống
+            if (uiEls.tradeBody.innerHTML.includes("Không hỗ trợ") || uiEls.tradeBody.innerHTML.includes("Không có dữ liệu")) {
+                uiEls.tradeBody.innerHTML = "";
+            }
+
+            // Lọc các bản ghi thực sự mới dựa trên thuộc tính thời gian duy nhất
+            const newTrades = res.data.filter(i => i.time !== lastTradeId);
+            if (newTrades.length === 0) return;
+
+            // Nếu độ dài mớI bằng toàn bộ mảng trả về (nghĩa là đổi mã hoàn toàn), xóa sạch để tránh bị dính đuôi
+            if (newTrades.length === res.data.length) {
+                uiEls.tradeBody.innerHTML = "";
+            }
+
             const fragment = document.createDocumentFragment();
-            
-            // Giả sử API trả về mảng mới nhất lên đầu (index 0)
-            // Ta lặp ngược từ dưới lên để prepend vào đầu bảng
-            const newTrades = res.data.filter(i => i.time !== lastTradeId); 
-            
-            if (newTrades.length === 0) return; // Không có dữ liệu mới, không làm gì cả
-
             newTrades.forEach(i => {
                 const tr = document.createElement('tr');
+                const sideColor = i.side === 'S' ? '#f23645' : '#089981';
+                const sideText = i.side === 'S' ? 'B' : 'M';
+                
+                // Chuẩn hóa hiển thị giá cổ phiếu cơ sở
+                let displayPrice = parseFloat(i.lastPrice);
+                if (type === "STOCK" && displayPrice > 1000) displayPrice = displayPrice / 1000;
+
                 tr.innerHTML = `
                     <td>${i.time}</td>
-                    <td>${i.lastPrice}</td>
-                    <td>${i.lastVol}</td>
-                    <td style="color:${i.side==='S'?'red':'green'}">${i.side==='S'?'B':'M'}</td>
+                    <td style="font-weight:600;">${displayPrice.toFixed(2)}</td>
+                    <td>${parseFloat(i.lastVol).toLocaleString()}</td>
+                    <td style="color:${sideColor}; font-weight:bold;">${sideText}</td>
                 `;
-                fragment.prepend(tr);
+                fragment.appendChild(tr);
             });
 
-            // Chèn vào đầu bảng
-            body.prepend(fragment);
+            uiEls.tradeBody.insertBefore(fragment, uiEls.tradeBody.firstChild);
 
-            // Giữ bảng chỉ có 10-20 dòng để tránh đầy DOM
-            while (body.children.length > 26) {
-                body.removeChild(body.lastChild);
+            while (uiEls.tradeBody.children.length > 20) {
+                uiEls.tradeBody.removeChild(uiEls.tradeBody.lastChild);
             }
 
-            // Cập nhật ID/Time để đánh dấu đã load
             lastTradeId = res.data[0].time;
-                
-        } catch(e) { 
-            if (e.name !== 'AbortError') {
-                console.error("Error fetching trade history:", e); 
-            }
-        }
+        } catch(e) {}
     }
 
-
-    function getAppState() {
-        const sidebar = document.querySelector(".sidebar-section");
-        const tradeContainer = document.getElementById("trade-history-container");
-        
-        return {
-            tabs: Array.from(document.querySelectorAll('.tab-item')).map(t => ({
-                id: t.getAttribute('data-id'),
-                symbol: t.getAttribute('data-symbol'),
-                active: t.classList.contains('active')
-            })),
-            currentSymbol: currentSymbol,
-            inputValue: document.getElementById('symbolInput').value,
-            sidebarScroll: sidebar ? sidebar.scrollTop : 0,
-            tradeScroll: tradeContainer ? tradeContainer.scrollTop : 0
-        };
-    }
-
-
-    // Hàm lưu (đảm bảo không lưu giá trị undefined)
     function saveAppState() {
-        const sidebar = document.querySelector(".sidebar-section");
-        const tradeContainer = document.getElementById("trade-history-container");
-        
-        // Thu thập danh sách tabs
         const tabs = [];
         document.querySelectorAll('.tab-item:not(.btn-add)').forEach(t => {
-            tabs.push({
-                symbol: t.getAttribute('data-symbol'), 
-                id: t.getAttribute('data-id'),
-                active: t.classList.contains('active') // Lưu luôn trạng thái active
-            });
+            tabs.push({ symbol: t.getAttribute('data-symbol'), id: t.getAttribute('data-id'), active: t.classList.contains('active') });
         });
-
-        // Tạo đối tượng state duy nhất
         const state = {
             tabs: tabs,
             activeTabId: document.querySelector('.tab-content-block.active')?.id,
             currentSymbol: currentSymbol,
-            inputValue: document.getElementById('symbolInput')?.value || "",
-            sidebarScroll: sidebar ? sidebar.scrollTop : 0,
-            tradeScroll: tradeContainer ? tradeContainer.scrollTop : 0
+            inputValue: document.getElementById('symbolInput')?.value || ""
         };
-
-        // Lưu vào localStorage
         localStorage.setItem('tradingAppState', JSON.stringify(state));
     }
 
-
-    function restoreState() {
-        const saved = localStorage.getItem('tradingAppState');
-        if (!saved) return;
-        
-        const state = JSON.parse(saved);
-        
-        // 1. Khôi phục Input
-        const inputEl = document.getElementById('symbolInput');
-        if (inputEl) inputEl.value = state.inputValue || "";
-        
-        // 2. Khôi phục Tabs (logic của bạn đã có, chỉ cần áp dụng thêm scroll)
-        // ... (Code tạo lại tab từ state.tabs) ...
-        
-        // 3. Khôi phục Scroll (cần dùng setTimeout để đảm bảo DOM đã render xong)
-        setTimeout(() => {
-            const sidebar = document.querySelector(".sidebar-section");
-            const tradeContainer = document.getElementById("trade-history-container");
-            
-            if (sidebar) sidebar.scrollTop = state.sidebarScroll;
-            if (tradeContainer) tradeContainer.scrollTop = state.tradeScroll;
-        }, 500);
-    }
-
-
-    // Biến toàn cục để lưu trữ thông tin đăng nhập
     let globalUserID = "";
     let globalSession = "";
 
-    // Hàm vẽ tab (Sửa logic truyền tham số)
     function createTab(symbol, id, isActive = false) {
         const sym = (symbol && symbol !== 'undefined' && symbol !== 'null') ? symbol : "VN30F1M";
-        
-        // --- THAY ĐỔI TẠI ĐÂY ---
-        // Sử dụng biến toàn cục thay vì lấy trực tiếp từ ô input
-        // Điều này giúp tab luôn sử dụng thông tin mới nhất đã được "Ghi dữ liệu"
         let chartUrl = `https://chart.vps.com.vn/tv/?symbol=${sym}&allowFullscreen=true&resolution=D&theme=light`;
+        if (globalUserID && globalSession) chartUrl += `&u=${globalUserID}&s=${globalSession}&loadLastChart=true`;
         
-        if (globalUserID && globalSession) {
-            chartUrl += `&u=${globalUserID}&s=${globalSession}&loadLastChart=true`;
-        }
-        // ------------------------
-        
-        // Tạo tab
         const tab = document.createElement("button");
         tab.className = "tab-item" + (isActive ? " active" : "");
         tab.setAttribute('data-id', id);
         tab.setAttribute('data-symbol', sym);
-        tab.innerHTML = `<span class="tab-title">${sym}</span> <span class="close-btn" onclick="removeTab(event, '${id}')">×</span>`;
-        tab.onclick = (e) => { if(e.target.tagName !== 'SPAN') switchTab(e, id, sym); };
         
-        const addBtn = document.querySelector(".btn-add");
-        document.getElementById("mainTabMenu").insertBefore(tab, addBtn);
+        // SỬA TẠI ĐÂY: Thêm style="pointer-events: none;" vào thẻ chứa chữ (tab-title)
+        tab.innerHTML = `<span class="tab-title" style="pointer-events: none;">${sym}</span> <span class="close-btn" onclick="removeTab(event, '${id}')">×</span>`;
+        
+        // SỬA TẠI ĐÂY: Logic click cực kỳ gọn gàng
+        tab.onclick = (e) => { 
+            // Nếu click trúng nút close-btn thì dừng lại để hàm removeTab xử lý
+            if (e.target.classList.contains('close-btn')) return; 
+            
+            // Còn lại click vào khoảng trắng hay click trúng chữ (đã xuyên thấu) đều chuyển tab
+            switchTab(e, id, sym); 
+        };
+        
+        
+        // Thay vì chèn vào trước nút bấm, ta dùng appendChild để tab mới luôn xếp ở cuối hàng bên phải
+        document.getElementById("mainTabMenu").appendChild(tab);
 
-        // Tạo khối nội dung
         const div = document.createElement("div");
         div.id = id;
         div.className = "tab-content-block" + (isActive ? " active" : "");
         div.innerHTML = `<div class="chart-section"><iframe src="${chartUrl}"></iframe></div>`;
         
-        const container = document.querySelector(".content-container");
-        const sidebar = document.querySelector(".sidebar-section");
-        
-        if (sidebar) {
-            container.insertBefore(div, sidebar);
-        } else {
-            container.appendChild(div);
-        }
+        const chartContainer = document.getElementById("tabChartsContainer");
+        if (chartContainer) chartContainer.appendChild(div);
 
-        if (isActive) {
-            div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
+        if (isActive) div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-
-
-    // Cập nhật hàm addNewChart
     function addNewChart() {
-        // 1. Loại bỏ trạng thái active của TẤT CẢ các tab và nội dung cũ
         document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab-content-block').forEach(b => b.classList.remove('active'));
-
-        // 2. Tạo ID mới cho tab sắp tạo
         const id = "c" + Date.now();
-        
-        // 3. Lấy symbol hiện tại (để mặc định hoặc theo mã đang chọn)
         const sym = currentSymbol || "VN30F1M"; 
-        
-        // 4. Tạo tab mới với trạng thái active = true
         createTab(sym, id, true);
-        
-        // 5. Cập nhật mã hiện tại sang mã của tab mới tạo
         currentSymbol = sym;
         document.getElementById('display_symbol').innerText = sym;
-        
-        // 6. Lưu trạng thái
         debouncedSave();
     }
 
-
-
-
-    // Thay vì 3 vòng lặp tách biệt, ta dùng 1 vòng lặp điều khiển
-
     let isRunning = true;
+    function checkMarketTime() {
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        const totalMinutes = hours * 60 + minutes;
+
+        const startMinutes = 8 * 60 + 45; // 8h45
+        const endMinutes = 15 * 60;       // 15h00
+
+        // Trả về true nếu đang trong khung giờ giao dịch từ 08:45 đến 15:00
+        return (totalMinutes >= startMinutes && totalMinutes < endMinutes);
+    }
 
     async function startSmartPolling() {
-        while (isRunning) {
-            // Kiểm tra thời gian
-            const now = new Date();
-            const hour = now.getHours();
-            const minute = now.getMinutes();
-            const totalMinutes = hour * 60 + minute;
-            
-            // Giờ làm việc: 09:00 (540) đến 15:00 (900)
-            const isWorkingHours = (totalMinutes >= 540 && totalMinutes <= 905);
+        // 1. VÒNG LẶP NHANH: Cập nhật giá chính (Mỗi 150ms)
+        const runFastLoop = async () => {
+            while (isRunning) {
+                // Nếu ngoài giờ giao dịch (15h00 - 8h45), cho vòng lặp ngủ đông 5 phút (300.000ms)
+                if (!checkMarketTime()) {
+                    console.log("=== Ngoài giờ giao dịch (15h00-8h45): Vòng lặp nhanh tạm nghỉ 5 phút ===");
+                    await new Promise(r => setTimeout(r, 300000)); 
+                    continue; // Sau 5 phút thức dậy kiểm tra lại giờ, không chạy code gọi API bên dưới
+                }
 
-            if (!isWorkingHours) {
-                console.log("Thị trường đã đóng, tạm dừng scheduler (check lại sau 1 phút)...");
-                // Chỉ fetch snapshot mỗi phút một lần để check trạng thái
-                await fetchVPSData(); 
-                await sleep(60000); 
-                continue;
-            }
-
-            // Nếu trong giờ làm việc, thực hiện cập nhật
-            try {
-                // Sử dụng các AbortController để đảm bảo nếu user đổi mã, request cũ bị hủy
+                const start = Date.now();
+                if (controllers.snapshot) controllers.snapshot.abort();
                 controllers.snapshot = new AbortController();
-                controllers.orderBook = new AbortController();
-                controllers.tradeHistory = new AbortController();
-
-                await Promise.all([
-                    fetchVPSData(controllers.snapshot.signal),
-                    updateOrderBook(controllers.orderBook.signal),
-                    fetchTradeHistory(controllers.tradeHistory.signal)
-                ]);
-            } catch (e) {
-                if (e.name !== 'AbortError') console.error("Lỗi cập nhật:", e);
+                
+                try { 
+                    await fetchVPSData(currentSymbol, controllers.snapshot.signal); 
+                } catch (e) { 
+                    if (e.name !== 'AbortError') { 
+                        await new Promise(r => setTimeout(r, 2000)); 
+                        continue; 
+                    } 
+                }
+                
+                const elapsed = Date.now() - start;
+                await new Promise(r => setTimeout(r, Math.max(0, 150 - elapsed)));
             }
+        };
 
-            // Đợi 1 giây trước khi lặp lại
-            await sleep(300); 
-        }
+        // 2. VÒNG LẶP CHẬM: Cập nhật Bước giá, Lịch sử khớp lệnh (Mỗi 3 giây)
+        const runSlowLoop = async () => {
+            while (isRunning) {
+                // Nếu ngoài giờ giao dịch (15h00 - 8h45), cho vòng lặp nặng ngủ đông 5 phút
+                if (!checkMarketTime()) {
+                    console.log("=== Ngoài giờ giao dịch (15h00-8h45): Vòng lặp chậm tạm nghỉ 5 phút ===");
+                    await new Promise(r => setTimeout(r, 300000));
+                    continue;
+                }
+
+                if (controllers.heavy) controllers.heavy.abort();
+                controllers.heavy = new AbortController();
+                
+                try {
+                    await Promise.all([
+                        getFullSnapshotData(currentSymbol, controllers.heavy.signal), 
+                        updateOrderBook(currentSymbol, controllers.heavy.signal),
+                        fetchTradeHistory(currentSymbol, controllers.heavy.signal)
+                    ]);
+                } catch (e) {
+                    console.error("Lỗi cập nhật dữ liệu nặng:", e);
+                }
+                
+                // Trong giờ làm việc thì cứ 3 giây quét 1 lần
+                await new Promise(r => setTimeout(r, 3000));
+            }
+        };
+
+        // Kích hoạt song song 2 luồng tự động kiểm soát giờ giấc
+        runFastLoop(); 
+        runSlowLoop();
     }
 
-    function isMarketActive() {
-        const now = new Date();
-        const hour = now.getHours();
-        const minute = now.getMinutes();
-        const totalMinutes = hour * 60 + minute;
-        
-        // Thị trường làm việc: 09:00 (540) đến 15:00 (900)
-        // Hoặc cộng thêm thời gian ATC/Post-close nếu cần
-        return (totalMinutes >= 540 && totalMinutes <= 905);
-    }
-
-    function isMarketTime() {
-        const now = new Date();
-        const h = now.getHours();
-        const m = now.getMinutes();
-        const totalMinutes = h * 60 + m;
-        
-        // Giờ giao dịch: 09:00 (540) đến 15:00 (900)
-        // Bạn có thể mở rộng đến 15:15 nếu muốn lấy dữ liệu ATC/đóng cửa
-        return (totalMinutes >= 540 && totalMinutes <= 905);
-    }
-
-
-    // Dừng tất cả các scheduler đang chạy
-    function stopAllSchedulers() {
-        isRunning = false;
-        // Hủy các AbortController hiện có
-        Object.values(controllers).forEach(c => c?.abort());
-    }
-
-
-
-    // Hàm khởi tạo khi load trang
-    // --- 2. HÀM INITAPP CẬP NHẬT ---
     async function initApp() {
         await loadSymbolMap();
-        await loadSnapshotData();
-        await updateAll();
         const savedUid = sessionStorage.getItem('vps_uid');
         const savedSess = sessionStorage.getItem('vps_sess');
-        
-        if (savedUid && savedSess) {
-            globalUserID = savedUid;
-            globalSession = savedSess;
-        }
+        if (savedUid && savedSess) { globalUserID = savedUid; globalSession = savedSess; }
 
-        const tabContainer = document.querySelector('.tab-bar-container'); 
-        const contentContainer = document.querySelector('.tab-content-wrapper');
-        if (tabContainer) tabContainer.innerHTML = ''; 
-        if (contentContainer) contentContainer.innerHTML = '';
+        const tabContainer = document.getElementById("mainTabMenu"); 
+        const chartContainer = document.getElementById("tabChartsContainer");
+        
+        // --- ĐOẠN ĐÃ ĐƯỢC SỬA TẠI ĐÂY ---
+        // Chỉ xóa các tab cũ (có class .tab-item), giữ nguyên nút "+ Thêm biểu đồ" ở đầu menu
+        if (tabContainer) { 
+            document.querySelectorAll('.tab-item').forEach(t => t.remove());
+        }
+        // --------------------------------
+        
+        if (chartContainer) chartContainer.innerHTML = ''; 
 
         const saved = localStorage.getItem('tradingAppState');
-        if (!saved) {
-            createTab("VN30F1M", "c_default", true);
-        } else {
+        let initialized = false;
+        if (saved) {
             try {
                 const state = JSON.parse(saved);
-                state.tabs.forEach(t => createTab(t.symbol, t.id, t.active));
-                currentSymbol = state.currentSymbol || "VN30F1M";
-                if (document.getElementById('symbolInput')) 
-                    document.getElementById('symbolInput').value = state.inputValue || "";
-            } catch (e) {
-                console.error(e);
-                createTab("VN30F1M", "c_default", true);
-            }
+                if (state.tabs && Array.isArray(state.tabs)) {
+                    state.tabs.forEach(t => {
+                        createTab(t.symbol, t.id, t.active);
+                        if (t.active) { currentSymbol = t.symbol; updateAll(t.symbol); }
+                    });
+                    const symInput = document.getElementById('symbolInput');
+                    if (symInput) symInput.value = state.inputValue || "";
+                    initialized = true;
+                }
+            } catch (e) { console.error("Lỗi khôi phục trạng thái:", e); }
         }
-
-        if (globalUserID && globalSession) {
-            updateActiveIframe();
-        }
-
-        // Sau đó mới khởi động vòng lặp thông minh
+        if (!initialized) { currentSymbol = "VN30F1M"; createTab(currentSymbol, "c_default", true); updateAll(currentSymbol); }
+        if (globalUserID && globalSession) setTimeout(updateActiveIframe, 100); 
+        window.isRunning = true; 
         startSmartPolling();
     }
 
-
-    // Hàm xóa tab
     function removeTab(e, id) {
         e.stopPropagation();
-        
         const tabItem = document.querySelector(`.tab-item[data-id="${id}"]`);
         const contentBlock = document.getElementById(id);
-        
-        // Kiểm tra xem tab bị xóa có đang active không
         const isRemovingActive = tabItem.classList.contains('active');
-        
-        // Nếu tab bị xóa đang active, hãy xác định tab kế tiếp trước khi xóa DOM
         if (isRemovingActive) {
-            // Tìm "anh em" kế tiếp (bên phải), nếu không có thì tìm bên trái
             const nextTab = tabItem.nextElementSibling || tabItem.previousElementSibling;
-            
-            // Loại bỏ tab hiện tại ra khỏi DOM
-            tabItem.remove();
-            if (contentBlock) contentBlock.remove();
-            
-            // Nếu còn tab, switch sang tab mới
+            tabItem.remove(); if (contentBlock) contentBlock.remove();
             if (nextTab && !nextTab.classList.contains('btn-add')) {
                 const nextId = nextTab.getAttribute('data-id');
                 const nextSymbol = nextTab.getAttribute('data-symbol');
                 switchTab({ currentTarget: nextTab }, nextId, nextSymbol);
-            } else {
-                // Nếu không còn tab nào khác, tạo tab mặc định
-                createTab("VN30F1M", "c_default", true);
-            }
-        } else {
-            // Nếu xóa tab không active, chỉ việc xóa DOM
-            tabItem.remove();
-            if (contentBlock) contentBlock.remove();
-        }
-        
+            } else { createTab("VN30F1M", "c_default", true); }
+        } else { tabItem.remove(); if (contentBlock) contentBlock.remove(); }
         debouncedSave();
     }
 
-    function updatePriceNode(id, newValue) {
-        const el = document.getElementById(id);
-        if (el && el.innerText !== String(newValue)) {
-            el.innerText = newValue;
-        }
-    }
-
-    let currentAbortController = null;
-    let isSwitching = false;
-
     async function switchTab(e, blockId, symbol) {
-        const tabItem = e.target.closest('.tab-item');
-        if (e.target.classList.contains('close-btn')) return;
-        if (!tabItem) return;
+        const tabItem = e.target ? e.target.closest('.tab-item') : e.currentTarget;
+        if (!tabItem || e.target?.classList.contains('close-btn')) return;
 
-        // 1. Dừng mọi request cũ đang chạy trên các scheduler
+        // BẮT BUỘC: Xóa trắng toàn bộ bảng lịch sử ngay lập tức khi đổi tab
+        if (uiEls.tradeBody) uiEls.tradeBody.innerHTML = "";
+        lastTradeId = "";
+        currentTradeSymbol = symbol;
+
         Object.values(controllers).forEach(c => c?.abort());
-
-        // 2. Chuyển đổi trạng thái UI (Active Class)
         document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
         tabItem.classList.add('active'); 
         document.querySelectorAll('.tab-content-block').forEach(b => b.classList.remove('active'));
-        document.getElementById(blockId).classList.add('active');
+        const targetBlock = document.getElementById(blockId);
+        if(targetBlock) targetBlock.classList.add('active');
 
-        // 3. Cập nhật thông tin mã hiện tại
         currentSymbol = symbol;
         globalRefPrice = null; 
-        document.getElementById('display_symbol').innerText = symbol;
+        const dispSymbol = document.getElementById('display_symbol');
+        if (dispSymbol) dispSymbol.innerText = symbol;
 
-        // 4. Ưu tiên load dữ liệu tức thì (Không chờ loop)
         try {
-            // Tạo các controller mới cho lượt load ưu tiên này
             controllers.snapshot = new AbortController();
             controllers.orderBook = new AbortController();
             controllers.tradeHistory = new AbortController();
-
+            controllers.heavy = new AbortController();
             await Promise.all([
-                loadSnapshotData(currentSymbol), // Hoặc fetchVPSData
-                updateOrderBook(controllers.orderBook.signal),
-                fetchTradeHistory(controllers.tradeHistory.signal)
+                getFullSnapshotData(currentSymbol, controllers.heavy.signal), 
+                fetchVPSData(currentSymbol, controllers.snapshot.signal),
+                updateOrderBook(currentSymbol, controllers.orderBook.signal),
+                fetchTradeHistory(currentSymbol, controllers.tradeHistory.signal)
             ]);
-        } catch (err) {
-            if (err.name !== 'AbortError') console.error("Error on tab switch load:", err);
-        }
-        
-        // 5. Lưu trạng thái
+        } catch (err) {}
         debouncedSave();
-        
-        // Lưu ý: Các loop realtime của bạn vẫn chạy ở background và sẽ tự 
-        // "bắt nhịp" theo currentSymbol mới trong vòng lặp tiếp theo.
     }
 
-    async function loadTabDataImmediately() {
-        // Nếu có request cũ đang chạy, hủy ngay
-        if (currentAbortController) {
-            currentAbortController.abort();
-        }
-        
-        // Tạo controller mới cho lần fetch này
-        currentAbortController = new AbortController();
-        
-        try {
-            // Chỉ chạy các hàm này với signal để theo dõi việc hủy
-            await Promise.all([
-                fetchVPSData(currentAbortController.signal),
-                updateOrderBook(currentAbortController.signal),
-                fetchTradeHistory(currentAbortController.signal)
-            ]);
-        } catch (err) {
-            if (err.name === 'AbortError') {
-                console.log("Request cũ đã bị hủy, bỏ qua...");
-            } else {
-                console.error("Lỗi tải dữ liệu:", err);
-            }
-        }
-    }
-
-
-
-    async function updateAll() {
+    async function updateAll(symbolToLoad) {
         const inputEl = document.getElementById('symbolInput');
-        if (!inputEl || !inputEl.value.trim()) return;
+        const symbol = symbolToLoad || (inputEl ? inputEl.value.trim().toUpperCase() : null);
+        if (!symbol) return;
         
-        currentSymbol = inputEl.value.trim().toUpperCase();
+        // BẮT BUỘC: Xóa trắng toàn bộ lịch sử khi gõ mã mới bấm Cập Nhật
+        if (uiEls.tradeBody) uiEls.tradeBody.innerHTML = "";
+        lastTradeId = "";
+        currentTradeSymbol = symbol;
+
+        currentSymbol = symbol;
+        if (inputEl) inputEl.value = symbol;
         
-        // 1. Lấy giá tham chiếu
         const refPrice = await getPreviousClosePrice(currentSymbol);
         globalRefPrice = refPrice; 
         
-        // 2. Cập nhật UI (Sử dụng hàm updatePriceNode để tối ưu)
-        document.getElementById('display_symbol').innerText = currentSymbol;
-        updatePriceNode('val_prev', refPrice ? refPrice.toLocaleString() : "---.--");
+        const dispSymbol = document.getElementById('display_symbol');
+        if (dispSymbol) dispSymbol.innerText = currentSymbol;
+        const prevEl = document.getElementById('val_prev');
+        if(prevEl) prevEl.innerText = refPrice ? refPrice.toFixed(2) : "---.--";
         
         const activeTab = document.querySelector('.tab-item.active');
         if (activeTab) {
@@ -1266,39 +650,24 @@
             activeTab.setAttribute('data-symbol', currentSymbol);
         }
 
-        // 3. Cập nhật iframe
         const activeIframe = document.querySelector('.tab-content-block.active iframe');
         if (activeIframe) {
             let newUrl = `https://chart.vps.com.vn/tv/?symbol=${currentSymbol}&allowFullscreen=true&resolution=D&theme=light`;
-            if (globalUserID && globalSession) {
-                newUrl += `&u=${globalUserID}&s=${globalSession}`;
-            }
+            if (globalUserID && globalSession) newUrl += `&u=${globalUserID}&s=${globalSession}`;
             activeIframe.src = newUrl;
         }
         
-        // 4. KIẾN TRÚC MỚI: Dừng các request cũ và load ngay lập tức
-        // Hủy tất cả các signal đang chạy
-        Object.values(controllers).forEach(c => c?.abort());
-
-        // Khởi tạo các controller mới
-        controllers.snapshot = new AbortController();
-        controllers.orderBook = new AbortController();
-        controllers.tradeHistory = new AbortController();
-        
+        Object.keys(controllers).forEach(key => { if (controllers[key]) controllers[key].abort(); controllers[key] = new AbortController(); });
         try {
-            // Thực hiện load dữ liệu ngay lập tức (không chờ timer)
             await Promise.all([
-                fetchVPSData(controllers.snapshot.signal),
-                updateOrderBook(controllers.orderBook.signal),
-                fetchTradeHistory(controllers.tradeHistory.signal)
+                fetchVPSData(currentSymbol, controllers.snapshot.signal),
+                getFullSnapshotData(currentSymbol, controllers.heavy.signal), 
+                updateOrderBook(currentSymbol, controllers.orderBook.signal), 
+                fetchTradeHistory(currentSymbol, controllers.tradeHistory.signal)
             ]);
-        } catch (e) {
-            if (e.name !== 'AbortError') console.error("UpdateAll Error:", e);
-        }
-        
+        } catch (e) {}
         debouncedSave();
     }
-
 
     function updateActiveIframe() {
         const activeIframe = document.querySelector('.tab-content-block.active iframe');
@@ -1308,52 +677,26 @@
             activeIframe.src = `https://chart.vps.com.vn/tv/?symbol=${sym}&allowFullscreen=true&resolution=D&theme=light&lang=vi&u=${globalUserID}&s=${globalSession}&loadLastChart=true`;
         }
     }
-    /*https://chart.vps.com.vn/tv/?symbol=${currentSymbol}&resolution=D&theme=light*/
-
-
 
     function syncAuthData() {
         const uidInput = document.getElementById('uidInput');
         const sessInput = document.getElementById('sessInput');
-        
         const uVal = uidInput.value.trim();
         const sVal = sessInput.value.trim();
-        
-        if (!uVal || !sVal) {
-            alert("Vui lòng nhập đầy đủ User ID và Token!");
-            return;
-        }
-
-        // 1. Lưu vào sessionStorage
-        sessionStorage.setItem('vps_uid', uVal);
-        sessionStorage.setItem('vps_sess', sVal);
-        
-        // Gán vào biến toàn cục để dùng ngay
-        globalUserID = uVal;
-        globalSession = sVal;
-
-        // 2. Cập nhật URL biểu đồ
-        updateActiveIframe(); // Gọi hàm phụ để code gọn hơn
-
-        // 3. XÓA DỮ LIỆU Ở Ô NHẬP
-        uidInput.value = "";
-        sessInput.value = "";
-        
+        if (!uVal || !sVal) { alert("Vui lòng nhập đầy đủ User ID và Token!"); return; }
+        sessionStorage.setItem('vps_uid', uVal); sessionStorage.setItem('vps_sess', sVal);
+        globalUserID = uVal; globalSession = sVal;
+        updateActiveIframe();
+        uidInput.value = ""; sessInput.value = "";
         alert("Đã đồng bộ biểu đồ.");
     }
 
-
     function toggleInstructions() {
         const panel = document.getElementById('instructionsPanel');
-        if (panel.style.display === 'none' || panel.style.display === '') {
-            panel.style.display = 'block';
-        } else {
-            panel.style.display = 'none';
-        }
+        panel.style.display = (panel.style.display === 'none' || panel.style.display === '') ? 'block' : 'none';
     }
 
     window.addEventListener('DOMContentLoaded', initApp);
-    
 </script>
 </body>
 </html>
