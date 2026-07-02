@@ -407,8 +407,8 @@
 
     function createTab(symbol, id, isActive = false) {
         const sym = (symbol && symbol !== 'undefined' && symbol !== 'null') ? symbol : "VN30F1M";
-        let chartUrl = `https://chart.vps.com.vn/tv/?symbol=${sym}&allowFullscreen=true&resolution=15`;
-        if (globalUserID && globalSession) chartUrl += `&u=${globalUserID}&s=${globalSession}&loadLastChart=true&theme=light`;
+        let chartUrl = `https://chart.vps.com.vn/tv/?symbol=${sym}&allowFullscreen=true&resolution=15&theme=light`;
+        if (globalUserID && globalSession) chartUrl += `&u=${globalUserID}&s=${globalSession}&loadLastChart=true`;
         
         const tab = document.createElement("button");
         tab.className = "tab-item" + (isActive ? " active" : "");
@@ -652,8 +652,8 @@
 
         const activeIframe = document.querySelector('.tab-content-block.active iframe');
         if (activeIframe) {
-            let newUrl = `https://chart.vps.com.vn/tv/?symbol=${currentSymbol}&allowFullscreen=true&resolution=15`;
-            if (globalUserID && globalSession) newUrl += `&u=${globalUserID}&s=${globalSession}&theme=light`;
+            let newUrl = `https://chart.vps.com.vn/tv/?symbol=${currentSymbol}&allowFullscreen=true&resolution=15&theme=light`;
+            if (globalUserID && globalSession) newUrl += `&u=${globalUserID}&s=${globalSession}`;
             activeIframe.src = newUrl;
         }
         
@@ -674,7 +674,7 @@
         if (activeIframe) {
             const activeTab = document.querySelector('.tab-item.active');
             const sym = activeTab ? activeTab.getAttribute('data-symbol') : "VN30F1M";
-            activeIframe.src = `https://chart.vps.com.vn/tv/?symbol=${sym}&allowFullscreen=true&resolution=15&lang=vi&u=${globalUserID}&s=${globalSession}&loadLastChart=true&theme=light`;
+            activeIframe.src = `https://chart.vps.com.vn/tv/?symbol=${sym}&allowFullscreen=true&resolution=15&theme=light&lang=vi&u=${globalUserID}&s=${globalSession}&loadLastChart=true`;
         }
     }
 
